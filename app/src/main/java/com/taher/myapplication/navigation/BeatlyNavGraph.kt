@@ -1,12 +1,17 @@
-package com.taher.myapplication.navigation
+package com.beatly.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.beatly.navigation.Screen
 import com.beatly.ui.onboarding.OnboardingScreen
 import com.beatly.ui.splash.SplashScreen
+
+sealed class Screen(val route: String) {
+    data object Splash : Screen("splash")
+    data object Onboarding : Screen("onboarding")
+    // Add more screens here: Login, Register, Home, etc.
+}
 
 @Composable
 fun BeatlyNavGraph() {
