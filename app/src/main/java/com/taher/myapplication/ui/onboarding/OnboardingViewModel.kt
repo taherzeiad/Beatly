@@ -23,17 +23,17 @@ class OnboardingViewModel : ViewModel() {
         OnboardingPage(
             title = "Your Music, Anytime, Anywhere",
             description = "Enjoy your favorite tracks without limits—stream online or listen offline.",
-            imageRes = 0//R.drawable.onboarding_1
+            imageRes = R.drawable.onboarding_1
         ),
         OnboardingPage(
             title = "Endless Music, Zero Restrictions",
             description = "Discover and play the songs you love, wherever you are.",
-            imageRes = 0//R.drawable.onboarding_2
+            imageRes = R.drawable.onboarding_2
         ),
         OnboardingPage(
             title = "Offline or Online, It's All Yours",
             description = "Download your playlists and enjoy uninterrupted music anytime.",
-            imageRes = 0//R.drawable.onboarding_3
+            imageRes = R.drawable.onboarding_3
         )
     )
 

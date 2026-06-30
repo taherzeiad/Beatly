@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -13,11 +14,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.beatly.model.OnboardingPage
@@ -25,20 +24,23 @@ import com.beatly.ui.components.BeatlyPrimaryButton
 import com.beatly.ui.components.PageIndicators
 import com.beatly.ui.components.RegisterFooter
 import com.beatly.ui.theme.BeatlyTheme
-import com.beatly.ui.theme.TextWhite
+import com.beatly.ui.theme.BodyMediumRegular
+import com.beatly.ui.theme.Gray950
+import com.beatly.ui.theme.Headline
+import com.beatly.ui.theme.White
 
-// ── Screen entry point ─────────────────────────────────────────────────────
+// ── Screen entry point (wires ViewModel) ──────────────────────────────────
 
 @Composable
 fun OnboardingScreen(
-    viewModel: OnboardingViewModel = viewModel(),
+    viewModel         : OnboardingViewModel = viewModel(),
     onContinueFinished: () -> Unit,
-    onRegisterClicked: () -> Unit
+    onRegisterClicked : () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val pagerState = rememberPagerState(pageCount = { uiState.pages.size })
+    val uiState    by viewModel.uiState.collectAsStateWithLifecycle()
+    val pagerState  = rememberPagerState(pageCount = { uiState.pages.size })
 
-    // Sync pager ↔ ViewModel
+    // Keep ViewModel in sync when user swipes manually
     LaunchedEffect(pagerState.currentPage) {
         viewModel.onPageChanged(pagerState.currentPage)
     }
@@ -46,10 +48,10 @@ fun OnboardingScreen(
     if (uiState.pages.isEmpty()) return
 
     OnboardingContent(
-        pages = uiState.pages,
+        pages       = uiState.pages,
         currentPage = uiState.currentPageIndex,
-        pagerState = pagerState,
-        onContinue = {
+        pagerState  = pagerState,
+        onContinue  = {
             val finished = viewModel.onContinueClicked()
             if (finished) onContinueFinished()
         },
@@ -61,114 +63,107 @@ fun OnboardingScreen(
 
 @Composable
 private fun OnboardingContent(
-    pages: List<OnboardingPage>,
-    currentPage: Int,
-    pagerState: androidx.compose.foundation.pager.PagerState,
-    onContinue: () -> Unit,
-    onRegisterClicked: () -> Unit
+    pages             : List<OnboardingPage>,
+    currentPage       : Int,
+    pagerState        : PagerState,
+    onContinue        : () -> Unit,
+    onRegisterClicked : () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Pager fills entire screen
+        // Full-screen pager
         HorizontalPager(
-            state = pagerState,
+            state    = pagerState,
             modifier = Modifier.fillMaxSize()
-        ) { pageIndex ->
-            OnboardingPageItem(page = pages[pageIndex])
+        ) { index ->
+            OnboardingPageItem(page = pages[index])
         }
 
-        // Overlay controls pinned to bottom
+        // Bottom controls overlay
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 40.dp),
+                .padding(bottom = 44.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Page indicators
             PageIndicators(
-                pageCount = pages.size,
+                pageCount   = pages.size,
                 currentPage = currentPage,
-                modifier = Modifier.padding(bottom = 28.dp)
+                modifier    = Modifier.padding(bottom = 28.dp)
             )
 
-            // Continue button
             BeatlyPrimaryButton(
-                text = "Continue",
+                text    = "Continue",
                 onClick = onContinue
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Register footer
             RegisterFooter(onRegisterClicked = onRegisterClicked)
         }
     }
 }
 
-// ── Single onboarding page ─────────────────────────────────────────────────
+// ── Single page ────────────────────────────────────────────────────────────
 
 @Composable
 private fun OnboardingPageItem(page: OnboardingPage) {
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Background image
+        // Hero image
         Image(
-            painter = painterResource(id = page.imageRes),
+            painter            = painterResource(id = page.imageRes),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            modifier           = Modifier.fillMaxSize(),
+            contentScale       = ContentScale.Crop
         )
 
-        // Gradient overlay: transparent at top → dark at bottom
+        // Gradient: transparent → Gray950 (matches dark overlay in Figma)
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
                         colorStops = arrayOf(
-                            0.35f to Color.Transparent,
-                            0.65f to Color(0xCC1A1A2E),
-                            1f to Color(0xFF0F0F1A)
+                            0.30f to Color.Transparent,
+                            0.60f to Gray950.copy(alpha = 0.80f),
+                            1.00f to Gray950
                         )
                     )
                 )
         )
 
-        // Text content sits above gradient, in the lower half
+        // Text block — sits above bottom controls
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 180.dp), // leave room for controls
+                .padding(bottom = 192.dp),   // clearance for dots + button + footer
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Headline — Figma: SemiBold 28sp / lh 39.2
             Text(
-                text = page.title,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = TextWhite,
-                textAlign = TextAlign.Center,
-                lineHeight = 36.sp
+                text      = page.title,
+                style     = Headline,
+                color     = White,
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Body — Figma: Regular 16sp / lh 25.6
             Text(
-                text = page.description,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Normal,
-                color = TextWhite.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-                lineHeight = 22.sp
+                text      = page.description,
+                style     = BodyMediumRegular,
+                color     = White.copy(alpha = 0.80f),
+                textAlign = TextAlign.Center
             )
         }
     }
 }
-
-// ── Preview ────────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -176,7 +171,7 @@ fun OnboardingScreenPreview() {
     BeatlyTheme {
         OnboardingScreen(
             onContinueFinished = {},
-            onRegisterClicked = {}
+            onRegisterClicked  = {}
         )
     }
 }
