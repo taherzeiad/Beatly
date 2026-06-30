@@ -1,4 +1,4 @@
-package com.beatly
+package com.taher.myapplication
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
