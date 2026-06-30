@@ -51,7 +51,7 @@ fun SplashScreen(
             ) {
                 BeatlyLogoIcon(size = 48.dp)
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
                 Text(
                     text = "Beatly",
