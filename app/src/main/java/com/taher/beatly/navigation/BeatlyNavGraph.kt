@@ -1,19 +1,22 @@
-package com.taher.beatly.navigation
+package com.beatly.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.taher.beatly.ui.auth.ProfileSuccessScreen
 import com.taher.beatly.ui.auth.signIn.SignInScreen
 import com.taher.beatly.ui.auth.signup.SignUpScreen
 import com.taher.beatly.ui.onboarding.OnboardingScreen
 import com.taher.beatly.ui.splash.SplashScreen
 
 sealed class Screen(val route: String) {
-    data object Splash     : Screen("splash")
+    data object Splash : Screen("splash")
     data object Onboarding : Screen("onboarding")
-    data object SignIn     : Screen("sign_in")
-    data object SignUp     : Screen("sign_up")
+    data object SignIn : Screen("sign_in")
+    data object SignUp : Screen("sign_up")
+    data object ProfileSuccess : Screen("profile_success")
+    // data object Home         : Screen("home")
 }
 
 @Composable
@@ -21,7 +24,7 @@ fun BeatlyNavGraph() {
     val navController = rememberNavController()
 
     NavHost(
-        navController    = navController,
+        navController = navController,
         startDestination = Screen.Splash.route
     ) {
 
@@ -45,9 +48,7 @@ fun BeatlyNavGraph() {
                     }
                 },
                 onRegisterClicked = {
-                    navController.navigate(Screen.SignIn.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
-                    }
+                    navController.navigate(Screen.SignUp.route)
                 }
             )
         }
@@ -55,44 +56,42 @@ fun BeatlyNavGraph() {
         // ── Sign In ────────────────────────────────────────────────────────
         composable(Screen.SignIn.route) {
             SignInScreen(
-                onBackClicked = {
-                    navController.popBackStack()
-                },
+                onBackClicked = { navController.popBackStack() },
                 onSignInSuccess = {
-                    // navController.navigate(Screen.Home.route) {
-                    //     popUpTo(Screen.SignIn.route) { inclusive = true }
-                    // }
+                    navController.navigate(Screen.ProfileSuccess.route) {
+                        popUpTo(Screen.SignIn.route) { inclusive = true }
+                    }
                 },
-                onForgotPassword = {
-                    // navController.navigate(Screen.ForgotPassword.route)
-                },
-                onRegisterClicked = {
-                    navController.navigate(Screen.SignUp.route)
-                },
-                onAppleSignIn = {
-                    // handle Apple OAuth
-                },
-                onFacebookSignIn = {
-                    // handle Facebook OAuth
-                }
+                onForgotPassword = { /* TODO: ForgotPassword screen */ },
+                onRegisterClicked = { navController.navigate(Screen.SignUp.route) },
+                onAppleSignIn = { /* TODO: Apple OAuth */ },
+                onFacebookSignIn = { /* TODO: Facebook OAuth */ }
             )
         }
 
         // ── Sign Up ────────────────────────────────────────────────────────
         composable(Screen.SignUp.route) {
             SignUpScreen(
-                onBackClicked = {
-                    navController.popBackStack()
-                },
+                onBackClicked = { navController.popBackStack() },
                 onSignUpSuccess = {
-                    // navController.navigate(Screen.Home.route)
+                    navController.navigate(Screen.ProfileSuccess.route) {
+                        popUpTo(Screen.SignUp.route) { inclusive = true }
+                    }
                 },
-                onTermsClicked = {
-                    // open Terms
+                onTermsClicked = { /* TODO: Terms screen */ },
+                onPrivacyClicked = { /* TODO: Privacy screen */ }
+            )
+        }
+
+        // ── Profile Setup Success ──────────────────────────────────────────
+        composable(Screen.ProfileSuccess.route) {
+            ProfileSuccessScreen(
+                onContinue = {
+                    // navController.navigate(Screen.Home.route) {
+                    //     popUpTo(0) { inclusive = true }
+                    // }
                 },
-                onPrivacyClicked = {
-                    // open Privacy
-                }
+                onCallSupport = { /* TODO: open support */ }
             )
         }
     }
