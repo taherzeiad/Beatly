@@ -1,4 +1,4 @@
-package com.beatly.navigation
+package com.taher.beatly.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
