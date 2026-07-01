@@ -1,19 +1,19 @@
-package com.beatly.navigation
+package com.taher.beatly.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.beatly.ui.auth.SignInScreen
-import com.beatly.ui.onboarding.OnboardingScreen
-import com.beatly.ui.splash.SplashScreen
+import com.taher.beatly.ui.auth.signIn.SignInScreen
+import com.taher.beatly.ui.auth.signup.SignUpScreen
+import com.taher.beatly.ui.onboarding.OnboardingScreen
+import com.taher.beatly.ui.splash.SplashScreen
 
 sealed class Screen(val route: String) {
     data object Splash     : Screen("splash")
     data object Onboarding : Screen("onboarding")
     data object SignIn     : Screen("sign_in")
-    // data object Register : Screen("register")
-    // data object Home     : Screen("home")
+    data object SignUp     : Screen("sign_up")
 }
 
 @Composable
@@ -67,13 +67,31 @@ fun BeatlyNavGraph() {
                     // navController.navigate(Screen.ForgotPassword.route)
                 },
                 onRegisterClicked = {
-                    // navController.navigate(Screen.Register.route)
+                    navController.navigate(Screen.SignUp.route)
                 },
                 onAppleSignIn = {
                     // handle Apple OAuth
                 },
                 onFacebookSignIn = {
                     // handle Facebook OAuth
+                }
+            )
+        }
+
+        // ── Sign Up ────────────────────────────────────────────────────────
+        composable(Screen.SignUp.route) {
+            SignUpScreen(
+                onBackClicked = {
+                    navController.popBackStack()
+                },
+                onSignUpSuccess = {
+                    // navController.navigate(Screen.Home.route)
+                },
+                onTermsClicked = {
+                    // open Terms
+                },
+                onPrivacyClicked = {
+                    // open Privacy
                 }
             )
         }

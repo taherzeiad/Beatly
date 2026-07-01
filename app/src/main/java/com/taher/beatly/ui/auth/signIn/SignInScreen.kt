@@ -1,4 +1,4 @@
-package com.beatly.ui.auth
+package com.taher.beatly.ui.auth.signIn
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
@@ -13,11 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import com.taher.myapplication.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.beatly.ui.theme.*
+import com.taher.beatly.ui.theme.*
+import com.taher.beatly.R
 
 // ── Screen entry point ─────────────────────────────────────────────────────
 

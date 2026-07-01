@@ -1,4 +1,4 @@
-package com.beatly.ui.components
+package com.taher.beatly.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,14 +18,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.beatly.ui.theme.BodyMediumMedium
-import com.beatly.ui.theme.BodySmallRegular
-import com.beatly.ui.theme.Gray400
-import com.beatly.ui.theme.Purple300
-import com.beatly.ui.theme.Purple500
-import com.beatly.ui.theme.TextBlack
-import com.beatly.ui.theme.White
-import com.taher.myapplication.R
+import com.taher.beatly.ui.theme.BodyMediumMedium
+import com.taher.beatly.ui.theme.BodySmallRegular
+import com.taher.beatly.ui.theme.Gray400
+import com.taher.beatly.ui.theme.Purple300
+import com.taher.beatly.ui.theme.Purple500
+import com.taher.beatly.ui.theme.TextBlack
+import com.taher.beatly.ui.theme.White
+import com.taher.beatly.R
 
 
 // ── Logo icon ──────────────────────────────────────────────────────────────

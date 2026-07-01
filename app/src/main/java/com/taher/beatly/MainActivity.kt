@@ -1,12 +1,12 @@
-package com.taher.myapplication
+package com.taher.beatly
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
-import com.beatly.navigation.BeatlyNavGraph
-import com.beatly.ui.theme.BeatlyTheme
+import com.taher.beatly.navigation.BeatlyNavGraph
+import com.taher.beatly.ui.theme.BeatlyTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

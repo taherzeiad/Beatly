@@ -1,4 +1,4 @@
-package com.taher.myapplication
+package com.taher.beatly
 
 import org.junit.Test
 
