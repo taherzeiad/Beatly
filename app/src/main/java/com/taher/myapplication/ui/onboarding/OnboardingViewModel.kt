@@ -22,7 +22,7 @@ class OnboardingViewModel : ViewModel() {
     private val onboardingPages = listOf(
         OnboardingPage(
             title = "Your Music, Anytime, Anywhere",
-            description = "Enjoy your favorite tracks without limits—stream online or listen offline.",
+            description = "Enjoy your favorite tracks without limits—stream \n online \n or listen offline.",
             imageRes = R.drawable.onboarding_1
         ),
         OnboardingPage(

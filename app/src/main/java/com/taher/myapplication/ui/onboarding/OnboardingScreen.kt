@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.beatly.model.OnboardingPage
@@ -33,12 +34,12 @@ import com.beatly.ui.theme.White
 
 @Composable
 fun OnboardingScreen(
-    viewModel         : OnboardingViewModel = viewModel(),
+    viewModel: OnboardingViewModel = viewModel(),
     onContinueFinished: () -> Unit,
-    onRegisterClicked : () -> Unit
+    onRegisterClicked: () -> Unit
 ) {
-    val uiState    by viewModel.uiState.collectAsStateWithLifecycle()
-    val pagerState  = rememberPagerState(pageCount = { uiState.pages.size })
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val pagerState = rememberPagerState(pageCount = { uiState.pages.size })
 
     // Keep ViewModel in sync when user swipes manually
     LaunchedEffect(pagerState.currentPage) {
@@ -48,10 +49,10 @@ fun OnboardingScreen(
     if (uiState.pages.isEmpty()) return
 
     OnboardingContent(
-        pages       = uiState.pages,
+        pages = uiState.pages,
         currentPage = uiState.currentPageIndex,
-        pagerState  = pagerState,
-        onContinue  = {
+        pagerState = pagerState,
+        onContinue = {
             val finished = viewModel.onContinueClicked()
             if (finished) onContinueFinished()
         },
@@ -63,18 +64,17 @@ fun OnboardingScreen(
 
 @Composable
 private fun OnboardingContent(
-    pages             : List<OnboardingPage>,
-    currentPage       : Int,
-    pagerState        : PagerState,
-    onContinue        : () -> Unit,
-    onRegisterClicked : () -> Unit
+    pages: List<OnboardingPage>,
+    currentPage: Int,
+    pagerState: PagerState,
+    onContinue: () -> Unit,
+    onRegisterClicked: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
 
         // Full-screen pager
         HorizontalPager(
-            state    = pagerState,
-            modifier = Modifier.fillMaxSize()
+            state = pagerState, modifier = Modifier.fillMaxSize()
         ) { index ->
             OnboardingPageItem(page = pages[index])
         }
@@ -88,15 +88,15 @@ private fun OnboardingContent(
                 .padding(bottom = 44.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             PageIndicators(
-                pageCount   = pages.size,
+                pageCount = pages.size,
                 currentPage = currentPage,
-                modifier    = Modifier.padding(bottom = 28.dp)
+                modifier = Modifier.padding(bottom = 50.dp)
             )
 
             BeatlyPrimaryButton(
-                text    = "Continue",
-                onClick = onContinue
+                text = "Continue", onClick = onContinue
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -114,10 +114,10 @@ private fun OnboardingPageItem(page: OnboardingPage) {
 
         // Hero image
         Image(
-            painter            = painterResource(id = page.imageRes),
+            painter = painterResource(id = page.imageRes),
             contentDescription = null,
-            modifier           = Modifier.fillMaxSize(),
-            contentScale       = ContentScale.Crop
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
 
         // Gradient: transparent → Gray950 (matches dark overlay in Figma)
@@ -141,24 +141,21 @@ private fun OnboardingPageItem(page: OnboardingPage) {
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 192.dp),   // clearance for dots + button + footer
+                .padding(bottom = 250.dp),   // clearance for dots + button + footer
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Headline — Figma: SemiBold 28sp / lh 39.2
             Text(
-                text      = page.title,
-                style     = Headline,
-                color     = White,
-                textAlign = TextAlign.Center
+                text = page.title, style = Headline, color = White, textAlign = TextAlign.Center
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Body — Figma: Regular 16sp / lh 25.6
             Text(
-                text      = page.description,
-                style     = BodyMediumRegular,
-                color     = White.copy(alpha = 0.80f),
+                text = page.description,
+                fontSize = 14.sp,
+                style = BodyMediumRegular,
+                color = White.copy(alpha = 0.80f),
                 textAlign = TextAlign.Center
             )
         }
@@ -169,9 +166,6 @@ private fun OnboardingPageItem(page: OnboardingPage) {
 @Composable
 fun OnboardingScreenPreview() {
     BeatlyTheme {
-        OnboardingScreen(
-            onContinueFinished = {},
-            onRegisterClicked  = {}
-        )
+        OnboardingScreen(onContinueFinished = {}, onRegisterClicked = {})
     }
 }
