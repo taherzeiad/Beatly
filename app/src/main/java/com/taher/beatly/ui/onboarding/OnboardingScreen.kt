@@ -1,4 +1,4 @@
-package com.beatly.ui.onboarding
+package com.taher.beatly.ui.onboarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,15 +20,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.beatly.model.OnboardingPage
-import com.beatly.ui.components.BeatlyPrimaryButton
-import com.beatly.ui.components.PageIndicators
-import com.beatly.ui.components.RegisterFooter
-import com.beatly.ui.theme.BeatlyTheme
-import com.beatly.ui.theme.BodyMediumRegular
-import com.beatly.ui.theme.Gray950
-import com.beatly.ui.theme.Headline
-import com.beatly.ui.theme.White
+import com.taher.beatly.model.OnboardingPage
+import com.taher.beatly.ui.components.BeatlyPrimaryButton
+import com.taher.beatly.ui.components.PageIndicators
+import com.taher.beatly.ui.components.RegisterFooter
+import com.taher.beatly.ui.theme.BeatlyTheme
+import com.taher.beatly.ui.theme.BodyMediumRegular
+import com.taher.beatly.ui.theme.Gray950
+import com.taher.beatly.ui.theme.Headline
+import com.taher.beatly.ui.theme.White
 import kotlinx.coroutines.launch
 
 // ── Screen entry point ─────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-package com.beatly.ui.auth
+package com.taher.beatly.ui.auth.signIn
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

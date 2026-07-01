@@ -1,4 +1,4 @@
-package com.beatly.ui.theme
+package com.taher.beatly.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

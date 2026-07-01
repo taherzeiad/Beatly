@@ -1,4 +1,4 @@
-package com.beatly.model
+package com.taher.beatly.model
 
 import androidx.annotation.DrawableRes
 

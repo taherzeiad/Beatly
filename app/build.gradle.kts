@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.taher.myapplication"
+    namespace = "com.taher.beatly"
     compileSdk {
         version = release(37) {
             minorApiLevel = 0

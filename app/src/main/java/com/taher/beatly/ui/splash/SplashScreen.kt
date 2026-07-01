@@ -1,4 +1,4 @@
-package com.beatly.ui.splash
+package com.taher.beatly.ui.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -13,13 +13,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.beatly.ui.components.BeatlyLogoIcon
-import com.beatly.ui.theme.BeatlyTheme
-import com.beatly.ui.theme.BodySmallRegular
-import com.beatly.ui.theme.Gray500
-import com.beatly.ui.theme.Headline
-import com.beatly.ui.theme.Purple500
-import com.beatly.ui.theme.TextBlack
+import com.taher.beatly.ui.components.BeatlyLogoIcon
+import com.taher.beatly.ui.theme.BeatlyTheme
+import com.taher.beatly.ui.theme.BodySmallRegular
+import com.taher.beatly.ui.theme.Gray500
+import com.taher.beatly.ui.theme.Headline
+import com.taher.beatly.ui.theme.Purple500
+import com.taher.beatly.ui.theme.TextBlack
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 

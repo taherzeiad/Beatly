@@ -1,8 +1,8 @@
-package com.beatly.ui.onboarding
+package com.taher.beatly.ui.onboarding
 
 import androidx.lifecycle.ViewModel
-import com.beatly.model.OnboardingPage
-import com.taher.myapplication.R
+import com.taher.beatly.model.OnboardingPage
+import com.taher.beatly.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
