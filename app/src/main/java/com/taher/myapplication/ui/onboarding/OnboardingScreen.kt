@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.beatly.model.OnboardingPage
@@ -28,19 +29,21 @@ import com.beatly.ui.theme.BodyMediumRegular
 import com.beatly.ui.theme.Gray950
 import com.beatly.ui.theme.Headline
 import com.beatly.ui.theme.White
+import kotlinx.coroutines.launch
 
-// ── Screen entry point (wires ViewModel) ──────────────────────────────────
+// ── Screen entry point ─────────────────────────────────────────────────────
 
 @Composable
 fun OnboardingScreen(
-    viewModel         : OnboardingViewModel = viewModel(),
+    viewModel: OnboardingViewModel = viewModel(),
     onContinueFinished: () -> Unit,
-    onRegisterClicked : () -> Unit
+    onRegisterClicked: () -> Unit
 ) {
-    val uiState    by viewModel.uiState.collectAsStateWithLifecycle()
-    val pagerState  = rememberPagerState(pageCount = { uiState.pages.size })
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val pagerState = rememberPagerState(pageCount = { uiState.pages.size })
+    val scope = rememberCoroutineScope()
 
-    // Keep ViewModel in sync when user swipes manually
+    // Sync ViewModel → when user swipes manually
     LaunchedEffect(pagerState.currentPage) {
         viewModel.onPageChanged(pagerState.currentPage)
     }
@@ -48,12 +51,18 @@ fun OnboardingScreen(
     if (uiState.pages.isEmpty()) return
 
     OnboardingContent(
-        pages       = uiState.pages,
+        pages = uiState.pages,
         currentPage = uiState.currentPageIndex,
-        pagerState  = pagerState,
-        onContinue  = {
-            val finished = viewModel.onContinueClicked()
-            if (finished) onContinueFinished()
+        pagerState = pagerState,
+        onContinue = {
+            val nextIndex = uiState.currentPageIndex + 1
+            if (nextIndex < uiState.pages.size) {
+                // ✅ Move the pager — ViewModel syncs automatically via LaunchedEffect
+                scope.launch { pagerState.animateScrollToPage(nextIndex) }
+            } else {
+                // Last page → navigate out
+                onContinueFinished()
+            }
         },
         onRegisterClicked = onRegisterClicked
     )
@@ -63,17 +72,16 @@ fun OnboardingScreen(
 
 @Composable
 private fun OnboardingContent(
-    pages             : List<OnboardingPage>,
-    currentPage       : Int,
-    pagerState        : PagerState,
-    onContinue        : () -> Unit,
-    onRegisterClicked : () -> Unit
+    pages: List<OnboardingPage>,
+    currentPage: Int,
+    pagerState: PagerState,
+    onContinue: () -> Unit,
+    onRegisterClicked: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Full-screen pager
         HorizontalPager(
-            state    = pagerState,
+            state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { index ->
             OnboardingPageItem(page = pages[index])
@@ -89,13 +97,13 @@ private fun OnboardingContent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             PageIndicators(
-                pageCount   = pages.size,
+                pageCount = pages.size,
                 currentPage = currentPage,
-                modifier    = Modifier.padding(bottom = 28.dp)
+                modifier = Modifier.padding(bottom = 50.dp)
             )
 
             BeatlyPrimaryButton(
-                text    = "Continue",
+                text = "Continue",
                 onClick = onContinue
             )
 
@@ -112,15 +120,13 @@ private fun OnboardingContent(
 private fun OnboardingPageItem(page: OnboardingPage) {
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Hero image
         Image(
-            painter            = painterResource(id = page.imageRes),
+            painter = painterResource(id = page.imageRes),
             contentDescription = null,
-            modifier           = Modifier.fillMaxSize(),
-            contentScale       = ContentScale.Crop
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
 
-        // Gradient: transparent → Gray950 (matches dark overlay in Figma)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -135,30 +141,28 @@ private fun OnboardingPageItem(page: OnboardingPage) {
                 )
         )
 
-        // Text block — sits above bottom controls
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 192.dp),   // clearance for dots + button + footer
+                .padding(bottom = 250.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Headline — Figma: SemiBold 28sp / lh 39.2
             Text(
-                text      = page.title,
-                style     = Headline,
-                color     = White,
+                text = page.title,
+                style = Headline,
+                color = White,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Body — Figma: Regular 16sp / lh 25.6
             Text(
-                text      = page.description,
-                style     = BodyMediumRegular,
-                color     = White.copy(alpha = 0.80f),
+                text = page.description,
+                style = BodyMediumRegular,
+                fontSize = 14.sp,
+                color = White.copy(alpha = 0.80f),
                 textAlign = TextAlign.Center
             )
         }
@@ -169,9 +173,6 @@ private fun OnboardingPageItem(page: OnboardingPage) {
 @Composable
 fun OnboardingScreenPreview() {
     BeatlyTheme {
-        OnboardingScreen(
-            onContinueFinished = {},
-            onRegisterClicked  = {}
-        )
+        OnboardingScreen(onContinueFinished = {}, onRegisterClicked = {})
     }
 }

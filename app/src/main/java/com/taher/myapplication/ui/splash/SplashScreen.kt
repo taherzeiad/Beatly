@@ -12,6 +12,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.beatly.ui.components.BeatlyLogoIcon
 import com.beatly.ui.theme.BeatlyTheme
 import com.beatly.ui.theme.BodySmallRegular
@@ -34,7 +35,7 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
     }
 
     Box(
-        modifier        = Modifier
+        modifier = Modifier
             .fillMaxSize()
             .alpha(alpha.value),
         contentAlignment = Alignment.Center
@@ -46,17 +47,18 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
 
             // ── Logo row ───────────────────────────────────────────────────
             Row(
-                verticalAlignment     = Alignment.CenterVertically,
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                BeatlyLogoIcon(size = 44.dp, tint = Purple500)
+                BeatlyLogoIcon(size = 50.dp, tint = Purple500)
 
                 Spacer(modifier = Modifier.width(10.dp))
 
                 Text(
-                    text  = "Beatly",
+                    text = "Beatly",
                     style = Headline,
-                    color = TextBlack
+                    color = TextBlack,
+                    fontSize = 40.sp
                 )
             }
 
@@ -64,10 +66,11 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
 
             // ── Tagline ────────────────────────────────────────────────────
             Text(
-                text      = "Feel the rhythm, live the beat.",
-                style     = BodySmallRegular,
-                color     = Gray500,
-                textAlign = TextAlign.Center
+                text = "Feel the rhythm, live the beat.",
+                style = BodySmallRegular,
+                color = Gray500,
+                textAlign = TextAlign.Center,
+                fontSize = 13.sp
             )
         }
     }

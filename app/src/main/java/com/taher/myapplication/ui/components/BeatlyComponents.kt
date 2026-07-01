@@ -4,14 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -26,19 +25,21 @@ import com.beatly.ui.theme.Purple300
 import com.beatly.ui.theme.Purple500
 import com.beatly.ui.theme.TextBlack
 import com.beatly.ui.theme.White
+import com.taher.myapplication.R
+
 
 // ── Logo icon ──────────────────────────────────────────────────────────────
 
 @Composable
 fun BeatlyLogoIcon(
     size: Dp = 48.dp,
-    tint: Color = Purple500
+    tint: Color = Color.Unspecified
 ) {
     Icon(
-        imageVector    = Icons.Filled.MusicNote,
+        painter = painterResource(id = R.drawable.music),
         contentDescription = "Beatly Logo",
-        tint           = tint,
-        modifier       = Modifier.size(size)
+        tint = tint,
+        modifier = Modifier.size(size)
     )
 }
 
@@ -63,7 +64,7 @@ fun PageIndicators(
                     .clip(CircleShape)
                     .background(
                         if (isSelected) Purple500
-                        else White.copy(alpha = 0.40f)
+                        else White
                     )
             )
         }

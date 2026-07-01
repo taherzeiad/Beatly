@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 data class OnboardingUiState(
-    val pages: List<OnboardingPage> = emptyList(),
-    val currentPageIndex: Int = 0,
-    val isLastPage: Boolean = false
+    val pages          : List<OnboardingPage> = emptyList(),
+    val currentPageIndex: Int     = 0,
+    val isLastPage     : Boolean  = false
 )
 
 class OnboardingViewModel : ViewModel() {
@@ -21,48 +21,32 @@ class OnboardingViewModel : ViewModel() {
 
     private val onboardingPages = listOf(
         OnboardingPage(
-            title = "Your Music, Anytime, Anywhere",
-            description = "Enjoy your favorite tracks without limits—stream online or listen offline.",
-            imageRes = R.drawable.onboarding_1
+            title       = "Your Music, Anytime, Anywhere",
+            description = "Enjoy your favorite tracks without limits—stream \n online \n or listen offline.",
+            imageRes    = R.drawable.onboarding_1
         ),
         OnboardingPage(
-            title = "Endless Music, Zero Restrictions",
-            description = "Discover and play the songs you love, wherever you are.",
-            imageRes = R.drawable.onboarding_2
+            title       = "Endless Music, Zero Restrictions",
+            description = "Discover and play the songs you love, \n wherever you are.",
+            imageRes    = R.drawable.onboarding_2
         ),
         OnboardingPage(
-            title = "Offline or Online, It's All Yours",
-            description = "Download your playlists and enjoy uninterrupted music anytime.",
-            imageRes = R.drawable.onboarding_3
+            title       = "Offline or Online, It's All Yours",
+            description = "Download your playlists and enjoy uninterrupted \n music anytime.",
+            imageRes    = R.drawable.onboarding_3
         )
     )
 
     init {
-        _uiState.update { state ->
-            state.copy(pages = onboardingPages)
-        }
+        _uiState.update { it.copy(pages = onboardingPages) }
     }
 
-    fun onContinueClicked(): Boolean {
-        val currentIndex = _uiState.value.currentPageIndex
-        return if (currentIndex < onboardingPages.size - 1) {
-            _uiState.update { state ->
-                state.copy(
-                    currentPageIndex = currentIndex + 1,
-                    isLastPage = currentIndex + 1 == onboardingPages.size - 1
-                )
-            }
-            false // not done yet
-        } else {
-            true // navigate to registration/home
-        }
-    }
-
+    // ✅ يُستدعى فقط من LaunchedEffect عند تغيير صفحة الـ Pager (سحب أو زر)
     fun onPageChanged(index: Int) {
         _uiState.update { state ->
             state.copy(
                 currentPageIndex = index,
-                isLastPage = index == onboardingPages.size - 1
+                isLastPage       = index == onboardingPages.size - 1
             )
         }
     }
