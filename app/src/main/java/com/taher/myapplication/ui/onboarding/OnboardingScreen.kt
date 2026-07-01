@@ -29,8 +29,9 @@ import com.beatly.ui.theme.BodyMediumRegular
 import com.beatly.ui.theme.Gray950
 import com.beatly.ui.theme.Headline
 import com.beatly.ui.theme.White
+import kotlinx.coroutines.launch
 
-// ── Screen entry point (wires ViewModel) ──────────────────────────────────
+// ── Screen entry point ─────────────────────────────────────────────────────
 
 @Composable
 fun OnboardingScreen(
@@ -40,8 +41,9 @@ fun OnboardingScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState(pageCount = { uiState.pages.size })
+    val scope = rememberCoroutineScope()
 
-    // Keep ViewModel in sync when user swipes manually
+    // Sync ViewModel → when user swipes manually
     LaunchedEffect(pagerState.currentPage) {
         viewModel.onPageChanged(pagerState.currentPage)
     }
@@ -53,8 +55,14 @@ fun OnboardingScreen(
         currentPage = uiState.currentPageIndex,
         pagerState = pagerState,
         onContinue = {
-            val finished = viewModel.onContinueClicked()
-            if (finished) onContinueFinished()
+            val nextIndex = uiState.currentPageIndex + 1
+            if (nextIndex < uiState.pages.size) {
+                // ✅ Move the pager — ViewModel syncs automatically via LaunchedEffect
+                scope.launch { pagerState.animateScrollToPage(nextIndex) }
+            } else {
+                // Last page → navigate out
+                onContinueFinished()
+            }
         },
         onRegisterClicked = onRegisterClicked
     )
@@ -72,9 +80,9 @@ private fun OnboardingContent(
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Full-screen pager
         HorizontalPager(
-            state = pagerState, modifier = Modifier.fillMaxSize()
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
         ) { index ->
             OnboardingPageItem(page = pages[index])
         }
@@ -88,7 +96,6 @@ private fun OnboardingContent(
                 .padding(bottom = 44.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             PageIndicators(
                 pageCount = pages.size,
                 currentPage = currentPage,
@@ -96,7 +103,8 @@ private fun OnboardingContent(
             )
 
             BeatlyPrimaryButton(
-                text = "Continue", onClick = onContinue
+                text = "Continue",
+                onClick = onContinue
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -112,7 +120,6 @@ private fun OnboardingContent(
 private fun OnboardingPageItem(page: OnboardingPage) {
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Hero image
         Image(
             painter = painterResource(id = page.imageRes),
             contentDescription = null,
@@ -120,7 +127,6 @@ private fun OnboardingPageItem(page: OnboardingPage) {
             contentScale = ContentScale.Crop
         )
 
-        // Gradient: transparent → Gray950 (matches dark overlay in Figma)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -135,26 +141,27 @@ private fun OnboardingPageItem(page: OnboardingPage) {
                 )
         )
 
-        // Text block — sits above bottom controls
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 250.dp),   // clearance for dots + button + footer
+                .padding(bottom = 250.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Headline — Figma: SemiBold 28sp / lh 39.2
             Text(
-                text = page.title, style = Headline, color = White, textAlign = TextAlign.Center
+                text = page.title,
+                style = Headline,
+                color = White,
+                textAlign = TextAlign.Center
             )
+
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Body — Figma: Regular 16sp / lh 25.6
             Text(
                 text = page.description,
-                fontSize = 14.sp,
                 style = BodyMediumRegular,
+                fontSize = 14.sp,
                 color = White.copy(alpha = 0.80f),
                 textAlign = TextAlign.Center
             )

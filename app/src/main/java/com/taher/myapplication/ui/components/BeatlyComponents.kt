@@ -64,7 +64,7 @@ fun PageIndicators(
                     .clip(CircleShape)
                     .background(
                         if (isSelected) Purple500
-                        else White.copy(alpha = 0.40f)
+                        else White
                     )
             )
         }
