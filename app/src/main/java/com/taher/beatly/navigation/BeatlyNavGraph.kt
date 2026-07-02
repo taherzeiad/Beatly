@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.taher.beatly.ui.auth.ProfileSuccessScreen
 import com.taher.beatly.ui.auth.RecoverySuccessScreen
+import com.taher.beatly.ui.auth.forgotpassword.ForgotPasswordScreen
 import com.taher.beatly.ui.auth.recoveryemail.RecoveryEmailSentScreen
 import com.taher.beatly.ui.auth.resetpassword.ResetPasswordScreen
 import com.taher.beatly.ui.auth.signIn.SignInScreen
@@ -71,8 +72,8 @@ fun BeatlyNavGraph() {
                 },
                 onForgotPassword  = { navController.navigate(Screen.ForgotPassword.route) },
                 onRegisterClicked = { navController.navigate(Screen.SignUp.route) },
-                onAppleSignIn     = { /* TODO */ },
-                onFacebookSignIn  = { /* TODO */ }
+                onAppleSignIn     = {  },
+                onFacebookSignIn  = {  }
             )
         }
 
@@ -85,16 +86,16 @@ fun BeatlyNavGraph() {
                         popUpTo(Screen.SignUp.route) { inclusive = true }
                     }
                 },
-                onTermsClicked   = { /* TODO */ },
-                onPrivacyClicked = { /* TODO */ }
+                onTermsClicked   = {  },
+                onPrivacyClicked = {  }
             )
         }
 
         // ── Profile Setup Success ──────────────────────────────────────────
         composable(Screen.ProfileSuccess.route) {
             ProfileSuccessScreen(
-                onContinue    = { /* TODO: navigate to Home */ },
-                onCallSupport = { /* TODO */ }
+                onContinue    = {  },
+                onCallSupport = {  }
             )
         }
 
@@ -103,7 +104,7 @@ fun BeatlyNavGraph() {
             ForgotPasswordScreen(
                 onBackClicked = { navController.popBackStack() },
                 onContinue    = { navController.navigate(Screen.RecoveryEmailSent.route) },
-                onCallSupport = { /* TODO */ }
+                onCallSupport = {  }
             )
         }
 
@@ -111,7 +112,7 @@ fun BeatlyNavGraph() {
         composable(Screen.RecoveryEmailSent.route) {
             RecoveryEmailSentScreen(
                 onContinue    = { navController.navigate(Screen.ResetPassword.route) },
-                onCallSupport = { /* TODO */ }
+                onCallSupport = { }
             )
         }
 
@@ -124,7 +125,7 @@ fun BeatlyNavGraph() {
                         popUpTo(Screen.ForgotPassword.route) { inclusive = true }
                     }
                 },
-                onCallSupport = { /* TODO */ }
+                onCallSupport = {  }
             )
         }
 
@@ -136,17 +137,8 @@ fun BeatlyNavGraph() {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                onCallSupport = { /* TODO */ }
+                onCallSupport = {  }
             )
         }
     }
-}
-
-@Composable
-fun ForgotPasswordScreen(
-    onBackClicked: () -> Boolean,
-    onContinue: () -> Unit,
-    onCallSupport: () -> Unit
-) {
-    TODO("Not yet implemented")
 }

@@ -1,5 +1,6 @@
 package com.taher.beatly.ui.auth.forgotpassword
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -111,6 +112,7 @@ fun ForgotPasswordEmptyPreview() {
     BeatlyTheme { ForgotPasswordScreen(onBackClicked = {}, onContinue = {}, onCallSupport = {}) }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ForgotPasswordFilledPreview() {
