@@ -5,8 +5,8 @@ import com.taher.beatly.model.Genre
 import com.taher.beatly.model.LibraryItem
 import com.taher.beatly.model.LibraryItemIcon
 import com.taher.beatly.model.Song
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
