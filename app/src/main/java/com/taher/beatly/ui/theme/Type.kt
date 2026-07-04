@@ -17,11 +17,25 @@ val Inter = FontFamily(
 )
 
 // ── Named text styles (match Figma exactly) ────────────────────────────────
+val DisplayLarge = TextStyle(
+    fontFamily = Inter,
+    fontWeight = FontWeight.SemiBold,
+    fontSize   = 40.sp,
+    lineHeight = 56.sp,
+)
+
 val Headline = TextStyle(
     fontFamily = Inter,
     fontWeight = FontWeight.SemiBold,
     fontSize   = 28.sp,
     lineHeight = 39.2.sp,   // 28 × 1.4 — screen titles, onboarding headlines
+)
+
+val TitleMedium = TextStyle(
+    fontFamily = Inter,
+    fontWeight = FontWeight.Bold,
+    fontSize   = 22.sp,
+    lineHeight = 30.8.sp,
 )
 
 val BodyMediumMedium = TextStyle(
@@ -54,8 +68,9 @@ val BodyXSmallRegular = TextStyle(
 
 // ── Material3 Typography mapping ───────────────────────────────────────────
 val BeatlyTypography = Typography(
+    displayLarge = DisplayLarge,
     titleLarge  = Headline,
-    titleMedium = Headline,
+    titleMedium = TitleMedium,
     bodyLarge   = BodyMediumRegular,
     labelLarge  = BodyMediumMedium,
     bodyMedium  = BodySmallRegular,

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,25 +18,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taher.beatly.model.OnboardingPage
 import com.taher.beatly.ui.components.BeatlyPrimaryButton
 import com.taher.beatly.ui.components.PageIndicators
 import com.taher.beatly.ui.components.RegisterFooter
 import com.taher.beatly.ui.theme.BeatlyTheme
-import com.taher.beatly.ui.theme.BodyMediumRegular
-import com.taher.beatly.ui.theme.Gray950
-import com.taher.beatly.ui.theme.Headline
-import com.taher.beatly.ui.theme.White
 import kotlinx.coroutines.launch
 
 // ── Screen entry point ─────────────────────────────────────────────────────
 
 @Composable
 fun OnboardingScreen(
-    viewModel: OnboardingViewModel = viewModel(),
+    viewModel: OnboardingViewModel = hiltViewModel(),
     onContinueFinished: () -> Unit,
     onRegisterClicked: () -> Unit
 ) {
@@ -127,6 +123,9 @@ private fun OnboardingPageItem(page: OnboardingPage) {
             contentScale = ContentScale.Crop
         )
 
+        val overlayColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f) // Usually near black
+        val endColor = MaterialTheme.colorScheme.onSurface
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -134,8 +133,8 @@ private fun OnboardingPageItem(page: OnboardingPage) {
                     Brush.verticalGradient(
                         colorStops = arrayOf(
                             0.30f to Color.Transparent,
-                            0.60f to Gray950.copy(alpha = 0.80f),
-                            1.00f to Gray950
+                            0.60f to overlayColor,
+                            1.00f to endColor
                         )
                     )
                 )
@@ -151,8 +150,8 @@ private fun OnboardingPageItem(page: OnboardingPage) {
         ) {
             Text(
                 text = page.title,
-                style = Headline,
-                color = White,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.background,
                 textAlign = TextAlign.Center
             )
 
@@ -160,9 +159,8 @@ private fun OnboardingPageItem(page: OnboardingPage) {
 
             Text(
                 text = page.description,
-                style = BodyMediumRegular,
-                fontSize = 14.sp,
-                color = White.copy(alpha = 0.80f),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.80f),
                 textAlign = TextAlign.Center
             )
         }

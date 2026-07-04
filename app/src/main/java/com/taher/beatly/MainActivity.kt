@@ -7,7 +7,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
 import com.taher.beatly.navigation.BeatlyNavGraph
 import com.taher.beatly.ui.theme.BeatlyTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
