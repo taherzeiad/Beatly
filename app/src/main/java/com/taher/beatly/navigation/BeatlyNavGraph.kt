@@ -51,7 +51,7 @@ fun BeatlyNavGraph() {
 
     NavHost(
         navController    = navController,
-        startDestination = Screen.Splash.route
+        startDestination = Screen.Home.route
     ) {
 
         // ── Splash ─────────────────────────────────────────────────────────

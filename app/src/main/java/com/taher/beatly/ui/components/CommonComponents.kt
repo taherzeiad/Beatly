@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.taher.beatly.ui.theme.Gray400
 import com.taher.beatly.ui.theme.Gray500
 import com.taher.beatly.ui.theme.Gray950
@@ -34,7 +35,9 @@ fun PlaceholderImage(
             .clip(shape),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Icon(
                 imageVector = Icons.Outlined.Image,
                 contentDescription = null,
@@ -109,7 +112,7 @@ fun SectionHeader(title: String, onSeeAllClick: (() -> Unit)? = null) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(title, style = MaterialTheme.typography.titleMedium)
+        Text(title, fontSize = 18.sp, style = MaterialTheme.typography.titleMedium)
         if (onSeeAllClick != null) {
             Text(
                 "See All",
@@ -135,17 +138,19 @@ fun SongRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .height(140.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PlaceholderImage(modifier = Modifier.size(64.dp), shape = RoundedCornerShape(12.dp))
+        PlaceholderImage(modifier = Modifier.width(115.dp).height(130.dp), shape = RoundedCornerShape(12.dp))
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 song.title,
                 style = MaterialTheme.typography.labelLarge,
                 maxLines = 1,
+                fontSize = 15.sp,
                 overflow = TextOverflow.Ellipsis
             )
             Text(

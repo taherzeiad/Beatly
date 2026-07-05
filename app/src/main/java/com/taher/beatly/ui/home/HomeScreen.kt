@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taher.beatly.model.Artist
@@ -71,8 +72,11 @@ fun HomeScreenContent(
     onPlayPauseClick: (Song) -> Unit = {}
 ) {
     Scaffold(
-        bottomBar = { BeatlyBottomBar(selectedTab = BeatlyTab.HOME, onTabSelected = onNavigateTab) }
-    ) { padding ->
+        bottomBar = {
+            BeatlyBottomBar(
+                selectedTab = BeatlyTab.HOME, onTabSelected = onNavigateTab
+            )
+        }) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -118,9 +122,7 @@ private fun HomeHeader(userName: String, onSearchClick: () -> Unit) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             PlaceholderImage(
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-                showLabel = false
+                modifier = Modifier.size(56.dp), shape = CircleShape, showLabel = false
             )
             Spacer(Modifier.width(12.dp))
             Column {
@@ -129,14 +131,12 @@ private fun HomeHeader(userName: String, onSearchClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text(userName, style = MaterialTheme.typography.titleMedium)
+                Text(userName, fontSize = 17.sp, style = MaterialTheme.typography.titleMedium)
             }
         }
         Row {
             RoundIconButton(
-                icon = Icons.Filled.Search,
-                onClick = onSearchClick,
-                contentDescription = "Search"
+                icon = Icons.Filled.Search, onClick = onSearchClick, contentDescription = "Search"
             )
             Spacer(Modifier.width(8.dp))
             RoundIconButton(
@@ -159,6 +159,7 @@ private fun TrendingRow(songs: List<Song>) {
                     song.title,
                     style = MaterialTheme.typography.labelLarge,
                     maxLines = 1,
+                    fontSize = 13.sp,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
@@ -166,6 +167,7 @@ private fun TrendingRow(songs: List<Song>) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
+                    fontSize = 12.sp,
                     overflow = TextOverflow.Ellipsis
                 )
             }
@@ -178,21 +180,18 @@ private fun TopArtistRow(artists: List<Artist>, onArtistClick: (String) -> Unit)
     LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
         items(artists, key = { it.id }) { artist ->
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.width(90.dp)
+                horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(90.dp)
             ) {
                 PlaceholderImage(
-                    modifier = Modifier.size(90.dp),
-                    shape = CircleShape,
-                    showLabel = false
+                    modifier = Modifier.size(90.dp), shape = CircleShape, showLabel = false
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
                     artist.name,
                     maxLines = 1,
+                    fontSize = 13.sp,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.clickable { onArtistClick(artist.id) }
-                )
+                    modifier = Modifier.clickable { onArtistClick(artist.id) })
             }
         }
     }
@@ -207,8 +206,16 @@ private fun TopArtistRow(artists: List<Artist>, onArtistClick: (String) -> Unit)
 // ─────────────────────────────────────────────────────────────────────────
 
 private val previewSongs = listOf(
-    Song(id = "s1", title = "Sharks", artistName = "Imagine Dragons", artistId = "a9", isLiked = true),
-    Song(id = "s2", title = "God Is a Woman", artistName = "Ariana Grande", artistId = "a10", isLiked = true),
+    Song(
+        id = "s1", title = "Sharks", artistName = "Imagine Dragons", artistId = "a9", isLiked = true
+    ),
+    Song(
+        id = "s2",
+        title = "God Is a Woman",
+        artistName = "Ariana Grande",
+        artistId = "a10",
+        isLiked = true
+    ),
     Song(id = "s3", title = "Handsome", artistName = "Warren Hue", artistId = "a11", isLiked = true)
 )
 
@@ -224,7 +231,13 @@ private val previewUiState = HomeUiState(
     trendingSongs = previewSongs,
     topArtists = previewArtists,
     recentlyPlayed = listOf(
-        Song(id = "s4", title = "Ghost", artistName = "Justin Bieber", artistId = "a1", isLiked = true)
+        Song(
+            id = "s4",
+            title = "Ghost",
+            artistName = "Justin Bieber",
+            artistId = "a1",
+            isLiked = true
+        )
     ),
     currentlyPlayingSongId = "s4",
     isLoading = false
@@ -238,7 +251,11 @@ private fun HomeScreenPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Home – Dark", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(
+    showBackground = true,
+    name = "Home – Dark",
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun HomeScreenPreviewDark() {
     MaterialTheme {
