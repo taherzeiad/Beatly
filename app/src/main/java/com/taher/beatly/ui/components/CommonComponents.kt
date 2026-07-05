@@ -143,7 +143,12 @@ fun SongRow(
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PlaceholderImage(modifier = Modifier.width(115.dp).height(130.dp), shape = RoundedCornerShape(12.dp))
+        PlaceholderImage(
+            modifier = Modifier
+                .width(115.dp)
+                .height(130.dp),
+            shape = RoundedCornerShape(12.dp)
+        )
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
