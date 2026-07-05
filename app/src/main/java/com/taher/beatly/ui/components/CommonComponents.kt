@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -81,7 +83,7 @@ fun BeatlyBottomBar(
         NavigationBarItem(
             selected = selectedTab == BeatlyTab.LIBRARY,
             onClick = { onTabSelected(BeatlyTab.LIBRARY) },
-            icon = { Icon(Icons.Outlined.LibraryBooks, contentDescription = "Library") },
+            icon = { Icon(imageVector = Icons.AutoMirrored.Outlined.LibraryBooks, contentDescription = "Library") },
             label = { Text("Library") },
             colors = navBarColors()
         )
@@ -220,7 +222,7 @@ fun BeatlyTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         RoundIconButton(
-            icon = Icons.Filled.ArrowBack,
+            icon = Icons.AutoMirrored.Filled.ArrowBack,
             onClick = { onBackClick?.invoke() },
             contentDescription = "Back"
         )
