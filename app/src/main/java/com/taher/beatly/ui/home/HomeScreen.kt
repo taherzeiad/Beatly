@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -21,6 +22,10 @@ import com.taher.beatly.model.Artist
 import com.taher.beatly.model.Song
 import com.taher.beatly.ui.components.*
 
+/**
+ * Stateful entry point wired to Hilt + the real ViewModel.
+ * This is what the NavGraph calls.
+ */
 @Composable
 fun HomeScreen(
     onSearchClick: () -> Unit,
@@ -33,6 +38,38 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    HomeScreenContent(
+        uiState = uiState,
+        onSearchClick = onSearchClick,
+        onSeeAllTrendingClick = onSeeAllTrendingClick,
+        onSeeAllArtistsClick = onSeeAllArtistsClick,
+        onSeeAllRecentClick = onSeeAllRecentClick,
+        onArtistClick = onArtistClick,
+        onNavigateTab = onNavigateTab,
+        onLikeClick = viewModel::onLikeToggled,
+        onPlayPauseClick = viewModel::onPlayPauseToggled
+    )
+}
+
+/**
+ * Stateless UI layer — takes plain data and lambdas only, no ViewModel/Hilt.
+ * Because it has no dependency on hiltViewModel(), it can be rendered directly
+ * inside @Preview (Android Studio's "Split"/"Design" preview pane) with fake
+ * data, so you can tweak spacing/colors/layout and see results instantly
+ * without running the app on a device or emulator.
+ */
+@Composable
+fun HomeScreenContent(
+    uiState: HomeUiState,
+    onSearchClick: () -> Unit = {},
+    onSeeAllTrendingClick: () -> Unit = {},
+    onSeeAllArtistsClick: () -> Unit = {},
+    onSeeAllRecentClick: () -> Unit = {},
+    onArtistClick: (String) -> Unit = {},
+    onNavigateTab: (BeatlyTab) -> Unit = {},
+    onLikeClick: (String) -> Unit = {},
+    onPlayPauseClick: (Song) -> Unit = {}
+) {
     Scaffold(
         bottomBar = { BeatlyBottomBar(selectedTab = BeatlyTab.HOME, onTabSelected = onNavigateTab) }
     ) { padding ->
@@ -61,9 +98,9 @@ fun HomeScreen(
             uiState.recentlyPlayed.firstOrNull()?.let { song ->
                 SongRow(
                     song = song,
-                    onLikeClick = { viewModel.onLikeToggled(song.id) },
-                    onPlayClick = { viewModel.onPlayPauseToggled(song) },
-                    onPauseClick = { viewModel.onPlayPauseToggled(song) },
+                    onLikeClick = { onLikeClick(song.id) },
+                    onPlayClick = { onPlayPauseClick(song) },
+                    onPauseClick = { onPlayPauseClick(song) },
                     isCurrentlyPlaying = uiState.currentlyPlayingSongId == song.id
                 )
             }
@@ -145,8 +182,7 @@ private fun TopArtistRow(artists: List<Artist>, onArtistClick: (String) -> Unit)
                 modifier = Modifier.width(90.dp)
             ) {
                 PlaceholderImage(
-                    modifier = Modifier
-                        .size(90.dp),
+                    modifier = Modifier.size(90.dp),
                     shape = CircleShape,
                     showLabel = false
                 )
@@ -162,4 +198,58 @@ private fun TopArtistRow(artists: List<Artist>, onArtistClick: (String) -> Unit)
     }
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Previews — open this file in Android Studio and use the "Split" or
+// "Design" tab (or the small "Preview" gutter icon next to each fun) to see
+// the screen render instantly. Edit any composable above and hit the
+// refresh icon on the preview pane (or Build > Rebuild if it's stale) to
+// see your change without installing the app on a device/emulator.
+// ─────────────────────────────────────────────────────────────────────────
 
+private val previewSongs = listOf(
+    Song(id = "s1", title = "Sharks", artistName = "Imagine Dragons", artistId = "a9", isLiked = true),
+    Song(id = "s2", title = "God Is a Woman", artistName = "Ariana Grande", artistId = "a10", isLiked = true),
+    Song(id = "s3", title = "Handsome", artistName = "Warren Hue", artistId = "a11", isLiked = true)
+)
+
+private val previewArtists = listOf(
+    Artist(id = "a5", name = "Khalid", isVerified = true),
+    Artist(id = "a3", name = "Taylor Swift", isVerified = true),
+    Artist(id = "a1", name = "Justin Bieber", isVerified = true),
+    Artist(id = "a8", name = "Paramore")
+)
+
+private val previewUiState = HomeUiState(
+    userName = "Mr. Aiden Smith",
+    trendingSongs = previewSongs,
+    topArtists = previewArtists,
+    recentlyPlayed = listOf(
+        Song(id = "s4", title = "Ghost", artistName = "Justin Bieber", artistId = "a1", isLiked = true)
+    ),
+    currentlyPlayingSongId = "s4",
+    isLoading = false
+)
+
+@Preview(showBackground = true, name = "Home – Light")
+@Composable
+private fun HomeScreenPreview() {
+    MaterialTheme {
+        HomeScreenContent(uiState = previewUiState)
+    }
+}
+
+@Preview(showBackground = true, name = "Home – Dark", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun HomeScreenPreviewDark() {
+    MaterialTheme {
+        HomeScreenContent(uiState = previewUiState)
+    }
+}
+
+@Preview(showBackground = true, name = "Home – Empty state")
+@Composable
+private fun HomeScreenEmptyPreview() {
+    MaterialTheme {
+        HomeScreenContent(uiState = HomeUiState(userName = "Mr. Aiden Smith", isLoading = false))
+    }
+}
