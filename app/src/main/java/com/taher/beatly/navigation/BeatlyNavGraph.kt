@@ -1,16 +1,27 @@
 package com.taher.beatly.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.taher.beatly.ui.artist.ArtistDetailScreen
 import com.taher.beatly.ui.auth.ProfileSuccessScreen
 import com.taher.beatly.ui.auth.RecoverySuccessScreen
+import com.taher.beatly.ui.auth.forgotpassword.ForgotPasswordScreen
 import com.taher.beatly.ui.auth.recoveryemail.RecoveryEmailSentScreen
 import com.taher.beatly.ui.auth.resetpassword.ResetPasswordScreen
 import com.taher.beatly.ui.auth.signIn.SignInScreen
 import com.taher.beatly.ui.auth.signup.SignUpScreen
+import com.taher.beatly.ui.components.BeatlyTab
+import com.taher.beatly.ui.genre.AllGenreScreen
+import com.taher.beatly.ui.home.HomeScreen
+import com.taher.beatly.ui.library.LikedSongsScreen
+import com.taher.beatly.ui.library.MyLibraryScreen
 import com.taher.beatly.ui.onboarding.OnboardingScreen
+import com.taher.beatly.ui.player.PlayMusicScreen
+import com.taher.beatly.ui.search.SearchArtistsScreen
 import com.taher.beatly.ui.splash.SplashScreen
 
 sealed class Screen(val route: String) {
@@ -23,7 +34,15 @@ sealed class Screen(val route: String) {
     data object RecoveryEmailSent   : Screen("recovery_email_sent")
     data object ResetPassword       : Screen("reset_password")
     data object RecoverySuccess     : Screen("recovery_success")
-    // data object Home             : Screen("home")
+    data object Home                : Screen("home")
+    data object Search              : Screen("search")
+    data object Library             : Screen("library")
+    data object AllGenre            : Screen("genres")
+    data object LikedSongs          : Screen("liked_songs")
+    data object Player              : Screen("player")
+    data object ArtistDetail : Screen("artist/{artistId}") {
+        fun createRoute(artistId: String) = "artist/$artistId"
+    }
 }
 
 @Composable
@@ -32,7 +51,7 @@ fun BeatlyNavGraph() {
 
     NavHost(
         navController    = navController,
-        startDestination = Screen.Splash.route
+        startDestination = Screen.Home.route
     ) {
 
         // ── Splash ─────────────────────────────────────────────────────────
@@ -71,8 +90,8 @@ fun BeatlyNavGraph() {
                 },
                 onForgotPassword  = { navController.navigate(Screen.ForgotPassword.route) },
                 onRegisterClicked = { navController.navigate(Screen.SignUp.route) },
-                onAppleSignIn     = { /* TODO */ },
-                onFacebookSignIn  = { /* TODO */ }
+                onAppleSignIn     = {  },
+                onFacebookSignIn  = {  }
             )
         }
 
@@ -85,16 +104,20 @@ fun BeatlyNavGraph() {
                         popUpTo(Screen.SignUp.route) { inclusive = true }
                     }
                 },
-                onTermsClicked   = { /* TODO */ },
-                onPrivacyClicked = { /* TODO */ }
+                onTermsClicked   = {  },
+                onPrivacyClicked = {  }
             )
         }
 
         // ── Profile Setup Success ──────────────────────────────────────────
         composable(Screen.ProfileSuccess.route) {
             ProfileSuccessScreen(
-                onContinue    = { /* TODO: navigate to Home */ },
-                onCallSupport = { /* TODO */ }
+                onContinue    = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onCallSupport = { /* Open dialer or support */ }
             )
         }
 
@@ -103,7 +126,7 @@ fun BeatlyNavGraph() {
             ForgotPasswordScreen(
                 onBackClicked = { navController.popBackStack() },
                 onContinue    = { navController.navigate(Screen.RecoveryEmailSent.route) },
-                onCallSupport = { /* TODO */ }
+                onCallSupport = {  }
             )
         }
 
@@ -111,7 +134,7 @@ fun BeatlyNavGraph() {
         composable(Screen.RecoveryEmailSent.route) {
             RecoveryEmailSentScreen(
                 onContinue    = { navController.navigate(Screen.ResetPassword.route) },
-                onCallSupport = { /* TODO */ }
+                onCallSupport = { }
             )
         }
 
@@ -124,7 +147,7 @@ fun BeatlyNavGraph() {
                         popUpTo(Screen.ForgotPassword.route) { inclusive = true }
                     }
                 },
-                onCallSupport = { /* TODO */ }
+                onCallSupport = {  }
             )
         }
 
@@ -136,17 +159,85 @@ fun BeatlyNavGraph() {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                onCallSupport = { /* TODO */ }
+                onCallSupport = { /* Open support */ }
+            )
+        }
+
+        // ── Home ───────────────────────────────────────────────────────────
+        composable(Screen.Home.route) {
+            HomeScreen(
+                onSearchClick = { navController.navigate(Screen.Search.route) },
+                onSeeAllTrendingClick = { /* Navigate to trending list */ },
+                onSeeAllArtistsClick = { navController.navigate(Screen.Search.route) },
+                onSeeAllRecentClick = { /* Navigate to recent list */ },
+                onArtistClick = { artistId ->
+                    navController.navigate(Screen.ArtistDetail.createRoute(artistId))
+                },
+                onNavigateTab = { tab ->
+                    when (tab) {
+                        BeatlyTab.HOME -> {}
+                        BeatlyTab.EXPLORE -> navController.navigate(Screen.Search.route)
+                        BeatlyTab.LIBRARY -> navController.navigate(Screen.Library.route)
+                        BeatlyTab.PROFILE -> { /* Navigate to profile */ }
+                    }
+                }
+            )
+        }
+
+        // ── Search / Explore ───────────────────────────────────────────────
+        composable(Screen.Search.route) {
+            SearchArtistsScreen(
+                onBackClick = { navController.popBackStack() },
+                onArtistClick = { artistId ->
+                    navController.navigate(Screen.ArtistDetail.createRoute(artistId))
+                }
+            )
+        }
+
+        // ── Library ────────────────────────────────────────────────────────
+        composable(Screen.Library.route) {
+            MyLibraryScreen(
+                onBackClick = { navController.popBackStack() },
+                onLibraryItemClick = { item ->
+                    if (item.id == "l1") { // Hardcoded ID for Liked Songs in FakeRepo
+                        navController.navigate(Screen.LikedSongs.route)
+                    }
+                }
+            )
+        }
+
+        // ── Liked Songs ────────────────────────────────────────────────────
+        composable(Screen.LikedSongs.route) {
+            LikedSongsScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // ── Artist Detail ──────────────────────────────────────────────────
+        composable(
+            route = Screen.ArtistDetail.route,
+            arguments = listOf(navArgument("artistId") { type = NavType.StringType })
+        ) {
+            ArtistDetailScreen(
+                onBackClick = { navController.popBackStack() },
+                onSeeAllSongsClick = { /* Navigate to all songs */ }
+            )
+        }
+
+        // ── Genres ─────────────────────────────────────────────────────────
+        composable(Screen.AllGenre.route) {
+            AllGenreScreen(
+                onBackClick = { navController.popBackStack() },
+                onSearchClick = { navController.navigate(Screen.Search.route) },
+                onGenreClick = { /* Navigate to genre details */ }
+            )
+        }
+
+        // ── Player ─────────────────────────────────────────────────────────
+        composable(Screen.Player.route) {
+            PlayMusicScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
     }
-}
-
-@Composable
-fun ForgotPasswordScreen(
-    onBackClicked: () -> Boolean,
-    onContinue: () -> Unit,
-    onCallSupport: () -> Unit
-) {
-    TODO("Not yet implemented")
 }

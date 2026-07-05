@@ -1,6 +1,7 @@
 package com.taher.beatly.ui.components
 
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,20 +30,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.taher.beatly.ui.theme.BodyMediumMedium
-import com.taher.beatly.ui.theme.BodySmallRegular
-import com.taher.beatly.ui.theme.Gray100
-import com.taher.beatly.ui.theme.Gray400
-import com.taher.beatly.ui.theme.Gray500
-import com.taher.beatly.ui.theme.Gray950
-import com.taher.beatly.ui.theme.Green500
-import com.taher.beatly.ui.theme.Headline
-import com.taher.beatly.ui.theme.Inter
-import com.taher.beatly.ui.theme.Purple300
-import com.taher.beatly.ui.theme.Purple500
-import com.taher.beatly.ui.theme.SurfaceFill
-import com.taher.beatly.ui.theme.TextBlack
-import com.taher.beatly.ui.theme.White
 import com.taher.beatly.R
 
 
@@ -54,13 +41,14 @@ fun AuthBackButton(onClick: () -> Unit) {
         modifier = Modifier
             .size(40.dp)
             .clip(CircleShape)
-            .background(Gray100)
-            .clickable { onClick() }, contentAlignment = Alignment.Center
+            .background(MaterialTheme.colorScheme.outlineVariant)
+            .clickable { onClick() }, 
+        contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = Icons.Default.ArrowBackIosNew,
             contentDescription = "Back",
-            tint = TextBlack,
+            tint = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.size(16.dp)
         )
     }
@@ -70,16 +58,16 @@ fun AuthBackButton(onClick: () -> Unit) {
 
 @Composable
 fun AuthTitleBlock(title: String, subtitle: String) {
-    Text(text = title, style = Headline, color = TextBlack)
+    Text(text = title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
     Spacer(modifier = Modifier.height(6.dp))
-    Text(text = subtitle, style = BodySmallRegular, color = Gray500)
+    Text(text = subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 // ── Field label ────────────────────────────────────────────────────────────
 
 @Composable
 fun AuthFieldLabel(text: String) {
-    Text(text = text, style = BodyMediumMedium, color = TextBlack)
+    Text(text = text, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onBackground)
 }
 
 // ── Text field ─────────────────────────────────────────────────────────────
@@ -102,17 +90,17 @@ fun AuthTextField(
         modifier = modifier
             .fillMaxWidth()
             .height(52.dp),
-        placeholder = { Text(placeholder, style = BodySmallRegular, color = Gray400) },
-        textStyle = BodySmallRegular.copy(color = Gray950),
+        placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
         singleLine = true,
         isError = isError,
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = SurfaceFill,
-            focusedContainerColor = SurfaceFill,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             unfocusedBorderColor = Color.Transparent,
-            focusedBorderColor = Purple500,
-            errorContainerColor = SurfaceFill,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            errorContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             errorBorderColor = MaterialTheme.colorScheme.error
         ),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
@@ -124,7 +112,7 @@ fun AuthTextField(
                         painter = painterResource(
                             if (isPasswordVisible) R.drawable.eyeclosed
                             else R.drawable.eyeclosed
-                        ), contentDescription = null, tint = Gray400
+                        ), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -145,14 +133,14 @@ fun AuthPrimaryButton(
             .height(56.dp),
         shape = RoundedCornerShape(50),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Purple500,
-            contentColor = White,
-            disabledContainerColor = Purple300,
-            disabledContentColor = TextBlack
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
         elevation = ButtonDefaults.buttonElevation(0.dp)
     ) {
-        Text(text = text, style = BodyMediumMedium)
+        Text(text = text, style = MaterialTheme.typography.labelLarge)
     }
 }
 
@@ -163,16 +151,16 @@ fun AuthSupportFooter(onClick: () -> Unit) {
     val text = buildAnnotatedString {
         withStyle(
             SpanStyle(
-                color = Gray500, fontFamily = Inter, fontSize = BodySmallRegular.fontSize
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = MaterialTheme.typography.bodySmall.fontSize
             )
         ) {
             append("Can't access your Account? ")
         }
         withStyle(
             SpanStyle(
-                color = Purple500,
-                fontFamily = Inter,
-                fontSize = BodySmallRegular.fontSize,
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = MaterialTheme.typography.bodySmall.fontSize,
                 fontWeight = FontWeight.SemiBold
             )
         ) {
@@ -198,20 +186,21 @@ fun PasswordRuleItem(label: String, isMet: Boolean) {
         Icon(
             imageVector = if (isMet) Icons.Filled.CheckCircle else Icons.Outlined.Circle,
             contentDescription = null,
-            tint = if (isMet) Green500 else Gray400,
+            tint = if (isMet) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, // Using primary for success state if Green500 not in MaterialTheme
             modifier = Modifier
                 .size(20.dp)
                 .padding(top = 1.dp)
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = label, style = BodySmallRegular, color = if (isMet) TextBlack else Gray500
+            text = label, 
+            style = MaterialTheme.typography.bodySmall, 
+            color = if (isMet) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
 // ── Success/info screen scaffold ───────────────────────────────────────────
-// Reused by RecoveryEmail, RecoverySuccess, ProfileSuccess
 
 @Composable
 fun AuthSuccessScaffold(
@@ -220,37 +209,30 @@ fun AuthSuccessScaffold(
     buttonLabel: String,
     onContinue: () -> Unit,
     onSupport: () -> Unit,
-    topContent: @Composable () -> Unit   // caller places the icon/illustration
+    topContent: @Composable () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(White), contentAlignment = Alignment.Center
+            .background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center
     ) {
-        // Centre block
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(horizontal = 32.dp)
         ) {
             topContent()
-
             Spacer(modifier = Modifier.height(40.dp))
-
             Text(
-                text = title, style = Headline, color = TextBlack, textAlign = TextAlign.Center
+                text = title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center
             )
-
             Spacer(modifier = Modifier.height(12.dp))
-
             Text(
                 text = subtitle,
-                style = BodySmallRegular,
-                color = Gray500,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }
-
-        // Bottom actions
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -266,15 +248,14 @@ fun AuthSuccessScaffold(
     }
 }
 
-// ── Animated check circle (shared by success screens) ─────────────────────
+// ── Animated check circle ─────────────────────
 
 @Composable
 fun AnimatedCheckCircle() {
-    // Import spring animation at call site or keep it self-contained here
     val scale = remember { androidx.compose.animation.core.Animatable(0f) }
     androidx.compose.runtime.LaunchedEffect(Unit) {
         scale.animateTo(
-            targetValue = 1f, animationSpec = androidx.compose.animation.core.spring(
+            targetValue = 1f, animationSpec = spring(
                 dampingRatio = Spring.DampingRatioMediumBouncy,
                 stiffness = Spring.StiffnessMedium
             )
@@ -282,7 +263,6 @@ fun AnimatedCheckCircle() {
     }
 
     Box(contentAlignment = Alignment.Center) {
-        // Decorative dots
         AuthDecorDot(10.dp, (-80).dp, (-20).dp, 0.25f)
         AuthDecorDot(8.dp, 70.dp, (-50).dp, 0.20f)
         AuthDecorDot(12.dp, (-50).dp, 60.dp, 0.18f)
@@ -292,13 +272,13 @@ fun AnimatedCheckCircle() {
             modifier = Modifier
                 .size(120.dp)
                 .scale(scale.value)
-                .background(Purple500, CircleShape),
+                .background(MaterialTheme.colorScheme.primary, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.CheckCircle,
                 contentDescription = null,
-                tint = White,
+                tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(56.dp)
             )
         }
@@ -316,6 +296,6 @@ fun AuthDecorDot(
         modifier = Modifier
             .size(size)
             .offset(x = offsetX, y = offsetY)
-            .background(Purple300.copy(alpha = alpha), CircleShape)
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = alpha), CircleShape)
     )
 }

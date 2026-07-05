@@ -12,14 +12,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.taher.beatly.ui.components.BeatlyLogoIcon
 import com.taher.beatly.ui.theme.BeatlyTheme
-import com.taher.beatly.ui.theme.BodySmallRegular
-import com.taher.beatly.ui.theme.Gray500
-import com.taher.beatly.ui.theme.Headline
-import com.taher.beatly.ui.theme.Purple500
-import com.taher.beatly.ui.theme.TextBlack
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -50,15 +44,14 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                BeatlyLogoIcon(size = 50.dp, tint = Purple500)
+                BeatlyLogoIcon(size = 50.dp, tint = MaterialTheme.colorScheme.primary)
 
                 Spacer(modifier = Modifier.width(10.dp))
 
                 Text(
                     text = "Beatly",
-                    style = Headline,
-                    color = TextBlack,
-                    fontSize = 40.sp
+                    style = MaterialTheme.typography.displayLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -67,10 +60,9 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
             // ── Tagline ────────────────────────────────────────────────────
             Text(
                 text = "Feel the rhythm, live the beat.",
-                style = BodySmallRegular,
-                color = Gray500,
-                textAlign = TextAlign.Center,
-                fontSize = 13.sp
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
             )
         }
     }

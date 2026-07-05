@@ -18,13 +18,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.taher.beatly.ui.theme.BodyMediumMedium
-import com.taher.beatly.ui.theme.BodySmallRegular
-import com.taher.beatly.ui.theme.Gray400
-import com.taher.beatly.ui.theme.Purple300
-import com.taher.beatly.ui.theme.Purple500
-import com.taher.beatly.ui.theme.TextBlack
-import com.taher.beatly.ui.theme.White
 import com.taher.beatly.R
 
 
@@ -33,7 +26,7 @@ import com.taher.beatly.R
 @Composable
 fun BeatlyLogoIcon(
     size: Dp = 48.dp,
-    tint: Color = Color.Unspecified
+    tint: Color = MaterialTheme.colorScheme.primary
 ) {
     Icon(
         painter = painterResource(id = R.drawable.music),
@@ -63,8 +56,8 @@ fun PageIndicators(
                     .size(if (isSelected) 10.dp else 8.dp)
                     .clip(CircleShape)
                     .background(
-                        if (isSelected) Purple500
-                        else White
+                        if (isSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.background
                     )
             )
         }
@@ -72,8 +65,6 @@ fun PageIndicators(
 }
 
 // ── Primary button ─────────────────────────────────────────────────────────
-// Active state  → Purple500 bg / White label
-// Disabled state → Purple300 bg / TextBlack label  (matches Figma)
 
 @Composable
 fun BeatlyPrimaryButton(
@@ -90,17 +81,16 @@ fun BeatlyPrimaryButton(
             .height(56.dp),
         shape     = RoundedCornerShape(50),
         colors    = ButtonDefaults.buttonColors(
-            containerColor         = Purple500,
-            contentColor           = White,
-            disabledContainerColor = Purple300,
-            disabledContentColor   = TextBlack
+            containerColor         = MaterialTheme.colorScheme.primary,
+            contentColor           = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            disabledContentColor   = MaterialTheme.colorScheme.onPrimaryContainer
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
     ) {
         Text(
             text  = text,
-            style = BodyMediumMedium,
-            color = if (enabled) White else TextBlack
+            style = MaterialTheme.typography.labelLarge
         )
     }
 }
@@ -114,16 +104,16 @@ fun RegisterFooter(
 ) {
     val annotated = buildAnnotatedString {
         withStyle(SpanStyle(
-            color      = White,
-            fontSize   = BodySmallRegular.fontSize,
-            fontFamily = BodySmallRegular.fontFamily,
+            color      = MaterialTheme.colorScheme.background, // Assuming dark bg for onboarding
+            fontSize   = MaterialTheme.typography.bodySmall.fontSize,
+            fontFamily = MaterialTheme.typography.bodySmall.fontFamily,
             fontWeight = FontWeight.Normal
         )) { append("Haven't registered yet? ") }
 
         withStyle(SpanStyle(
-            color      = Purple300,           // lighter purple on dark bg
-            fontSize   = BodySmallRegular.fontSize,
-            fontFamily = BodySmallRegular.fontFamily,
+            color      = MaterialTheme.colorScheme.primaryContainer,
+            fontSize   = MaterialTheme.typography.bodySmall.fontSize,
+            fontFamily = MaterialTheme.typography.bodySmall.fontFamily,
             fontWeight = FontWeight.SemiBold
         )) { append("Register Now") }
     }
@@ -140,6 +130,6 @@ fun BeatlyDivider(modifier: Modifier = Modifier) {
     HorizontalDivider(
         modifier  = modifier,
         thickness = 1.dp,
-        color     = Gray400.copy(alpha = 0.20f)
+        color     = MaterialTheme.colorScheme.outline.copy(alpha = 0.20f)
     )
 }

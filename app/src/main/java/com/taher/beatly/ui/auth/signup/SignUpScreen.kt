@@ -29,30 +29,16 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.taher.beatly.ui.theme.BeatlyTheme
-import com.taher.beatly.ui.theme.BodyMediumMedium
-import com.taher.beatly.ui.theme.BodySmallRegular
-import com.taher.beatly.ui.theme.BodyXSmallRegular
-import com.taher.beatly.ui.theme.Gray100
-import com.taher.beatly.ui.theme.Gray400
-import com.taher.beatly.ui.theme.Gray500
-import com.taher.beatly.ui.theme.Gray950
-import com.taher.beatly.ui.theme.Headline
-import com.taher.beatly.ui.theme.Inter
-import com.taher.beatly.ui.theme.Purple300
-import com.taher.beatly.ui.theme.Purple500
-import com.taher.beatly.ui.theme.SurfaceFill
-import com.taher.beatly.ui.theme.TextBlack
-import com.taher.beatly.ui.theme.White
+import com.taher.beatly.ui.theme.*
 import com.taher.beatly.R
 
 // ── Screen entry point ─────────────────────────────────────────────────────
 
 @Composable
 fun SignUpScreen(
-    viewModel          : SignUpViewModel = viewModel(),
+    viewModel          : SignUpViewModel = hiltViewModel(),
     onBackClicked      : () -> Unit,
     onSignUpSuccess    : () -> Unit,
     onTermsClicked     : () -> Unit,
@@ -96,7 +82,7 @@ private fun SignUpContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
             .padding(top = 60.dp, bottom = 40.dp)
@@ -107,9 +93,9 @@ private fun SignUpContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         // ── Title ──────────────────────────────────────────────────────────
-        Text(text = "Sign Up", style = Headline, color = TextBlack)
+        Text(text = "Sign Up", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(6.dp))
-        Text(text = "Set up your profile before continue", style = BodySmallRegular, color = Gray500)
+        Text(text = "Set up your profile before continue", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -168,7 +154,7 @@ private fun SignUpContent(
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text  = "Passwords do not match",
-                style = BodyXSmallRegular,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error
             )
         }
@@ -194,14 +180,14 @@ private fun SignUpContent(
                 .height(56.dp),
             shape    = RoundedCornerShape(50),
             colors   = ButtonDefaults.buttonColors(
-                containerColor         = Purple500,
-                contentColor           = White,
-                disabledContainerColor = Purple300,
-                disabledContentColor   = TextBlack
+                containerColor         = MaterialTheme.colorScheme.primary,
+                contentColor           = MaterialTheme.colorScheme.onPrimary,
+                disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                disabledContentColor   = MaterialTheme.colorScheme.onPrimaryContainer
             ),
             elevation = ButtonDefaults.buttonElevation(0.dp)
         ) {
-            Text(text = "Continue", style = BodyMediumMedium)
+            Text(text = "Continue", style = MaterialTheme.typography.labelLarge)
         }
     }
 }
@@ -214,14 +200,14 @@ private fun SignUpBackButton(onClick: () -> Unit) {
         modifier = Modifier
             .size(40.dp)
             .clip(CircleShape)
-            .background(Gray100)
+            .background(MaterialTheme.colorScheme.outlineVariant)
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector        = Icons.Default.ArrowBackIosNew,
             contentDescription = "Back",
-            tint               = TextBlack,
+            tint               = MaterialTheme.colorScheme.onBackground,
             modifier           = Modifier.size(16.dp)
         )
     }
@@ -229,7 +215,7 @@ private fun SignUpBackButton(onClick: () -> Unit) {
 
 @Composable
 private fun SignUpLabel(text: String) {
-    Text(text = text, style = BodyMediumMedium, color = TextBlack)
+    Text(text = text, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onBackground)
 }
 
 @Composable
@@ -249,18 +235,18 @@ private fun SignUpTextField(
         modifier      = Modifier
             .fillMaxWidth()
             .height(52.dp),
-        placeholder   = { Text(placeholder, style = BodySmallRegular, color = Gray400) },
-        textStyle     = BodySmallRegular.copy(color = Gray950),
+        placeholder   = { Text(placeholder, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+        textStyle     = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
         singleLine    = true,
         isError       = isError,
         shape         = RoundedCornerShape(12.dp),
         colors        = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = SurfaceFill,
-            focusedContainerColor   = SurfaceFill,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            focusedContainerColor   = MaterialTheme.colorScheme.surfaceVariant,
             unfocusedBorderColor    = Color.Transparent,
-            focusedBorderColor      = Purple500,
+            focusedBorderColor      = MaterialTheme.colorScheme.primary,
             errorBorderColor        = MaterialTheme.colorScheme.error,
-            errorContainerColor     = SurfaceFill,
+            errorContainerColor     = MaterialTheme.colorScheme.surfaceVariant,
         ),
         keyboardOptions      = KeyboardOptions(keyboardType = keyboardType),
         visualTransformation = if (isPassword && !isPasswordVisible)
@@ -274,7 +260,7 @@ private fun SignUpTextField(
                             else R.drawable.eyeclosed // TODO: Use eyeopen when available
                         ),
                         contentDescription = null,
-                        tint               = Gray400
+                        tint               = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -294,7 +280,7 @@ private fun TermsRow(
             imageVector        = if (checked) Icons.Default.CheckBox
             else Icons.Default.CheckBoxOutlineBlank,
             contentDescription = "Accept terms",
-            tint               = if (checked) Purple500 else Gray400,
+            tint               = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier           = Modifier
                 .size(20.dp)
                 .clickable { onToggle() }
@@ -302,20 +288,20 @@ private fun TermsRow(
         Spacer(modifier = Modifier.width(10.dp))
 
         val text = buildAnnotatedString {
-            withStyle(SpanStyle(color = TextBlack, fontFamily = Inter, fontSize = BodySmallRegular.fontSize)) {
+            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onBackground, fontFamily = Inter, fontSize = MaterialTheme.typography.bodyMedium.fontSize)) {
                 append("By creating an account, you agree to our ")
             }
-            withStyle(SpanStyle(color = Purple500, fontFamily = Inter, fontSize = BodySmallRegular.fontSize, fontWeight = FontWeight.SemiBold)) {
+            withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary, fontFamily = Inter, fontSize = MaterialTheme.typography.bodyMedium.fontSize, fontWeight = FontWeight.SemiBold)) {
                 append("Terms and Conditions")
             }
-            withStyle(SpanStyle(color = TextBlack, fontFamily = Inter, fontSize = BodySmallRegular.fontSize)) {
+            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onBackground, fontFamily = Inter, fontSize = MaterialTheme.typography.bodyMedium.fontSize)) {
                 append(" and ")
             }
-            withStyle(SpanStyle(color = Purple500, fontFamily = Inter, fontSize = BodySmallRegular.fontSize, fontWeight = FontWeight.SemiBold)) {
+            withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary, fontFamily = Inter, fontSize = MaterialTheme.typography.bodyMedium.fontSize, fontWeight = FontWeight.SemiBold)) {
                 append("Privacy Notice.")
             }
         }
-        Text(text = text, lineHeight = BodySmallRegular.lineHeight)
+        Text(text = text, lineHeight = MaterialTheme.typography.bodyMedium.lineHeight)
     }
 }
 

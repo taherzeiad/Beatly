@@ -30,8 +30,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taher.beatly.ui.theme.*
 import com.taher.beatly.R
 
@@ -39,7 +39,7 @@ import com.taher.beatly.R
 
 @Composable
 fun SignInScreen(
-    viewModel: SignInViewModel = viewModel(),
+    viewModel: SignInViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onSignInSuccess: () -> Unit,
     onForgotPassword: () -> Unit,
@@ -83,7 +83,7 @@ private fun SignInContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
             .padding(top = 60.dp, bottom = 40.dp)
@@ -96,14 +96,14 @@ private fun SignInContent(
         // ── Title ──────────────────────────────────────────────────────────
         Text(
             text = "Sign In",
-            style = Headline,
-            color = TextBlack
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = "Sign In to your account",
-            style = BodySmallRegular,
-            color = Gray500
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -147,8 +147,8 @@ private fun SignInContent(
             )
             Text(
                 text = "Forgot password?",
-                style = BodySmallRegular,
-                color = TextBlack,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.clickable { onForgotPassword() }
             )
         }
@@ -164,14 +164,14 @@ private fun SignInContent(
                 .height(56.dp),
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Purple500,
-                contentColor = White,
-                disabledContainerColor = Purple300,
-                disabledContentColor = TextBlack
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer
             ),
             elevation = ButtonDefaults.buttonElevation(0.dp)
         ) {
-            Text(text = "Continue", style = BodyMediumMedium)
+            Text(text = "Continue", style = MaterialTheme.typography.labelLarge)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -186,8 +186,8 @@ private fun SignInContent(
             iconRes = R.drawable.apple,
             label = "Sign In with Apple",
             onClick = onAppleSignIn,
-            containerColor = White,
-            contentColor = TextBlack
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -196,8 +196,8 @@ private fun SignInContent(
             iconRes = R.drawable.facebook,
             label = "Sign In with Facebook",
             onClick = onFacebookSignIn,
-            containerColor = White,
-            contentColor = TextBlack
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -207,8 +207,8 @@ private fun SignInContent(
             val isNew = uiState.email.isBlank() && uiState.password.isBlank()
             withStyle(
                 SpanStyle(
-                    color = Gray500,
-                    fontSize = BodySmallRegular.fontSize,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontFamily = Inter
                 )
             ) {
@@ -216,8 +216,8 @@ private fun SignInContent(
             }
             withStyle(
                 SpanStyle(
-                    color = Purple500,
-                    fontSize = BodySmallRegular.fontSize,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontFamily = Inter,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -243,14 +243,14 @@ private fun BackButton(onClick: () -> Unit) {
         modifier = Modifier
             .size(40.dp)
             .clip(CircleShape)
-            .background(Gray100)
+            .background(MaterialTheme.colorScheme.outlineVariant)
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = Icons.Default.ArrowBackIosNew,
             contentDescription = "Back",
-            tint = TextBlack,
+            tint = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.size(16.dp)
         )
     }
@@ -260,8 +260,8 @@ private fun BackButton(onClick: () -> Unit) {
 private fun BeatlyLabel(text: String) {
     Text(
         text = text,
-        style = BodyMediumMedium,
-        color = TextBlack
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onBackground
     )
 }
 
@@ -282,16 +282,16 @@ private fun BeatlyTextField(
             .fillMaxWidth()
             .height(52.dp),
         placeholder = {
-            Text(text = placeholder, style = BodySmallRegular, color = Gray400)
+            Text(text = placeholder, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         },
-        textStyle = BodySmallRegular.copy(color = Gray950),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
         singleLine = true,
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = SurfaceFill,
-            focusedContainerColor = SurfaceFill,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             unfocusedBorderColor = Color.Transparent,
-            focusedBorderColor = Purple500,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
         ),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         visualTransformation = if (isPassword && !isPasswordVisible)
@@ -305,7 +305,7 @@ private fun BeatlyTextField(
                             else R.drawable.eyeclosed  // عين مغلقة
                         ),
                         contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
-                        tint = if (isPasswordVisible) Purple500 else Gray400  // يتغير اللون
+                        tint = if (isPasswordVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -326,11 +326,11 @@ private fun RememberMeCheckbox(
             imageVector = if (checked) Icons.Default.CheckBox
             else Icons.Default.CheckBoxOutlineBlank,
             contentDescription = "Remember me",
-            tint = if (checked) Purple500 else Gray400,
+            tint = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = "Remember me", style = BodySmallRegular, color = TextBlack)
+        Text(text = "Remember me", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
     }
 }
 
@@ -340,13 +340,13 @@ private fun OrDivider() {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        HorizontalDivider(modifier = Modifier.weight(1f), color = Gray200)
+        HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outline)
         Text(
             text = "  OR  ",
-            style = BodySmallRegular,
-            color = Gray500
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        HorizontalDivider(modifier = Modifier.weight(1f), color = Gray200)
+        HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outline)
     }
 }
 
@@ -368,7 +368,7 @@ private fun SocialButton(
             containerColor = containerColor,
             contentColor = contentColor
         ),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Gray200)
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Icon(
             painter = painterResource(id = iconRes),
@@ -377,7 +377,7 @@ private fun SocialButton(
             tint = Color.Unspecified
         )
         Spacer(modifier = Modifier.width(12.dp))
-        Text(text = label, style = BodyMediumMedium, color = contentColor)
+        Text(text = label, style = MaterialTheme.typography.labelLarge, color = contentColor)
     }
 }
 

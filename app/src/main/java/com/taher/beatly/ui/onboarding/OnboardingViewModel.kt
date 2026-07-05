@@ -3,10 +3,12 @@ package com.taher.beatly.ui.onboarding
 import androidx.lifecycle.ViewModel
 import com.taher.beatly.model.OnboardingPage
 import com.taher.beatly.R
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
 data class OnboardingUiState(
     val pages          : List<OnboardingPage> = emptyList(),
@@ -14,7 +16,8 @@ data class OnboardingUiState(
     val isLastPage     : Boolean  = false
 )
 
-class OnboardingViewModel : ViewModel() {
+@HiltViewModel
+class OnboardingViewModel @Inject constructor() : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
