@@ -6,7 +6,7 @@ import com.taher.beatly.data.MusicRepository
 import com.taher.beatly.model.Artist
 import com.taher.beatly.model.SearchFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
+import javax.inject.Inject
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
