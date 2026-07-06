@@ -12,11 +12,11 @@ fun ProfileSuccessScreen(
     onCallSupport: () -> Unit,
 ) {
     AuthSuccessScaffold(
-        title = "Profile Setup Success!",
-        subtitle = "Now you can listen to music on this app \n anytime and anywhere.",
+        title       = "Profile Setup Success!",
+        subtitle    = "Now you can listen to music on this app \n anytime and anywhere.",
         buttonLabel = "Continue",
-        onContinue = onContinue,
-        onSupport = onCallSupport
+        onContinue  = onContinue,
+        onSupport   = onCallSupport,
     ) {
         AnimatedCheckCircle()
     }

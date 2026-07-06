@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.*
@@ -27,9 +27,9 @@ import com.taher.beatly.ui.theme.SurfaceFill
 
 @Composable
 fun SearchArtistsScreen(
-    onBackClick: () -> Unit,
-    onArtistClick: (String) -> Unit,
-    viewModel: SearchViewModel = hiltViewModel()
+    onBackClick   : () -> Unit,
+    onArtistClick : (String) -> Unit,
+    viewModel     : SearchViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -43,8 +43,8 @@ fun SearchArtistsScreen(
             Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RoundIconButton(
-                    icon = Icons.Filled.ArrowBack,
-                    onClick = onBackClick,
+                    icon               = Icons.AutoMirrored.Filled.ArrowBack,
+                    onClick            = onBackClick,
                     contentDescription = "Back"
                 )
                 Spacer(Modifier.width(12.dp))
@@ -65,7 +65,7 @@ fun SearchArtistsScreen(
             LazyColumn(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 items(uiState.artists, key = { it.id }) { artist ->
                     ArtistSearchRow(
-                        artist = artist,
+                        artist        = artist,
                         onArtistClick = { onArtistClick(artist.id) },
                         onFollowClick = { viewModel.onFollowToggled(artist.id) }
                     )

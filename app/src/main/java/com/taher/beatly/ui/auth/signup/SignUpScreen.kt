@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -291,17 +292,32 @@ private fun TermsRow(
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.onBackground, fontFamily = Inter, fontSize = MaterialTheme.typography.bodyMedium.fontSize)) {
                 append("By creating an account, you agree to our ")
             }
+            pushStringAnnotation(tag = "terms", annotation = "terms")
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary, fontFamily = Inter, fontSize = MaterialTheme.typography.bodyMedium.fontSize, fontWeight = FontWeight.SemiBold)) {
                 append("Terms and Conditions")
             }
+            pop()
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.onBackground, fontFamily = Inter, fontSize = MaterialTheme.typography.bodyMedium.fontSize)) {
                 append(" and ")
             }
+            pushStringAnnotation(tag = "privacy", annotation = "privacy")
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary, fontFamily = Inter, fontSize = MaterialTheme.typography.bodyMedium.fontSize, fontWeight = FontWeight.SemiBold)) {
                 append("Privacy Notice.")
             }
+            pop()
         }
-        Text(text = text, lineHeight = MaterialTheme.typography.bodyMedium.lineHeight)
+        ClickableText(
+            text = text,
+            style = LocalTextStyle.current.copy(lineHeight = MaterialTheme.typography.bodyMedium.lineHeight),
+            onClick = { offset ->
+                text.getStringAnnotations(tag = "terms", start = offset, end = offset).firstOrNull()?.let {
+                    onTermsClicked()
+                }
+                text.getStringAnnotations(tag = "privacy", start = offset, end = offset).firstOrNull()?.let {
+                    onPrivacyClicked()
+                }
+            }
+        )
     }
 }
 

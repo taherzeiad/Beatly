@@ -31,12 +31,12 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun OnboardingScreen(
-    viewModel: OnboardingViewModel = hiltViewModel(),
-    onContinueFinished: () -> Unit,
-    onRegisterClicked: () -> Unit
+    viewModel          : OnboardingViewModel = hiltViewModel(),
+    onContinueFinished : () -> Unit,
+    onRegisterClicked  : () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val pagerState = rememberPagerState(pageCount = { uiState.pages.size })
+    val pagerState = rememberPagerState { uiState.pages.size }
     val scope = rememberCoroutineScope()
 
     // Sync ViewModel → when user swipes manually
