@@ -33,9 +33,10 @@ fun HomeScreen(
     onSeeAllTrendingClick: () -> Unit,
     onSeeAllArtistsClick: () -> Unit,
     onSeeAllRecentClick: () -> Unit,
-    onArtistClick: (String) -> Unit,
-    onNavigateTab: (BeatlyTab) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    onArtistClick         : (String) -> Unit,
+    onSongClick           : (Song) -> Unit,
+    onNavigateTab         : (BeatlyTab) -> Unit,
+    viewModel             : HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -46,6 +47,7 @@ fun HomeScreen(
         onSeeAllArtistsClick = onSeeAllArtistsClick,
         onSeeAllRecentClick = onSeeAllRecentClick,
         onArtistClick = onArtistClick,
+        onSongClick = onSongClick,
         onNavigateTab = onNavigateTab,
         onLikeClick = viewModel::onLikeToggled,
         onPlayPauseClick = viewModel::onPlayPauseToggled
@@ -65,18 +67,21 @@ fun HomeScreenContent(
     onSearchClick: () -> Unit = {},
     onSeeAllTrendingClick: () -> Unit = {},
     onSeeAllArtistsClick: () -> Unit = {},
-    onSeeAllRecentClick: () -> Unit = {},
-    onArtistClick: (String) -> Unit = {},
-    onNavigateTab: (BeatlyTab) -> Unit = {},
-    onLikeClick: (String) -> Unit = {},
-    onPlayPauseClick: (Song) -> Unit = {}
+    onSeeAllRecentClick : () -> Unit = {},
+    onArtistClick       : (String) -> Unit = {},
+    onSongClick         : (Song) -> Unit = {},
+    onNavigateTab       : (BeatlyTab) -> Unit = {},
+    onLikeClick         : (String) -> Unit = {},
+    onPlayPauseClick    : (Song) -> Unit = {},
 ) {
     Scaffold(
         bottomBar = {
             BeatlyBottomBar(
-                selectedTab = BeatlyTab.HOME, onTabSelected = onNavigateTab
+                selectedTab   = BeatlyTab.HOME,
+                onTabSelected = onNavigateTab
             )
-        }) { padding ->
+        }
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -103,7 +108,7 @@ fun HomeScreenContent(
                 SongRow(
                     song = song,
                     onLikeClick = { onLikeClick(song.id) },
-                    onPlayClick = { onPlayPauseClick(song) },
+                    onPlayClick = { onSongClick(song) },
                     onPauseClick = { onPlayPauseClick(song) },
                     isCurrentlyPlaying = uiState.currentlyPlayingSongId == song.id
                 )

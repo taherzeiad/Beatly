@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.MoreVert
@@ -28,8 +28,8 @@ import com.taher.beatly.ui.components.RoundIconButton
 
 @Composable
 fun LikedSongsScreen(
-    onBackClick: () -> Unit,
-    viewModel: LibraryViewModel = hiltViewModel()
+    onBackClick : () -> Unit,
+    viewModel   : LibraryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.likedSongsState.collectAsStateWithLifecycle()
 
@@ -48,7 +48,11 @@ fun LikedSongsScreen(
                     .align(Alignment.TopCenter),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                RoundIconButton(icon = Icons.Filled.ArrowBack, onClick = onBackClick, contentDescription = "Back")
+                RoundIconButton(
+                    icon               = Icons.AutoMirrored.Filled.ArrowBack,
+                    onClick            = onBackClick,
+                    contentDescription = "Back"
+                )
                 RoundIconButton(icon = Icons.Filled.MoreHoriz, onClick = { }, contentDescription = "More")
             }
         }
@@ -61,9 +65,9 @@ fun LikedSongsScreen(
             LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 items(uiState.songs, key = { it.id }) { song ->
                     LikedSongRow(
-                        song = song,
+                        song        = song,
                         onLikeClick = { viewModel.onLikeToggled(song.id) },
-                        onClick = { viewModel.onPlaySong(song) }
+                        onClick     = { viewModel.onPlaySong(song) }
                     )
                 }
             }

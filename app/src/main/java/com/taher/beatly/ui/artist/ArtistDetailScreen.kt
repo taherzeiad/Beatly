@@ -23,19 +23,19 @@ import com.taher.beatly.ui.components.SongRow
 
 @Composable
 fun ArtistDetailScreen(
-    onBackClick: () -> Unit,
-    onSeeAllSongsClick: () -> Unit,
-    viewModel: ArtistDetailViewModel = hiltViewModel()
+    onBackClick        : () -> Unit,
+    onSeeAllSongsClick : () -> Unit,
+    viewModel          : ArtistDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val artist = uiState.artist ?: return
 
-    Scaffold { padding ->
+    Scaffold { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 20.dp)
+                .padding(paddingValues)
+                .padding(horizontal = 20.dp),
         ) {
             Spacer(Modifier.height(12.dp))
             Row(

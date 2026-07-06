@@ -23,6 +23,11 @@ import com.taher.beatly.ui.onboarding.OnboardingScreen
 import com.taher.beatly.ui.player.PlayMusicScreen
 import com.taher.beatly.ui.search.SearchArtistsScreen
 import com.taher.beatly.ui.splash.SplashScreen
+import com.taher.beatly.ui.subscription.AddCardScreen
+import com.taher.beatly.ui.subscription.CongratulationsScreen
+import com.taher.beatly.ui.subscription.PaymentMethodScreen
+import com.taher.beatly.ui.subscription.PickPlanScreen
+import com.taher.beatly.ui.subscription.ReviewSummaryScreen
 
 sealed class Screen(val route: String) {
     data object Splash              : Screen("splash")
@@ -40,9 +45,14 @@ sealed class Screen(val route: String) {
     data object AllGenre            : Screen("genres")
     data object LikedSongs          : Screen("liked_songs")
     data object Player              : Screen("player")
-    data object ArtistDetail : Screen("artist/{artistId}") {
+    data object ArtistDetail        : Screen("artist/{artistId}") {
         fun createRoute(artistId: String) = "artist/$artistId"
     }
+    data object PickPlan            : Screen("pick_plan")
+    data object PaymentMethod       : Screen("payment_method")
+    data object AddCard             : Screen("add_card")
+    data object ReviewSummary       : Screen("review_summary")
+    data object Congratulations     : Screen("congratulations")
 }
 
 @Composable
@@ -51,7 +61,7 @@ fun BeatlyNavGraph() {
 
     NavHost(
         navController    = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Splash.route
     ) {
 
         // ── Splash ─────────────────────────────────────────────────────────
@@ -167,18 +177,21 @@ fun BeatlyNavGraph() {
         composable(Screen.Home.route) {
             HomeScreen(
                 onSearchClick = { navController.navigate(Screen.Search.route) },
-                onSeeAllTrendingClick = { /* Navigate to trending list */ },
+                onSeeAllTrendingClick = { navController.navigate(Screen.AllGenre.route) },
                 onSeeAllArtistsClick = { navController.navigate(Screen.Search.route) },
                 onSeeAllRecentClick = { /* Navigate to recent list */ },
                 onArtistClick = { artistId ->
                     navController.navigate(Screen.ArtistDetail.createRoute(artistId))
+                },
+                onSongClick = { song ->
+                    navController.navigate(Screen.Player.route)
                 },
                 onNavigateTab = { tab ->
                     when (tab) {
                         BeatlyTab.HOME -> {}
                         BeatlyTab.EXPLORE -> navController.navigate(Screen.Search.route)
                         BeatlyTab.LIBRARY -> navController.navigate(Screen.Library.route)
-                        BeatlyTab.PROFILE -> { /* Navigate to profile */ }
+                        BeatlyTab.PROFILE -> navController.navigate(Screen.PickPlan.route)
                     }
                 }
             )
@@ -237,6 +250,48 @@ fun BeatlyNavGraph() {
         composable(Screen.Player.route) {
             PlayMusicScreen(
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // ── Subscription Flow ──────────────────────────────────────────────
+
+        composable(Screen.PickPlan.route) {
+            PickPlanScreen(
+                onBackClicked = { navController.popBackStack() },
+                onContinue    = { navController.navigate(Screen.PaymentMethod.route) }
+            )
+        }
+
+        composable(Screen.PaymentMethod.route) {
+            PaymentMethodScreen(
+                onBackClicked = { navController.popBackStack() },
+                onAddCard     = { navController.navigate(Screen.AddCard.route) },
+                onContinue    = { navController.navigate(Screen.ReviewSummary.route) }
+            )
+        }
+
+        composable(Screen.AddCard.route) {
+            AddCardScreen(
+                onBackClicked = { navController.popBackStack() },
+                onAddCard     = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.ReviewSummary.route) {
+            ReviewSummaryScreen(
+                onBackClicked  = { navController.popBackStack() },
+                onConfirm      = { navController.navigate(Screen.Congratulations.route) },
+                onChangeMethod = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.Congratulations.route) {
+            CongratulationsScreen(
+                onBackToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                }
             )
         }
     }

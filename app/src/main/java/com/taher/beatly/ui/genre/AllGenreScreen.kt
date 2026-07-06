@@ -23,10 +23,10 @@ import com.taher.beatly.ui.components.BeatlyTopBar
 
 @Composable
 fun AllGenreScreen(
-    onBackClick: () -> Unit,
-    onSearchClick: () -> Unit,
-    onGenreClick: (String) -> Unit,
-    viewModel: GenreViewModel = hiltViewModel()
+    onBackClick   : () -> Unit,
+    onSearchClick : () -> Unit,
+    onGenreClick  : (String) -> Unit,
+    viewModel     : GenreViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -46,7 +46,10 @@ fun AllGenreScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(uiState.genres, key = { it.id }) { genre ->
-                    GenreCard(genre = genre, onClick = { onGenreClick(genre.id) })
+                    GenreCard(
+                        genre   = genre,
+                        onClick = { onGenreClick(genre.id) }
+                    )
                 }
             }
         }

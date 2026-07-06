@@ -22,16 +22,15 @@ import com.taher.beatly.ui.components.AuthTextField
 import com.taher.beatly.ui.components.AuthTitleBlock
 import com.taher.beatly.ui.components.PasswordRuleItem
 import com.taher.beatly.ui.theme.BeatlyTheme
-import com.taher.beatly.ui.theme.White
 
 // ── Screen entry point ─────────────────────────────────────────────────────
 
 @Composable
 fun ResetPasswordScreen(
-    viewModel: ResetPasswordViewModel = hiltViewModel(),
-    onBackClicked: () -> Unit,
-    onContinue: () -> Unit,          // → ResetSuccessScreen
-    onCallSupport: () -> Unit
+    viewModel     : ResetPasswordViewModel = hiltViewModel(),
+    onBackClicked : () -> Unit,
+    onContinue    : () -> Unit,          // → ResetSuccessScreen
+    onCallSupport : () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

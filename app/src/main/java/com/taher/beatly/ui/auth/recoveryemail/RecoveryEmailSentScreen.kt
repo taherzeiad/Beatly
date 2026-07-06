@@ -10,15 +10,15 @@ import com.taher.beatly.ui.theme.BeatlyTheme
 
 @Composable
 fun RecoveryEmailSentScreen(
-    onContinue: () -> Unit,   // → ResetPasswordScreen
-    onCallSupport: () -> Unit
+    onContinue    : () -> Unit,   // → ResetPasswordScreen
+    onCallSupport : () -> Unit,
 ) {
     AuthSuccessScaffold(
-        title = "We've sent an Recovery Email",
-        subtitle = "Check your email for a link to reset your password. If it doesn't appear within a few minutes, check your spam folder.",
+        title       = "We've sent an Recovery Email",
+        subtitle    = "Check your email for a link to reset your password. If it doesn't appear within a few minutes, check your spam folder.",
         buttonLabel = "Continue",
-        onContinue = onContinue,
-        onSupport = onCallSupport
+        onContinue  = onContinue,
+        onSupport   = onCallSupport,
     ) {
         AnimatedCheckCircle()
     }

@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -27,9 +29,9 @@ import com.taher.beatly.ui.theme.SurfaceFill
 
 @Composable
 fun MyLibraryScreen(
-    onBackClick: () -> Unit,
-    onLibraryItemClick: (LibraryItem) -> Unit,
-    viewModel: LibraryViewModel = hiltViewModel()
+    onBackClick        : () -> Unit,
+    onLibraryItemClick : (LibraryItem) -> Unit,
+    viewModel          : LibraryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -46,9 +48,17 @@ fun MyLibraryScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RoundIconButton(icon = Icons.Filled.ArrowBack, onClick = onBackClick, contentDescription = "Back")
+                RoundIconButton(
+                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    onClick = onBackClick,
+                    contentDescription = "Back"
+                )
                 Text("My Library", style = MaterialTheme.typography.titleLarge)
-                RoundIconButton(icon = Icons.Filled.Add, onClick = viewModel::onAddClicked, contentDescription = "Create playlist")
+                RoundIconButton(
+                    icon = Icons.Filled.Add,
+                    onClick = viewModel::onAddClicked,
+                    contentDescription = "Create playlist"
+                )
             }
 
             Spacer(Modifier.height(12.dp))
@@ -82,13 +92,16 @@ fun MyLibraryScreen(
                     Spacer(Modifier.width(6.dp))
                     Text(if (uiState.isAscending) "Sort Ascending" else "Sort Descending")
                 }
-                Icon(Icons.Filled.List, contentDescription = "List view")
+                Icon(Icons.AutoMirrored.Filled.List, contentDescription = "List view")
             }
 
             Spacer(Modifier.height(8.dp))
             LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 items(uiState.items, key = { it.id }) { item ->
-                    LibraryItemRow(item = item, onClick = { onLibraryItemClick(item) })
+                    LibraryItemRow(
+                        item    = item,
+                        onClick = { onLibraryItemClick(item) }
+                    )
                 }
             }
         }

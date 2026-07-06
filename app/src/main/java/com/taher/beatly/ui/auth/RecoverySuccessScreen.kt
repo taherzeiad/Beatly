@@ -11,14 +11,14 @@ import com.taher.beatly.ui.theme.BeatlyTheme
 @Composable
 fun RecoverySuccessScreen(
     onContinue    : () -> Unit,   // → Home or SignIn
-    onCallSupport : () -> Unit
+    onCallSupport : () -> Unit,
 ) {
     AuthSuccessScaffold(
         title       = "Recovery Success!",
         subtitle    = "Now you can listen to music on this app anytime and anywhere.",
         buttonLabel = "Continue",
         onContinue  = onContinue,
-        onSupport   = onCallSupport
+        onSupport   = onCallSupport,
     ) {
         AnimatedCheckCircle()
     }

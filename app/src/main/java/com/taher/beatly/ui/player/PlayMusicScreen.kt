@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Timer
@@ -24,9 +25,9 @@ import java.util.concurrent.TimeUnit
 
 @Composable
 fun PlayMusicScreen(
-    onBackClick: () -> Unit,
-    onLyricsClick: () -> Unit = {},
-    viewModel: PlayerViewModel = hiltViewModel()
+    onBackClick   : () -> Unit,
+    onLyricsClick : () -> Unit = {},
+    viewModel     : PlayerViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val song = uiState.song ?: return
@@ -38,11 +39,15 @@ fun PlayMusicScreen(
     ) {
         Spacer(Modifier.height(12.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier           = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment  = Alignment.CenterVertically
         ) {
-            RoundIconButton(icon = Icons.Filled.ArrowBack, onClick = onBackClick, contentDescription = "Back")
+            RoundIconButton(
+                icon               = Icons.AutoMirrored.Filled.ArrowBack,
+                onClick            = onBackClick,
+                contentDescription = "Back"
+            )
             Text("Music", style = MaterialTheme.typography.titleMedium)
             RoundIconButton(icon = Icons.Filled.MoreVert, onClick = { }, contentDescription = "More")
         }
