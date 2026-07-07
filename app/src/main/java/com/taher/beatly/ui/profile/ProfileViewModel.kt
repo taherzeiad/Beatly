@@ -1,4 +1,4 @@
-package com.taher.beatly.ui.profile
+package com.beatly.ui.profile
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,11 +14,10 @@ data class ProfileSettingItem(
 )
 
 data class ProfileUiState(
-    val userName    : String               = "Jenny Wilson",
-    val email       : String               = "wilson9@gmail.com",
-    val isPremium   : Boolean              = false,
-    val isDarkMode  : Boolean              = false,
-    val settings    : List<ProfileSettingItem> = emptyList()
+    val userName  : String                 = "Jenny Wilson",
+    val email     : String                 = "wilson9@gmail.com",
+    val isDarkMode: Boolean                = false,
+    val settings  : List<ProfileSettingItem> = emptyList()
 )
 
 class ProfileViewModel : ViewModel() {
@@ -28,19 +27,20 @@ class ProfileViewModel : ViewModel() {
 
     init {
         _uiState.update { state ->
-            state.copy(
-                settings = listOf(
-                    ProfileSettingItem("profile",       "Profile"),
-                    ProfileSettingItem("notification",  "Notification"),
-                    ProfileSettingItem("dark_mode",     "Dark Mode",     isToggle = true, toggled = false),
-                    ProfileSettingItem("audio_video",   "Audio & Video"),
-                    ProfileSettingItem("playback",      "Playback"),
-                    ProfileSettingItem("downloads",     "Downloads"),
-                    ProfileSettingItem("privacy_policy","Privacy Policy"),
-                    ProfileSettingItem("about",         "About"),
-                    ProfileSettingItem("logout",        "Logout"),
-                )
-            )
+            state.copy(settings = listOf(
+                ProfileSettingItem("profile",        "Profile"),
+                ProfileSettingItem("notification",   "Notification"),
+                ProfileSettingItem("dark_mode",      "Dark Mode", isToggle = true, toggled = false),
+                ProfileSettingItem("audio_video",    "Audio & Video"),
+                ProfileSettingItem("playback",       "Playback"),
+                ProfileSettingItem("downloads",      "Data Saver & Storage"),
+                ProfileSettingItem("security",       "Security"),
+                ProfileSettingItem("language",       "Language"),
+                ProfileSettingItem("privacy_policy", "Privacy Policy"),
+                ProfileSettingItem("about",          "About"),
+                ProfileSettingItem("delete_account", "Delete Account"),
+                ProfileSettingItem("logout",         "Logout"),
+            ))
         }
     }
 
@@ -54,4 +54,7 @@ class ProfileViewModel : ViewModel() {
             )
         }
     }
+
+    fun onDeleteAccount() { /* TODO: call auth repository */ }
+    fun onLogout()        { /* TODO: clear session + navigate to splash */ }
 }
