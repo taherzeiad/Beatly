@@ -163,8 +163,10 @@ fun ProfileScreen(
                             .weight(1f)
                             .height(44.dp),
                         shape = RoundedCornerShape(50),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextBlack),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Gray200)
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.outline.copy(alpha = 1f),
+                            contentColor = TextBlack
+                        )
                     ) {
                         Text(label, style = BodySmallRegular)
                     }
