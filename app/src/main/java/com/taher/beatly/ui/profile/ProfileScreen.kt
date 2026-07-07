@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taher.beatly.ui.components.BeatlyBottomBar
@@ -186,32 +187,27 @@ fun ProfileScreen(
                             )
                         )
                     )
-                    .height(140.dp)
+                    .height(180.dp)
+                    .width(335.dp)
             ) {
-                PlaceholderImage(
-                    modifier = Modifier
-                        .size(110.dp)
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 12.dp),
-                    showLabel = false
-                )
                 Column(modifier = Modifier
                     .align(Alignment.CenterStart)
                     .padding(20.dp)) {
                     Text(
                         "Enjoy All Benefits!",
+                        fontSize = 20.sp,
                         style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
                         color = White
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "Enjoy listening songs & podcasts with better audio quality, without restrictions, and without ads.",
+                        "Enjoy listening songs & \n podcasts with better audio \n quality, without restrictions, and \n without ads.",
                         style = BodyXSmallRegular, color = White.copy(alpha = 0.85f),
                         modifier = Modifier.widthIn(max = 200.dp)
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Button(
-                        onClick = onGetPremium, modifier = Modifier.height(40.dp),
+                        onClick = onGetPremium, modifier = Modifier.height(32.dp),
                         shape = RoundedCornerShape(50),
                         colors = ButtonDefaults.buttonColors(containerColor = White),
                         contentPadding = PaddingValues(horizontal = 18.dp)
@@ -219,7 +215,8 @@ fun ProfileScreen(
                         Text(
                             "Get Premium",
                             style = BodySmallRegular.copy(fontWeight = FontWeight.SemiBold),
-                            color = Purple500
+                            color = Purple500,
+                            fontSize = 14.sp
                         )
                     }
                 }
