@@ -59,10 +59,6 @@ fun MyLibraryScreen(
 
 /**
  * Stateless UI layer – takes plain data and lambdas only, no ViewModel/Hilt.
- * Because it has no dependency on hiltViewModel(), it can be rendered directly
- * inside @Preview (Android Studio's "Split"/"Design" preview pane) with fake
- * data, so you can tweak spacing/colors/layout and see results instantly
- * without running the app on a device or emulator.
  */
 @Composable
 fun MyLibraryContent(
@@ -198,6 +194,8 @@ private fun LibraryItemRow(item: LibraryItem, onClick: () -> Unit) {
     ) {
         LibraryItemIcon(icon = item.icon)
         Spacer(Modifier.width(14.dp))
+
+        // تم استخدام weight لضمان حجز المساحة المتبقية كاملة للـ Column
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = item.name,
@@ -206,10 +204,10 @@ private fun LibraryItemRow(item: LibraryItem, onClick: () -> Unit) {
                 overflow = TextOverflow.Ellipsis
             )
 
-            // تم دعم السكرول الأفقي هنا في حال كانت الشاشة ضيقة جداً كي لا ينقسم السطر
+            // التعديل السحري هنا: استخدام سكرول أفقي ممتد لمنع انقسام كلمة Artist نهائياً
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .width(IntrinsicSize.Max) // يجبر الـ Row على التمدد بحجم النص الأصلي دون التقيد بعرض الشاشة
                     .horizontalScroll(rememberScrollState()),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -218,10 +216,12 @@ private fun LibraryItemRow(item: LibraryItem, onClick: () -> Unit) {
                     text = "${item.songCount} songs • ${item.artistCount} $artistLabel",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall,
+                    softWrap = false, // يمنع الكلمة من الالتفاف أو النزول لسطر جديد
                     maxLines = 1
                 )
             }
         }
+        Spacer(Modifier.width(8.dp))
         Icon(
             imageVector = Icons.Filled.ChevronRight,
             contentDescription = null,
