@@ -209,9 +209,9 @@ fun ProfileScreen(
                         style = BodyXSmallRegular, color = White.copy(alpha = 0.85f),
                         modifier = Modifier.widthIn(max = 200.dp)
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = onGetPremium, modifier = Modifier.height(34.dp),
+                        onClick = onGetPremium, modifier = Modifier.height(40.dp),
                         shape = RoundedCornerShape(50),
                         colors = ButtonDefaults.buttonColors(containerColor = White),
                         contentPadding = PaddingValues(horizontal = 18.dp)
