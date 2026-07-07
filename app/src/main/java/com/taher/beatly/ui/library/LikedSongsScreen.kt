@@ -33,8 +33,8 @@ import com.taher.beatly.ui.components.RoundIconButton
  */
 @Composable
 fun LikedSongsScreen(
-    onBackClick: () -> Unit,
-    viewModel: LibraryViewModel = hiltViewModel(),
+    onBackClick : () -> Unit,
+    viewModel   : LibraryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.likedSongsState.collectAsStateWithLifecycle()
 
@@ -76,15 +76,11 @@ fun LikedSongsContent(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 RoundIconButton(
-                    icon = Icons.AutoMirrored.Filled.ArrowBack,
-                    onClick = onBackClick,
+                    icon               = Icons.AutoMirrored.Filled.ArrowBack,
+                    onClick            = onBackClick,
                     contentDescription = "Back"
                 )
-                RoundIconButton(
-                    icon = Icons.Filled.MoreHoriz,
-                    onClick = { },
-                    contentDescription = "More"
-                )
+                RoundIconButton(icon = Icons.Filled.MoreHoriz, onClick = { }, contentDescription = "More")
             }
         }
 
@@ -96,9 +92,9 @@ fun LikedSongsContent(
             LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 items(uiState.songs, key = { it.id }) { song ->
                     LikedSongRow(
-                        song = song,
+                        song        = song,
                         onLikeClick = { onLikeClick(song.id) },
-                        onClick = { onSongClick(song) }
+                        onClick     = { onSongClick(song) }
                     )
                 }
             }
@@ -115,11 +111,7 @@ private fun LikedSongsHeader(songCount: Int) {
     ) {
         Column {
             Text("Liked songs", style = MaterialTheme.typography.titleLarge)
-            Text(
-                "$songCount songs",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text("$songCount songs", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
         }
         Box(
             modifier = Modifier
@@ -127,11 +119,7 @@ private fun LikedSongsHeader(songCount: Int) {
                 .background(MaterialTheme.colorScheme.primary, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                Icons.Filled.PlayArrow,
-                contentDescription = "Play all",
-                tint = MaterialTheme.colorScheme.background
-            )
+            Icon(Icons.Filled.PlayArrow, contentDescription = "Play all", tint = MaterialTheme.colorScheme.background)
         }
     }
 }
@@ -145,19 +133,11 @@ private fun LikedSongRow(song: Song, onLikeClick: () -> Unit, onClick: () -> Uni
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PlaceholderImage(
-            modifier = Modifier.size(56.dp),
-            shape = RoundedCornerShape(12.dp),
-            showLabel = false
-        )
+        PlaceholderImage(modifier = Modifier.size(56.dp), shape = RoundedCornerShape(12.dp), showLabel = false)
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(song.title, style = MaterialTheme.typography.labelLarge)
-            Text(
-                song.artistName,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text(song.artistName, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
         }
         IconButton(onClick = onLikeClick) {
             Icon(
@@ -166,11 +146,7 @@ private fun LikedSongRow(song: Song, onLikeClick: () -> Unit, onClick: () -> Uni
                 tint = MaterialTheme.colorScheme.primary
             )
         }
-        Icon(
-            Icons.Filled.MoreVert,
-            contentDescription = "More",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Icon(Icons.Filled.MoreVert, contentDescription = "More", tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -183,20 +159,8 @@ private fun LikedSongRow(song: Song, onLikeClick: () -> Unit, onClick: () -> Uni
 // =========================================================================
 
 private val previewLikedSongs = listOf(
-    Song(
-        id = "s1",
-        title = "Sharks",
-        artistName = "Imagine Dragons",
-        artistId = "a9",
-        isLiked = true
-    ),
-    Song(
-        id = "s2",
-        title = "God Is a Woman",
-        artistName = "Ariana Grande",
-        artistId = "a10",
-        isLiked = true
-    ),
+    Song(id = "s1", title = "Sharks", artistName = "Imagine Dragons", artistId = "a9", isLiked = true),
+    Song(id = "s2", title = "God Is a Woman", artistName = "Ariana Grande", artistId = "a10", isLiked = true),
     Song(id = "s4", title = "Ghost", artistName = "Justin Bieber", artistId = "a1", isLiked = true)
 )
 

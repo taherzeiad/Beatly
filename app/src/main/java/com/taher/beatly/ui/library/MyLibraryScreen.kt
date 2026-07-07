@@ -2,9 +2,11 @@ package com.taher.beatly.ui.library
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,14 +31,52 @@ import com.taher.beatly.ui.components.RoundIconButton
 import com.taher.beatly.ui.theme.Gray200
 import com.taher.beatly.ui.theme.SurfaceFill
 
+/**
+ * Stateful entry point wired to Hilt + the real ViewModel.
+ * This is what the NavGraph calls.
+ */
 @Composable
 fun MyLibraryScreen(
-    onBackClick        : () -> Unit,
-    onLibraryItemClick : (LibraryItem) -> Unit,
-    viewModel          : LibraryViewModel = hiltViewModel(),
+    onBackClick: () -> Unit,
+    onLibraryItemClick: (LibraryItem) -> Unit,
+    viewModel: LibraryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    MyLibraryContent(
+        uiState = uiState,
+        onBackClick = onBackClick,
+        onLibraryItemClick = onLibraryItemClick,
+        onAddClicked = viewModel::onAddClicked,
+        onSearchQueryChanged = viewModel::onSearchQueryChanged,
+        onFilterSelected = viewModel::onFilterSelected,
+        onToggleSortOrder = viewModel::onToggleSortOrder,
+        onNewLibraryNameChanged = viewModel::onNewLibraryNameChanged,
+        onDialogDismiss = viewModel::onDialogDismiss,
+        onCreateLibraryConfirmed = viewModel::onCreateLibraryConfirmed
+    )
+}
+
+/**
+ * Stateless UI layer – takes plain data and lambdas only, no ViewModel/Hilt.
+ * Because it has no dependency on hiltViewModel(), it can be rendered directly
+ * inside @Preview (Android Studio's "Split"/"Design" preview pane) with fake
+ * data, so you can tweak spacing/colors/layout and see results instantly
+ * without running the app on a device or emulator.
+ */
+@Composable
+fun MyLibraryContent(
+    uiState: LibraryUiState,
+    onBackClick: () -> Unit = {},
+    onLibraryItemClick: (LibraryItem) -> Unit = {},
+    onAddClicked: () -> Unit = {},
+    onSearchQueryChanged: (String) -> Unit = {},
+    onFilterSelected: (LibraryFilter) -> Unit = {},
+    onToggleSortOrder: () -> Unit = {},
+    onNewLibraryNameChanged: (String) -> Unit = {},
+    onDialogDismiss: () -> Unit = {},
+    onCreateLibraryConfirmed: () -> Unit = {}
+) {
     Scaffold { padding ->
         Column(
             modifier = Modifier
@@ -56,7 +98,7 @@ fun MyLibraryScreen(
                 Text("My Library", style = MaterialTheme.typography.titleLarge)
                 RoundIconButton(
                     icon = Icons.Filled.Add,
-                    onClick = viewModel::onAddClicked,
+                    onClick = onAddClicked,
                     contentDescription = "Create playlist"
                 )
             }
@@ -64,7 +106,7 @@ fun MyLibraryScreen(
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
                 value = uiState.searchQuery,
-                onValueChange = viewModel::onSearchQueryChanged,
+                onValueChange = onSearchQueryChanged,
                 placeholder = { Text("Search...") },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 singleLine = true,
@@ -77,13 +119,16 @@ fun MyLibraryScreen(
             )
 
             Spacer(Modifier.height(12.dp))
-            LibraryFilterChips(selected = uiState.selectedFilter, onFilterSelected = viewModel::onFilterSelected)
+            LibraryFilterChips(
+                selected = uiState.selectedFilter,
+                onFilterSelected = onFilterSelected
+            )
 
             Spacer(Modifier.height(16.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(onClick = viewModel::onToggleSortOrder),
+                    .clickable(onClick = onToggleSortOrder),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -99,7 +144,7 @@ fun MyLibraryScreen(
             LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 items(uiState.items, key = { it.id }) { item ->
                     LibraryItemRow(
-                        item    = item,
+                        item = item,
                         onClick = { onLibraryItemClick(item) }
                     )
                 }
@@ -110,9 +155,9 @@ fun MyLibraryScreen(
     if (uiState.isCreateDialogVisible) {
         CreateLibraryDialog(
             name = uiState.newLibraryName,
-            onNameChanged = viewModel::onNewLibraryNameChanged,
-            onDismiss = viewModel::onDialogDismiss,
-            onConfirm = viewModel::onCreateLibraryConfirmed
+            onNameChanged = onNewLibraryNameChanged,
+            onDismiss = onDialogDismiss,
+            onConfirm = onCreateLibraryConfirmed
         )
     }
 }
@@ -154,14 +199,34 @@ private fun LibraryItemRow(item: LibraryItem, onClick: () -> Unit) {
         LibraryItemIcon(icon = item.icon)
         Spacer(Modifier.width(14.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(item.name, style = MaterialTheme.typography.labelLarge)
             Text(
-                "${item.songCount} songs • ${item.artistCount} Artist",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall
+                text = item.name,
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
+
+            // تم دعم السكرول الأفقي هنا في حال كانت الشاشة ضيقة جداً كي لا ينقسم السطر
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val artistLabel = if (item.artistCount > 1) "Artists" else "Artist"
+                Text(
+                    text = "${item.songCount} songs • ${item.artistCount} $artistLabel",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1
+                )
+            }
         }
-        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(
+            imageVector = Icons.Filled.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -188,5 +253,70 @@ private fun IconBadge(icon: androidx.compose.ui.graphics.vector.ImageVector) {
         contentAlignment = Alignment.Center
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+    }
+}
+
+// =========================================================================
+// Previews
+// =========================================================================
+
+private val previewLibraryItems = listOf(
+    LibraryItem(
+        id = "1",
+        name = "Liked Songs",
+        icon = LibraryItemIcon.LIKED_SONGS,
+        songCount = 120,
+        artistCount = 32
+    ),
+    LibraryItem(
+        id = "2",
+        name = "Workout Beats",
+        icon = LibraryItemIcon.PLAYLIST,
+        songCount = 45,
+        artistCount = 1
+    ),
+    LibraryItem(
+        id = "3",
+        name = "Rock Classics",
+        icon = LibraryItemIcon.CUSTOM_IMAGE,
+        songCount = 88,
+        artistCount = 15
+    )
+)
+
+private val previewLibraryUiState = LibraryUiState(
+    searchQuery = "",
+    selectedFilter = LibraryFilter.SONGS,
+    isAscending = true,
+    items = previewLibraryItems,
+    isCreateDialogVisible = false,
+    newLibraryName = ""
+)
+
+@Preview(showBackground = true, name = "Library – Light")
+@Composable
+private fun MyLibraryScreenPreview() {
+    MaterialTheme {
+        MyLibraryContent(uiState = previewLibraryUiState)
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "Library – Dark",
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun MyLibraryScreenPreviewDark() {
+    MaterialTheme {
+        MyLibraryContent(uiState = previewLibraryUiState)
+    }
+}
+
+@Preview(showBackground = true, name = "Library – Empty state")
+@Composable
+private fun MyLibraryScreenEmptyPreview() {
+    MaterialTheme {
+        MyLibraryContent(uiState = LibraryUiState(items = emptyList()))
     }
 }
