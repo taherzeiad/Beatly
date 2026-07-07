@@ -1,53 +1,83 @@
 package com.taher.beatly.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.beatly.ui.profile.ProfileScreen
-import com.taher.beatly.ui.auth.*
+import com.taher.beatly.ui.artist.ArtistDetailScreen
+import com.taher.beatly.ui.auth.ProfileSuccessScreen
+import com.taher.beatly.ui.auth.RecoverySuccessScreen
 import com.taher.beatly.ui.auth.forgotpassword.ForgotPasswordScreen
 import com.taher.beatly.ui.auth.recoveryemail.RecoveryEmailSentScreen
 import com.taher.beatly.ui.auth.resetpassword.ResetPasswordScreen
 import com.taher.beatly.ui.auth.signIn.SignInScreen
 import com.taher.beatly.ui.auth.signup.SignUpScreen
 import com.taher.beatly.ui.components.BeatlyTab
+import com.taher.beatly.ui.genre.AllGenreScreen
 import com.taher.beatly.ui.home.HomeScreen
+import com.taher.beatly.ui.library.LikedSongsScreen
+import com.taher.beatly.ui.library.MyLibraryScreen
 import com.taher.beatly.ui.onboarding.OnboardingScreen
-import com.taher.beatly.ui.settings.*
+import com.taher.beatly.ui.player.PlayMusicScreen
+import com.taher.beatly.ui.search.SearchArtistsScreen
+import com.taher.beatly.ui.settings.AudioVideoScreen
+import com.taher.beatly.ui.settings.DataSaverScreen
+import com.taher.beatly.ui.settings.EditProfileScreen
+import com.taher.beatly.ui.settings.LanguageScreen
+import com.taher.beatly.ui.settings.NotificationScreen
+import com.taher.beatly.ui.settings.PlaybackScreen
+import com.taher.beatly.ui.settings.SecurityScreen
 import com.taher.beatly.ui.splash.SplashScreen
-import com.taher.beatly.ui.subscription.*
+import com.taher.beatly.ui.subscription.AddCardScreen
+import com.taher.beatly.ui.subscription.CongratulationsScreen
+import com.taher.beatly.ui.subscription.PaymentMethodScreen
+import com.taher.beatly.ui.subscription.PickPlanScreen
+import com.taher.beatly.ui.subscription.ReviewSummaryScreen
 
 sealed class Screen(val route: String) {
-    // ── Auth flow ──────────────────────────────────────────────────────────
-    data object Splash : Screen("splash")
-    data object Onboarding : Screen("onboarding")
-    data object SignIn : Screen("sign_in")
-    data object SignUp : Screen("sign_up")
-    data object ProfileSuccess : Screen("profile_success")
-    data object ForgotPassword : Screen("forgot_password")
-    data object RecoveryEmailSent : Screen("recovery_email_sent")
-    data object ResetPassword : Screen("reset_password")
-    data object RecoverySuccess : Screen("recovery_success")
 
-    // ── Main tabs ──────────────────────────────────────────────────────────
-    data object Home : Screen("home")
+    // --- Auth flow ---
+    data object Splash            : Screen("splash")
+    data object Onboarding        : Screen("onboarding")
+    data object SignIn            : Screen("sign_in")
+    data object SignUp            : Screen("sign_up")
+    data object ProfileSuccess    : Screen("profile_success")
+    data object ForgotPassword    : Screen("forgot_password")
+    data object RecoveryEmailSent : Screen("recovery_email_sent")
+    data object ResetPassword     : Screen("reset_password")
+    data object RecoverySuccess   : Screen("recovery_success")
+
+    // --- Main tabs ---
+    data object Home    : Screen("home")
+    data object Search  : Screen("search")
+    data object Library : Screen("library")
     data object Profile : Screen("profile")
 
-    // ── Profile sub-screens ────────────────────────────────────────────────
+    // --- Home / library sub-screens ---
+    data object AllGenre   : Screen("genres")
+    data object LikedSongs : Screen("liked_songs")
+    data object Player     : Screen("player")
+    data object ArtistDetail : Screen("artist/{artistId}") {
+        fun createRoute(artistId: String) = "artist/$artistId"
+    }
+
+    // --- Profile sub-screens ---
     data object EditProfile : Screen("edit_profile")
     data object Notification : Screen("notification")
-    data object AudioVideo : Screen("audio_video")
-    data object Playback : Screen("playback")
-    data object DataSaver : Screen("data_saver")
-    data object Security : Screen("security")
-    data object Language : Screen("language")
+    data object AudioVideo   : Screen("audio_video")
+    data object Playback     : Screen("playback")
+    data object DataSaver    : Screen("data_saver")
+    data object Security     : Screen("security")
+    data object Language     : Screen("language")
 
-    // ── Subscription flow ──────────────────────────────────────────────────
-    data object PickPlan : Screen("pick_plan")
-    data object PaymentMethod : Screen("payment_method")
-    data object AddCard : Screen("add_card")
-    data object ReviewSummary : Screen("review_summary")
+    // --- Subscription flow ---
+    data object PickPlan        : Screen("pick_plan")
+    data object PaymentMethod   : Screen("payment_method")
+    data object AddCard         : Screen("add_card")
+    data object ReviewSummary   : Screen("review_summary")
     data object Congratulations : Screen("congratulations")
 }
 
@@ -55,7 +85,6 @@ sealed class Screen(val route: String) {
 fun BeatlyNavGraph() {
     val nav = rememberNavController()
 
-    // Helper lambdas
     fun popBack() = nav.popBackStack()
     fun goTo(s: Screen, popInclusive: Screen? = null) {
         nav.navigate(s.route) {
@@ -65,127 +94,190 @@ fun BeatlyNavGraph() {
 
     NavHost(navController = nav, startDestination = Screen.Splash.route) {
 
-        // ── Splash ─────────────────────────────────────────────────────────
+        // ===================== Splash =====================
         composable(Screen.Splash.route) {
             SplashScreen(onSplashFinished = { goTo(Screen.Onboarding, Screen.Splash) })
         }
 
-        // ── Onboarding ─────────────────────────────────────────────────────
+        // ===================== Onboarding =====================
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onContinueFinished = { goTo(Screen.SignIn, Screen.Onboarding) },
-                onRegisterClicked = { nav.navigate(Screen.SignUp.route) }
+                onRegisterClicked  = { nav.navigate(Screen.SignUp.route) }
             )
         }
 
-        // ── Sign In ────────────────────────────────────────────────────────
+        // ===================== Sign In =====================
         composable(Screen.SignIn.route) {
             SignInScreen(
-                onBackClicked = { popBack() },
-                onSignInSuccess = { goTo(Screen.Home, Screen.SignIn) },
-                onForgotPassword = { nav.navigate(Screen.ForgotPassword.route) },
+                onBackClicked     = { popBack() },
+                onSignInSuccess   = { goTo(Screen.ProfileSuccess, Screen.SignIn) },
+                onForgotPassword  = { nav.navigate(Screen.ForgotPassword.route) },
                 onRegisterClicked = { nav.navigate(Screen.SignUp.route) },
-                onAppleSignIn = { },
-                onFacebookSignIn = { }
+                onAppleSignIn     = { },
+                onFacebookSignIn  = { }
             )
         }
 
-        // ── Sign Up ────────────────────────────────────────────────────────
+        // ===================== Sign Up =====================
         composable(Screen.SignUp.route) {
             SignUpScreen(
-                onBackClicked = { popBack() },
-                onSignUpSuccess = { goTo(Screen.ProfileSuccess, Screen.SignUp) },
-                onTermsClicked = { },
+                onBackClicked    = { popBack() },
+                onSignUpSuccess  = { goTo(Screen.ProfileSuccess, Screen.SignUp) },
+                onTermsClicked   = { },
                 onPrivacyClicked = { }
             )
         }
 
-        // ── Profile Setup Success ──────────────────────────────────────────
+        // ===================== Profile Setup Success =====================
         composable(Screen.ProfileSuccess.route) {
             ProfileSuccessScreen(
-                onContinue = { goTo(Screen.Home, Screen.ProfileSuccess) },
+                onContinue    = { goTo(Screen.Home, Screen.ProfileSuccess) },
                 onCallSupport = { }
             )
         }
 
-        // ── Forgot Password ────────────────────────────────────────────────
+        // ===================== Forgot Password =====================
         composable(Screen.ForgotPassword.route) {
             ForgotPasswordScreen(
                 onBackClicked = { popBack() },
-                onContinue = { nav.navigate(Screen.RecoveryEmailSent.route) },
+                onContinue    = { nav.navigate(Screen.RecoveryEmailSent.route) },
                 onCallSupport = { }
             )
         }
 
+        // ===================== Recovery Email Sent =====================
         composable(Screen.RecoveryEmailSent.route) {
             RecoveryEmailSentScreen(
-                onContinue = { nav.navigate(Screen.ResetPassword.route) },
+                onContinue    = { nav.navigate(Screen.ResetPassword.route) },
                 onCallSupport = { }
             )
         }
 
+        // ===================== Reset Password =====================
         composable(Screen.ResetPassword.route) {
             ResetPasswordScreen(
                 onBackClicked = { popBack() },
-                onContinue = { goTo(Screen.RecoverySuccess, Screen.ForgotPassword) },
+                onContinue    = { goTo(Screen.RecoverySuccess, Screen.ForgotPassword) },
                 onCallSupport = { }
             )
         }
 
+        // ===================== Recovery Success =====================
         composable(Screen.RecoverySuccess.route) {
             RecoverySuccessScreen(
-                onContinue = { goTo(Screen.SignIn, Screen.RecoverySuccess) },
+                onContinue    = { goTo(Screen.SignIn, Screen.RecoverySuccess) },
                 onCallSupport = { }
             )
         }
 
-        // ── Home (tab root) ────────────────────────────────────────────────
+        // ===================== Home =====================
         composable(Screen.Home.route) {
-            // Placeholder — replace with actual HomeScreen
             HomeScreen(
-                onSearchClick = { },
-                onSeeAllTrendingClick = { },
-                onSeeAllArtistsClick = { },
-                onSeeAllRecentClick = { },
-                onArtistClick = { },
-                onNavigateTab = { tab ->
-                    when (tab) {
-                        BeatlyTab.PROFILE -> goTo(Screen.Profile)
-                        else -> {}
-                    }
-                }, onSongClick = {}
-            )
-        }
-
-        // ── Profile (tab) ──────────────────────────────────────────────────
-        composable(Screen.Profile.route) {
-            ProfileScreen(
-                onBackClicked = { popBack() },
-                onGetPremium = { nav.navigate(Screen.PickPlan.route) },
-                onShareProfile = { },   // show bottom sheet inside ProfileScreen
-                onEditProfile = { nav.navigate(Screen.EditProfile.route) },
-                onSettingClicked = { id ->
-                    when (id) {
-                        "profile" -> nav.navigate(Screen.EditProfile.route)
-                        "notification" -> nav.navigate(Screen.Notification.route)
-                        "audio_video" -> nav.navigate(Screen.AudioVideo.route)
-                        "playback" -> nav.navigate(Screen.Playback.route)
-                        "downloads" -> nav.navigate(Screen.DataSaver.route)
-                        "security" -> nav.navigate(Screen.Security.route)
-                        "language" -> nav.navigate(Screen.Language.route)
-                        else -> {}
-                    }
+                onSearchClick          = { nav.navigate(Screen.Search.route) },
+                onSeeAllTrendingClick  = { nav.navigate(Screen.AllGenre.route) },
+                onSeeAllArtistsClick   = { nav.navigate(Screen.Search.route) },
+                onSeeAllRecentClick    = { /* Navigate to recent list */ },
+                onArtistClick = { artistId ->
+                    nav.navigate(Screen.ArtistDetail.createRoute(artistId))
+                },
+                onSongClick = { _ ->
+                    nav.navigate(Screen.Player.route)
                 },
                 onNavigateTab = { tab ->
                     when (tab) {
-                        BeatlyTab.HOME -> goTo(Screen.Home)
-                        else -> {}
+                        BeatlyTab.HOME    -> { }
+                        BeatlyTab.EXPLORE -> nav.navigate(Screen.Search.route)
+                        BeatlyTab.LIBRARY -> nav.navigate(Screen.Library.route)
+                        BeatlyTab.PROFILE -> nav.navigate(Screen.Profile.route)
                     }
                 }
             )
         }
 
-        // ── Settings sub-screens ───────────────────────────────────────────
+        // ===================== Search / Explore =====================
+        composable(Screen.Search.route) {
+            SearchArtistsScreen(
+                onBackClick = { popBack() },
+                onArtistClick = { artistId ->
+                    nav.navigate(Screen.ArtistDetail.createRoute(artistId))
+                }
+            )
+        }
+
+        // ===================== Library =====================
+        composable(Screen.Library.route) {
+            MyLibraryScreen(
+                onBackClick = { popBack() },
+                onLibraryItemClick = { item ->
+                    if (item.id == "l1") { // Hardcoded ID for Liked Songs in FakeRepo
+                        nav.navigate(Screen.LikedSongs.route)
+                    }
+                }
+            )
+        }
+
+        // ===================== Liked Songs =====================
+        composable(Screen.LikedSongs.route) {
+            LikedSongsScreen(onBackClick = { popBack() })
+        }
+
+        // ===================== Artist Detail =====================
+        composable(
+            route     = Screen.ArtistDetail.route,
+            arguments = listOf(navArgument("artistId") { type = NavType.StringType })
+        ) {
+            ArtistDetailScreen(
+                onBackClick         = { popBack() },
+                onSeeAllSongsClick  = { /* Navigate to all songs */ }
+            )
+        }
+
+        // ===================== Genres =====================
+        composable(Screen.AllGenre.route) {
+            AllGenreScreen(
+                onBackClick   = { popBack() },
+                onSearchClick = { nav.navigate(Screen.Search.route) },
+                onGenreClick  = { /* Navigate to genre details */ }
+            )
+        }
+
+        // ===================== Player =====================
+        composable(Screen.Player.route) {
+            PlayMusicScreen(onBackClick = { popBack() })
+        }
+
+        // ===================== Profile (tab) =====================
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                onBackClicked   = { popBack() },
+                onGetPremium    = { nav.navigate(Screen.PickPlan.route) },
+                onShareProfile  = { },   // show bottom sheet inside ProfileScreen
+                onEditProfile   = { nav.navigate(Screen.EditProfile.route) },
+                onSettingClicked = { id ->
+                    when (id) {
+                        "profile"      -> nav.navigate(Screen.EditProfile.route)
+                        "notification" -> nav.navigate(Screen.Notification.route)
+                        "audio_video"  -> nav.navigate(Screen.AudioVideo.route)
+                        "playback"     -> nav.navigate(Screen.Playback.route)
+                        "downloads"    -> nav.navigate(Screen.DataSaver.route)
+                        "security"     -> nav.navigate(Screen.Security.route)
+                        "language"     -> nav.navigate(Screen.Language.route)
+                        else -> { }
+                    }
+                },
+                onNavigateTab = { tab ->
+                    when (tab) {
+                        BeatlyTab.HOME    -> goTo(Screen.Home)
+                        BeatlyTab.EXPLORE -> nav.navigate(Screen.Search.route)
+                        BeatlyTab.LIBRARY -> nav.navigate(Screen.Library.route)
+                        BeatlyTab.PROFILE -> { }
+                    }
+                }
+            )
+        }
+
+        // ===================== Profile sub-screens =====================
         composable(Screen.EditProfile.route) {
             EditProfileScreen(onBackClicked = { popBack() }, onUpdated = { popBack() })
         }
@@ -208,31 +300,41 @@ fun BeatlyNavGraph() {
             LanguageScreen(onBackClicked = { popBack() }, onChanged = { popBack() })
         }
 
-        // ── Subscription flow ──────────────────────────────────────────────
+        // ===================== Subscription Flow =====================
         composable(Screen.PickPlan.route) {
             PickPlanScreen(
                 onBackClicked = { popBack() },
-                onContinue = { nav.navigate(Screen.PaymentMethod.route) })
+                onContinue    = { nav.navigate(Screen.PaymentMethod.route) }
+            )
         }
+
         composable(Screen.PaymentMethod.route) {
             PaymentMethodScreen(
                 onBackClicked = { popBack() },
-                onAddCard = { nav.navigate(Screen.AddCard.route) },
-                onContinue = { nav.navigate(Screen.ReviewSummary.route) }
+                onAddCard     = { nav.navigate(Screen.AddCard.route) },
+                onContinue    = { nav.navigate(Screen.ReviewSummary.route) }
             )
         }
+
         composable(Screen.AddCard.route) {
-            AddCardScreen(onBackClicked = { popBack() }, onAddCard = { popBack() })
+            AddCardScreen(
+                onBackClicked = { popBack() },
+                onAddCard     = { popBack() }
+            )
         }
+
         composable(Screen.ReviewSummary.route) {
             ReviewSummaryScreen(
-                onBackClicked = { popBack() },
-                onConfirm = { goTo(Screen.Congratulations, Screen.PickPlan) },
+                onBackClicked  = { popBack() },
+                onConfirm      = { goTo(Screen.Congratulations, Screen.PickPlan) },
                 onChangeMethod = { popBack() }
             )
         }
+
         composable(Screen.Congratulations.route) {
-            CongratulationsScreen(onBackToHome = { goTo(Screen.Home, Screen.Congratulations) })
+            CongratulationsScreen(
+                onBackToHome = { goTo(Screen.Home, Screen.Congratulations) }
+            )
         }
     }
 }
