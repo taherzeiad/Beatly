@@ -21,7 +21,10 @@ class FakeMusicRepository @Inject constructor() : MusicRepository {
             Artist("a1", "Justin Bieber", isVerified = true, isFollowing = false),
             Artist("a2", "Lady Gaga", isVerified = true, isFollowing = true),
             Artist(
-                "a3", "Taylor Swift", isVerified = true, isFollowing = false,
+                "a3",
+                "Taylor Swift",
+                isVerified = true,
+                isFollowing = false,
                 monthlyListeners = 204_232_143L,
                 popularSongs = listOf(
                     Song("s10", "Love Story", "Taylor Swift", "a3", isLiked = true),
@@ -50,11 +53,16 @@ class FakeMusicRepository @Inject constructor() : MusicRepository {
 
     private val _genres = MutableStateFlow(
         listOf(
-            Genre("g1", "Latin"), Genre("g2", "Pop"),
-            Genre("g3", "Jazz"), Genre("g4", "Classical"),
-            Genre("g5", "Latin"), Genre("g6", "Minimal"),
-            Genre("g7", "Indie"), Genre("g8", "Rock"),
-            Genre("g9", "Hip Hop"), Genre("g10", "Romance")
+            Genre("g1", "Latin"),
+            Genre("g2", "Pop"),
+            Genre("g3", "Jazz"),
+            Genre("g4", "Classical"),
+            Genre("g5", "Latin"),
+            Genre("g6", "Minimal"),
+            Genre("g7", "Indie"),
+            Genre("g8", "Rock"),
+            Genre("g9", "Hip Hop"),
+            Genre("g10", "Romance")
         )
     )
 
@@ -143,6 +151,9 @@ class FakeMusicRepository @Inject constructor() : MusicRepository {
         _positionMs.value = positionMs.coerceIn(0L, _durationMs.value)
     }
 
-    override suspend fun skipNext() { /* wire to real playback queue */ }
-    override suspend fun skipPrevious() { /* wire to real playback queue */ }
+    override suspend fun skipNext() { /* wire to real playback queue */
+    }
+
+    override suspend fun skipPrevious() { /* wire to real playback queue */
+    }
 }
