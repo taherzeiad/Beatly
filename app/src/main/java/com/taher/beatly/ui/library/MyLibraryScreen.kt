@@ -160,7 +160,10 @@ fun MyLibraryContent(
 
 @Composable
 private fun LibraryFilterChips(selected: LibraryFilter, onFilterSelected: (LibraryFilter) -> Unit) {
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
         val labels = listOf(
             "Songs" to LibraryFilter.SONGS,
             "Playlist" to LibraryFilter.PLAYLIST,
@@ -171,7 +174,14 @@ private fun LibraryFilterChips(selected: LibraryFilter, onFilterSelected: (Libra
             FilterChip(
                 selected = selected == filter,
                 onClick = { onFilterSelected(filter) },
-                label = { Text(label) },
+                label = {
+                    Text(
+                        text = label,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Clip
+                    )
+                },
                 shape = RoundedCornerShape(50),
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = MaterialTheme.colorScheme.primary,
@@ -298,25 +308,5 @@ private val previewLibraryUiState = LibraryUiState(
 private fun MyLibraryScreenPreview() {
     MaterialTheme {
         MyLibraryContent(uiState = previewLibraryUiState)
-    }
-}
-
-@Preview(
-    showBackground = true,
-    name = "Library – Dark",
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
-)
-@Composable
-private fun MyLibraryScreenPreviewDark() {
-    MaterialTheme {
-        MyLibraryContent(uiState = previewLibraryUiState)
-    }
-}
-
-@Preview(showBackground = true, name = "Library – Empty state")
-@Composable
-private fun MyLibraryScreenEmptyPreview() {
-    MaterialTheme {
-        MyLibraryContent(uiState = LibraryUiState(items = emptyList()))
     }
 }
