@@ -26,8 +26,7 @@ data class LibraryUiState(
 )
 
 data class LikedSongsUiState(
-    val songs: List<Song> = emptyList(),
-    val currentlyPlayingSongId: String? = null
+    val songs: List<Song> = emptyList(), val currentlyPlayingSongId: String? = null
 )
 
 /**
@@ -45,41 +44,68 @@ class LibraryViewModel @Inject constructor(
     private val _isCreateDialogVisible = MutableStateFlow(false)
     private val _newLibraryName = MutableStateFlow("")
 
+    private data class LibraryFilterState(
+        val items: List<LibraryItem>,
+        val query: String,
+        val filter: LibraryFilter,
+        val ascending: Boolean,
+        val dialogVisible: Boolean
+    )
+
     val uiState: StateFlow<LibraryUiState> = combine(
-        repository.getLibraryItems(),
-        _searchQuery,
-        _selectedFilter,
-        _isAscending,
-        _isCreateDialogVisible
-    ) { items, query, filter, ascending, dialogVisible ->
-        val filtered = if (query.isBlank()) items else items.filter {
-            it.name.contains(query, ignoreCase = true)
+        combine(
+            repository.getLibraryItems(),
+            _searchQuery,
+            _selectedFilter,
+            _isAscending,
+            _isCreateDialogVisible
+        ) { items, query, filter, ascending, dialogVisible ->
+            LibraryFilterState(items, query, filter, ascending, dialogVisible)
+        }, _newLibraryName
+    ) { state, newName ->
+        val filtered = if (state.query.isBlank()) state.items else state.items.filter {
+            it.name.contains(state.query, ignoreCase = true)
         }
-        val sorted = if (ascending) filtered.sortedBy { it.name } else filtered.sortedByDescending { it.name }
+        val sorted =
+            if (state.ascending) filtered.sortedBy { it.name } else filtered.sortedByDescending { it.name }
         LibraryUiState(
-            searchQuery = query,
-            selectedFilter = filter,
-            isAscending = ascending,
+            searchQuery = state.query,
+            selectedFilter = state.filter,
+            isAscending = state.ascending,
             items = sorted,
-            isCreateDialogVisible = dialogVisible,
-            newLibraryName = _newLibraryName.value
+            isCreateDialogVisible = state.dialogVisible,
+            newLibraryName = newName
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LibraryUiState())
+    val likedSongsState: StateFlow<LikedSongsUiState> =
+        repository.getLikedSongs().map { LikedSongsUiState(songs = it) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LikedSongsUiState())
 
-    val likedSongsState: StateFlow<LikedSongsUiState> = repository.getLikedSongs()
-        .map { LikedSongsUiState(songs = it) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LikedSongsUiState())
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
+    }
 
-    fun onSearchQueryChanged(query: String) { _searchQuery.value = query }
-    fun onFilterSelected(filter: LibraryFilter) { _selectedFilter.value = filter }
-    fun onToggleSortOrder() { _isAscending.value = !_isAscending.value }
+    fun onFilterSelected(filter: LibraryFilter) {
+        _selectedFilter.value = filter
+    }
 
-    fun onAddClicked() { _isCreateDialogVisible.value = true }
+    fun onToggleSortOrder() {
+        _isAscending.value = !_isAscending.value
+    }
+
+    fun onAddClicked() {
+        _isCreateDialogVisible.value = true
+    }
+
     fun onDialogDismiss() {
         _isCreateDialogVisible.value = false
         _newLibraryName.value = ""
     }
-    fun onNewLibraryNameChanged(name: String) { _newLibraryName.value = name }
+
+    fun onNewLibraryNameChanged(name: String) {
+        _newLibraryName.value = name
+    }
+
     fun onCreateLibraryConfirmed() {
         viewModelScope.launch {
             repository.createLibraryPlaylist(_newLibraryName.value)
