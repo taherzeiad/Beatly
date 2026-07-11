@@ -1,6 +1,7 @@
 package com.taher.beatly.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -83,7 +85,12 @@ fun BeatlyBottomBar(
         NavigationBarItem(
             selected = selectedTab == BeatlyTab.LIBRARY,
             onClick = { onTabSelected(BeatlyTab.LIBRARY) },
-            icon = { Icon(imageVector = Icons.AutoMirrored.Outlined.LibraryBooks, contentDescription = "Library") },
+            icon = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.LibraryBooks,
+                    contentDescription = "Library"
+                )
+            },
             label = { Text("Library") },
             colors = navBarColors()
         )
@@ -214,32 +221,50 @@ fun BeatlyTopBar(
     title: String,
     onBackClick: (() -> Unit)? = null,
     onActionClick: (() -> Unit)? = null,
-    actionIcon: androidx.compose.ui.graphics.vector.ImageVector = Icons.Filled.Search
+    actionIcon: ImageVector = Icons.Filled.Search,
+    actionHasBorder: Boolean = false // 🛠️ باراميتر مضاف للتحكم في بوردر الأكشن الجانبي (مثل النقاط الثلاث)
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RoundIconButton(
-            icon = Icons.AutoMirrored.Filled.ArrowBack,
-            onClick = { onBackClick?.invoke() },
-            contentDescription = "Back"
-        )
+        if (onBackClick != null) {
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier.size(44.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Gray950
+                )
+            }
+        } else {
+            Spacer(Modifier.size(44.dp))
+        }
+
         Text(title, style = MaterialTheme.typography.titleMedium)
-        RoundIconButton(
-            icon = actionIcon,
-            onClick = { onActionClick?.invoke() },
-            contentDescription = "Action"
-        )
+
+        if (onActionClick != null) {
+            RoundIconButton(
+                icon = actionIcon,
+                onClick = onActionClick,
+                contentDescription = "Action",
+                hasBorder = actionHasBorder // يمرر القيمة المحددة للبوردر
+            )
+        } else {
+            Spacer(Modifier.size(44.dp))
+        }
     }
 }
 
 @Composable
 fun RoundIconButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     onClick: () -> Unit,
-    contentDescription: String?
+    contentDescription: String?,
+    hasBorder: Boolean = false
 ) {
     Box(
         modifier = Modifier
@@ -248,6 +273,23 @@ fun RoundIconButton(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(icon, contentDescription = contentDescription, tint = Gray950)
+        if (hasBorder) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .border(width = 1.dp, color = Color.Black, shape = CircleShape)
+                    .clip(CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    icon,
+                    contentDescription = contentDescription,
+                    tint = Gray950,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        } else {
+            Icon(icon, contentDescription = contentDescription, tint = Gray950)
+        }
     }
 }

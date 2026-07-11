@@ -38,18 +38,27 @@ fun ArtistDetailScreen(
                 .padding(horizontal = 20.dp),
         ) {
             Spacer(Modifier.height(12.dp))
+
+            // 🛠️ تعديل الشريط العلوي
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RoundIconButton(
-                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                // زر الرجوع القياسي النظيف والحر من أي إضافات
+                androidx.compose.material3.IconButton(
                     onClick = onBackClick,
-                    contentDescription = "Back"
-                )
+                    modifier = Modifier.size(44.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+
                 Text("Artist", style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.size(44.dp))
+                Spacer(Modifier.size(44.dp)) // للحفاظ على التوازن الهندسي للنص
             }
 
             Spacer(Modifier.height(20.dp))
@@ -88,14 +97,19 @@ fun ArtistDetailScreen(
                         color = if (artist.isFollowing) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.background
                     )
                 }
+
                 Spacer(Modifier.width(12.dp))
-                IconButton(onClick = { }) {
-                    Icon(
-                        Icons.Filled.MoreVert,
-                        contentDescription = "More"
-                    )
-                }
+
+                // 🛠️ تعديل زر الثلاث نقاط هنا لإضافة البوردر الأسود الصغير حوله فقط
+                RoundIconButton(
+                    icon = Icons.Filled.MoreVert,
+                    onClick = { /* أكشن الخيارات هنا */ },
+                    contentDescription = "More",
+                    hasBorder = true // تفعيل البوردر الصغير المخصص
+                )
+
                 Spacer(Modifier.weight(1f))
+
                 RoundIconButton(
                     icon = Icons.Filled.PlayArrow,
                     onClick = {
@@ -103,7 +117,8 @@ fun ArtistDetailScreen(
                             viewModel.onPlaySong(song)
                         }
                     },
-                    contentDescription = "Play all"
+                    contentDescription = "Play all",
+                    hasBorder = false // زر التشغيل يبقى بدون بوردر خارجي
                 )
             }
 

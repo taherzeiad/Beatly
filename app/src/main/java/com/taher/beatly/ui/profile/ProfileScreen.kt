@@ -103,7 +103,7 @@ fun ProfileScreen(
                     style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextBlack
                 )
-                RoundIconButton(Icons.Default.MoreHoriz, {}, "More")
+                RoundIconButton(Icons.Default.MoreHoriz, {}, "More", true)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -193,9 +193,11 @@ fun ProfileScreen(
                     .height(180.dp)
                     .width(335.dp)
             ) {
-                Column(modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(20.dp)) {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(20.dp)
+                ) {
                     Text(
                         "Enjoy All Benefits!",
                         fontSize = 20.sp,
