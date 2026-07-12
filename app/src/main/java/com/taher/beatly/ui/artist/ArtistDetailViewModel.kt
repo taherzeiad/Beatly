@@ -3,7 +3,8 @@ package com.taher.beatly.ui.artist
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.taher.beatly.data.MusicRepository
+import com.taher.beatly.domain.model.BeatlyResult
+import com.taher.beatly.domain.repository.MusicRepository
 import com.taher.beatly.model.Artist
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,9 +30,28 @@ class ArtistDetailViewModel @Inject constructor(
     val uiState: StateFlow<ArtistDetailUiState> = _uiState.asStateFlow()
 
     init {
+        loadArtist()
+    }
+
+    private fun loadArtist() {
         viewModelScope.launch {
-            repository.getArtistById(artistId).collect { artist ->
-                _uiState.value = ArtistDetailUiState(artist = artist, isLoading = false)
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            when (val result = repository.getArtistDetail(artistId)) {
+                is BeatlyResult.Success -> {
+                    val da = result.data
+                    val modelArtist = Artist(
+                        id = da.id,
+                        name = da.name,
+                        imageUrl = da.imageUrl,
+                        isVerified = da.isVerified,
+                        isFollowing = da.isFollowing,
+                        monthlyListeners = da.monthlyListeners
+                    )
+                    _uiState.value = ArtistDetailUiState(artist = modelArtist, isLoading = false)
+                }
+                else -> {
+                    _uiState.value = _uiState.value.copy(isLoading = false)
+                }
             }
         }
     }

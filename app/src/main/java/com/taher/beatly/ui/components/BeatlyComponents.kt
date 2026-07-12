@@ -26,7 +26,7 @@ import com.taher.beatly.R
 @Composable
 fun BeatlyLogoIcon(
     size: Dp = 48.dp,
-    tint: Color = MaterialTheme.colorScheme.primary
+    tint: Color = MaterialTheme.colorScheme.primary,
 ) {
     Icon(
         painter = painterResource(id = R.drawable.music),

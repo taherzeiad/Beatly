@@ -42,8 +42,8 @@ fun AuthBackButton(onClick: () -> Unit) {
             .size(40.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.outlineVariant)
-            .clickable { onClick() }, 
-        contentAlignment = Alignment.Center
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = Icons.Default.ArrowBackIosNew,
@@ -112,18 +112,24 @@ fun AuthTextField(
                         painter = painterResource(
                             if (isPasswordVisible) R.drawable.eyeclosed
                             else R.drawable.eyeclosed
-                        ), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
-        } else null)
+        } else null
+    )
 }
 
 // ── Primary action button ──────────────────────────────────────────────────
 
 @Composable
 fun AuthPrimaryButton(
-    text: String, onClick: () -> Unit, enabled: Boolean = true, modifier: Modifier = Modifier
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Button(
         onClick = onClick,

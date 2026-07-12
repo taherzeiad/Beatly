@@ -31,7 +31,7 @@ import com.taher.beatly.model.Song
 fun PlaceholderImage(
     modifier: Modifier = Modifier,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(16.dp),
-    showLabel: Boolean = true
+    showLabel: Boolean = true,
 ) {
     Box(
         modifier = modifier
@@ -124,10 +124,10 @@ fun SectionHeader(title: String, onSeeAllClick: (() -> Unit)? = null) {
         Text(title, fontSize = 18.sp, style = MaterialTheme.typography.titleMedium)
         if (onSeeAllClick != null) {
             Text(
-                "See All",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.clickable(onClick = onSeeAllClick)
+                text     = "See All",
+                color    = MaterialTheme.colorScheme.primary,
+                style    = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.clickable(onClick = onSeeAllClick),
             )
         }
     }
@@ -138,11 +138,11 @@ fun SectionHeader(title: String, onSeeAllClick: (() -> Unit)? = null) {
 fun SongRow(
     song: Song,
     onLikeClick: () -> Unit,
+    modifier: Modifier = Modifier,
     onSaveClick: () -> Unit = {},
     onPlayClick: () -> Unit,
     isCurrentlyPlaying: Boolean = false,
     onPauseClick: () -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier

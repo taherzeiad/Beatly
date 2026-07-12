@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.taher.beatly.ui.auth.signup
 
 import android.annotation.SuppressLint
@@ -334,7 +336,9 @@ fun SignUpEmptyPreview() {
 @Composable
 fun SignUpFilledPreview() {
     BeatlyTheme {
-        val vm = SignUpViewModel().apply {
+        val vm = SignUpViewModel(
+            authRepository = TODO()
+        ).apply {
             onEmailChanged("Wilson9@gmail.com")
             onUsernameChanged("Jenny Wilson")
             onPasswordChanged("***********")

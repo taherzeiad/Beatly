@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "134031870915",
+    "project_id": "beatly-72837",
+    "storage_bucket": "beatly-72837.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:134031870915:android:acca9284d29a8a1dc8cb76",
+        "android_client_info": {
+          "package_name": "com.taher.beatly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAbYRPHvRbYfQC_100D_ciG94HmzSeD9s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

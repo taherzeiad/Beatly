@@ -26,6 +26,6 @@ fun BeatlyTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = BeatlyLightColorScheme,
         typography  = BeatlyTypography,
-        content     = content
+        content     = content,
     )
 }

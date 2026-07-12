@@ -18,7 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.taher.beatly.model.Genre
+import com.taher.beatly.domain.model.Genre
 import com.taher.beatly.ui.components.BeatlyTopBar
 
 @Composable
@@ -35,7 +35,7 @@ fun AllGenreScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 20.dp),
         ) {
             Spacer(Modifier.height(12.dp))
             BeatlyTopBar(title = "All Genre", onBackClick = onBackClick, onActionClick = onSearchClick)

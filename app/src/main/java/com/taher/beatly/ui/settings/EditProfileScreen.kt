@@ -28,13 +28,17 @@ import com.taher.beatly.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
-    viewModel    : EditProfileViewModel = viewModel(),
+    viewModel: EditProfileViewModel = viewModel(),
     onBackClicked: () -> Unit,
-    onUpdated    : () -> Unit
+    onUpdated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize().background(White)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -45,7 +49,10 @@ fun EditProfileScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 // Name
                 Column {
                     AuthFieldLabel("Name")
@@ -63,51 +70,69 @@ fun EditProfileScreen(
                     AuthFieldLabel("Birth Date")
                     Spacer(Modifier.height(8.dp))
                     OutlinedTextField(
-                        value         = uiState.birthDate,
+                        value = uiState.birthDate,
                         onValueChange = viewModel::onBirthDateChanged,
-                        modifier      = Modifier.fillMaxWidth().height(52.dp),
-                        textStyle     = BodySmallRegular.copy(color = Gray950),
-                        singleLine    = true,
-                        shape         = RoundedCornerShape(12.dp),
-                        colors        = OutlinedTextFieldDefaults.colors(
-                            unfocusedContainerColor = SurfaceFill, focusedContainerColor = SurfaceFill,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        textStyle = BodySmallRegular.copy(color = Gray950),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedContainerColor = SurfaceFill,
+                            focusedContainerColor = SurfaceFill,
                             unfocusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
                             focusedBorderColor = Purple500
                         ),
-                        trailingIcon  = { Icon(Icons.Default.CalendarMonth, null, tint = Gray400) }
+                        trailingIcon = { Icon(Icons.Default.CalendarMonth, null, tint = Gray400) }
                     )
                 }
                 // Mail
                 Column {
                     AuthFieldLabel("Mail")
                     Spacer(Modifier.height(8.dp))
-                    AuthTextField(uiState.mail, viewModel::onMailChanged, "Mail", keyboardType = KeyboardType.Email)
+                    AuthTextField(
+                        uiState.mail,
+                        viewModel::onMailChanged,
+                        "Mail",
+                        keyboardType = KeyboardType.Email
+                    )
                 }
                 // Gender dropdown
                 Column {
                     AuthFieldLabel("Gender")
                     Spacer(Modifier.height(8.dp))
                     var expanded by remember { mutableStateOf(false) }
-                    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = it }) {
                         OutlinedTextField(
-                            value         = uiState.gender,
+                            value = uiState.gender,
                             onValueChange = {},
-                            modifier      = Modifier.fillMaxWidth().menuAnchor().height(52.dp),
-                            readOnly      = true,
-                            textStyle     = BodySmallRegular.copy(color = Gray950),
-                            shape         = RoundedCornerShape(12.dp),
-                            colors        = OutlinedTextFieldDefaults.colors(
-                                unfocusedContainerColor = SurfaceFill, focusedContainerColor = SurfaceFill,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor()
+                                .height(52.dp),
+                            readOnly = true,
+                            textStyle = BodySmallRegular.copy(color = Gray950),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedContainerColor = SurfaceFill,
+                                focusedContainerColor = SurfaceFill,
                                 unfocusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
                                 focusedBorderColor = Purple500
                             ),
-                            trailingIcon  = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) }
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) }
                         )
-                        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                            listOf("Male","Female","Prefer not to say").forEach { option ->
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }) {
+                            listOf("Male", "Female", "Prefer not to say").forEach { option ->
                                 DropdownMenuItem(
-                                    text    = { Text(option, style = BodySmallRegular) },
-                                    onClick = { viewModel.onGenderChanged(option); expanded = false }
+                                    text = { Text(option, style = BodySmallRegular) },
+                                    onClick = {
+                                        viewModel.onGenderChanged(option); expanded = false
+                                    }
                                 )
                             }
                         }
@@ -115,7 +140,13 @@ fun EditProfileScreen(
                 }
             }
         }
-        AuthPrimaryButton("Update", onUpdated, modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp, vertical = 40.dp))
+        AuthPrimaryButton(
+            "Update",
+            onUpdated,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 20.dp, vertical = 40.dp)
+        )
     }
 }
 
@@ -125,23 +156,41 @@ fun EditProfileScreen(
 
 @Composable
 fun NotificationScreen(
-    viewModel    : NotificationViewModel = viewModel(),
+    viewModel: NotificationViewModel = viewModel(),
     onBackClicked: () -> Unit,
-    onUpdated    : () -> Unit
+    onUpdated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize().background(White)) {
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 120.dp)
+        ) {
             SettingsTopBar("Notification", onBackClicked)
             Spacer(Modifier.height(20.dp))
-            Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 uiState.items.forEach { item ->
                     SettingsValueRow(label = item.label, value = item.subtitle)
                 }
             }
         }
-        AuthPrimaryButton("Update", onUpdated, modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp, vertical = 40.dp))
+        AuthPrimaryButton(
+            "Update",
+            onUpdated,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 20.dp, vertical = 40.dp)
+        )
     }
 }
 
@@ -151,30 +200,52 @@ fun NotificationScreen(
 
 @Composable
 fun AudioVideoScreen(
-    viewModel    : AudioVideoViewModel = viewModel(),
+    viewModel: AudioVideoViewModel = viewModel(),
     onBackClicked: () -> Unit,
-    onUpdated    : () -> Unit
+    onUpdated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize().background(White)) {
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 120.dp)
+        ) {
             SettingsTopBar("Audio & Video", onBackClicked)
             Spacer(Modifier.height(20.dp))
-            Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 SettingsSectionLabel("Audio Quality")
-                SettingsValueRow("Wi-Fi Streaming",       uiState.wifiStreamingAudio)
+                SettingsValueRow("Wi-Fi Streaming", uiState.wifiStreamingAudio)
                 SettingsValueRow("Data Cellular Streaming", uiState.cellularStreamingAudio)
-                SettingsToggleRow("Auto Adjust Quality",  checked = uiState.autoAdjustQuality, onToggle = viewModel::onAutoAdjustToggled)
-                SettingsValueRow("Download",              uiState.downloadQuality)
+                SettingsToggleRow(
+                    "Auto Adjust Quality",
+                    checked = uiState.autoAdjustQuality,
+                    onToggle = viewModel::onAutoAdjustToggled
+                )
+                SettingsValueRow("Download", uiState.downloadQuality)
 
                 Spacer(Modifier.height(4.dp))
                 SettingsSectionLabel("Video Quality")
-                SettingsValueRow("Wi-Fi Streaming",       uiState.wifiStreamingVideo)
+                SettingsValueRow("Wi-Fi Streaming", uiState.wifiStreamingVideo)
                 SettingsValueRow("Data Cellular Streaming", uiState.cellularStreamingVideo)
             }
         }
-        AuthPrimaryButton("Update", onUpdated, modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp, vertical = 40.dp))
+        AuthPrimaryButton(
+            "Update",
+            onUpdated,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 20.dp, vertical = 40.dp)
+        )
     }
 }
 
@@ -184,23 +255,45 @@ fun AudioVideoScreen(
 
 @Composable
 fun PlaybackScreen(
-    viewModel    : PlaybackViewModel = viewModel(),
+    viewModel: PlaybackViewModel = viewModel(),
     onBackClicked: () -> Unit,
-    onUpdated    : () -> Unit
+    onUpdated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize().background(White)) {
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 120.dp)
+        ) {
             SettingsTopBar("Playback", onBackClicked)
             Spacer(Modifier.height(20.dp))
-            Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 uiState.settings.forEach { s ->
-                    SettingsToggleRow(label = s.label, subtitle = s.subtitle, checked = s.enabled, onToggle = { viewModel.onToggled(s.id) })
+                    SettingsToggleRow(
+                        label = s.label,
+                        subtitle = s.subtitle,
+                        checked = s.enabled,
+                        onToggle = { viewModel.onToggled(s.id) })
                 }
             }
         }
-        AuthPrimaryButton("Update", onUpdated, modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp, vertical = 40.dp))
+        AuthPrimaryButton(
+            "Update",
+            onUpdated,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 20.dp, vertical = 40.dp)
+        )
     }
 }
 
@@ -210,38 +303,64 @@ fun PlaybackScreen(
 
 @Composable
 fun DataSaverScreen(
-    viewModel    : DataSaverViewModel = viewModel(),
+    viewModel: DataSaverViewModel = viewModel(),
     onBackClicked: () -> Unit,
-    onUpdated    : () -> Unit
+    onUpdated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize().background(White)) {
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 120.dp)
+        ) {
             SettingsTopBar("Data Saver & Storage", onBackClicked)
             Spacer(Modifier.height(20.dp))
-            Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 SettingsSectionLabel("Data Saver")
-                SettingsToggleRow("Audio Quality",
+                SettingsToggleRow(
+                    "Audio Quality",
                     subtitle = "Sets your audio quality to low (24kbit/s) and disables artist canvases.",
-                    checked  = uiState.audioQualitySaver,
-                    onToggle = viewModel::onAudioQualityToggled)
+                    checked = uiState.audioQualitySaver,
+                    onToggle = viewModel::onAudioQualityToggled
+                )
 
                 Spacer(Modifier.height(4.dp))
                 SettingsSectionLabel("Podcasts")
-                SettingsToggleRow("Download Audio Only",  subtitle = "Save video podcasts as audio only.",
-                    checked = uiState.downloadAudioOnly, onToggle = viewModel::onDownloadAudioToggled)
-                SettingsToggleRow("Stream Audio Only",
+                SettingsToggleRow(
+                    "Download Audio Only",
+                    subtitle = "Save video podcasts as audio only.",
+                    checked = uiState.downloadAudioOnly,
+                    onToggle = viewModel::onDownloadAudioToggled
+                )
+                SettingsToggleRow(
+                    "Stream Audio Only",
                     subtitle = "Play video podcasts as audio only when not connected on Wi-Fi.",
-                    checked  = uiState.streamAudioOnly, onToggle = viewModel::onStreamAudioToggled)
+                    checked = uiState.streamAudioOnly, onToggle = viewModel::onStreamAudioToggled
+                )
 
                 Spacer(Modifier.height(4.dp))
                 SettingsSectionLabel("Storage")
                 SettingsValueRow("Other Apps", uiState.otherAppsStorage)
-                SettingsValueRow("Cache",      uiState.cacheStorage)
+                SettingsValueRow("Cache", uiState.cacheStorage)
             }
         }
-        AuthPrimaryButton("Update", onUpdated, modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp, vertical = 40.dp))
+        AuthPrimaryButton(
+            "Update",
+            onUpdated,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 20.dp, vertical = 40.dp)
+        )
     }
 }
 
@@ -251,23 +370,43 @@ fun DataSaverScreen(
 
 @Composable
 fun SecurityScreen(
-    viewModel    : SecurityViewModel = viewModel(),
+    viewModel: SecurityViewModel = viewModel(),
     onBackClicked: () -> Unit,
-    onChangePin  : () -> Unit,
+    onChangePin: () -> Unit,
     onChangePassword: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize().background(White).verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
+            .verticalScroll(rememberScrollState())
+    ) {
         SettingsTopBar("Security", onBackClicked)
         Spacer(Modifier.height(20.dp))
-        Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            SettingsToggleRow("Remember me",         checked = uiState.rememberMe,   onToggle = viewModel::onRememberMeToggled)
-            SettingsToggleRow("Face ID",             checked = uiState.faceId,       onToggle = viewModel::onFaceIdToggled)
-            SettingsToggleRow("Biometric ID",        checked = uiState.biometricId,  onToggle = viewModel::onBiometricToggled)
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            SettingsToggleRow(
+                "Remember me",
+                checked = uiState.rememberMe,
+                onToggle = viewModel::onRememberMeToggled
+            )
+            SettingsToggleRow(
+                "Face ID",
+                checked = uiState.faceId,
+                onToggle = viewModel::onFaceIdToggled
+            )
+            SettingsToggleRow(
+                "Biometric ID",
+                checked = uiState.biometricId,
+                onToggle = viewModel::onBiometricToggled
+            )
             SettingsValueRow("Google Authenticator", onClick = {})
             Spacer(Modifier.height(8.dp))
-            AuthPrimaryButton("Change Pin",      onChangePin,      enabled = false)
+            AuthPrimaryButton("Change Pin", onChangePin, enabled = false)
             AuthPrimaryButton("Change Password", onChangePassword, enabled = false)
         }
         Spacer(Modifier.height(40.dp))
@@ -280,38 +419,61 @@ fun SecurityScreen(
 
 @Composable
 fun LanguageScreen(
-    viewModel    : LanguageViewModel = viewModel(),
+    viewModel: LanguageViewModel = viewModel(),
     onBackClicked: () -> Unit,
-    onChanged    : () -> Unit
+    onChanged: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize().background(White)) {
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 120.dp)
+        ) {
             SettingsTopBar("Language", onBackClicked)
             Spacer(Modifier.height(20.dp))
-            Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 uiState.groups.forEach { group ->
                     SettingsSectionLabel(group.groupTitle)
                     group.languages.forEach { lang ->
                         val isSelected = lang == uiState.selectedLang
                         Card(
-                            onClick   = { viewModel.onLanguageSelected(lang) },
-                            shape     = RoundedCornerShape(14.dp),
-                            colors    = CardDefaults.cardColors(containerColor = SurfaceFill),
+                            onClick = { viewModel.onLanguageSelected(lang) },
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(containerColor = SurfaceFill),
                             elevation = CardDefaults.cardElevation(0.dp),
-                            modifier  = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically) {
-                                Text(lang, style = BodySmallRegular, color = TextBlack, modifier = Modifier.weight(1f))
-                                Box(modifier = Modifier.size(20.dp),
-                                    contentAlignment = Alignment.Center) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    lang,
+                                    style = BodySmallRegular,
+                                    color = TextBlack,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Box(
+                                    modifier = Modifier.size(20.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     RadioButton(
                                         selected = isSelected,
-                                        onClick  = { viewModel.onLanguageSelected(lang) },
-                                        colors   = RadioButtonDefaults.colors(
-                                            selectedColor   = Purple500,
+                                        onClick = { viewModel.onLanguageSelected(lang) },
+                                        colors = RadioButtonDefaults.colors(
+                                            selectedColor = Purple500,
                                             unselectedColor = Gray200
                                         )
                                     )
@@ -323,29 +485,56 @@ fun LanguageScreen(
                 }
             }
         }
-        AuthPrimaryButton("Change", onChanged, modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp, vertical = 40.dp))
+        AuthPrimaryButton(
+            "Change",
+            onChanged,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 20.dp, vertical = 40.dp)
+        )
     }
 }
 
 // ── Previews ───────────────────────────────────────────────────────────────
 
 @Preview(showBackground = true, showSystemUi = true)
-@Composable fun EditProfilePreview()  { BeatlyTheme { EditProfileScreen(onBackClicked = {}, onUpdated = {}) } }
+@Composable
+fun EditProfilePreview() {
+    BeatlyTheme { EditProfileScreen(onBackClicked = {}, onUpdated = {}) }
+}
 
 @Preview(showBackground = true, showSystemUi = true)
-@Composable fun NotificationPreview() { BeatlyTheme { NotificationScreen(onBackClicked = {}, onUpdated = {}) } }
+@Composable
+fun NotificationPreview() {
+    BeatlyTheme { NotificationScreen(onBackClicked = {}, onUpdated = {}) }
+}
 
 @Preview(showBackground = true, showSystemUi = true)
-@Composable fun AudioVideoPreview()   { BeatlyTheme { AudioVideoScreen(onBackClicked = {}, onUpdated = {}) } }
+@Composable
+fun AudioVideoPreview() {
+    BeatlyTheme { AudioVideoScreen(onBackClicked = {}, onUpdated = {}) }
+}
 
 @Preview(showBackground = true, showSystemUi = true)
-@Composable fun PlaybackPreview()     { BeatlyTheme { PlaybackScreen(onBackClicked = {}, onUpdated = {}) } }
+@Composable
+fun PlaybackPreview() {
+    BeatlyTheme { PlaybackScreen(onBackClicked = {}, onUpdated = {}) }
+}
 
 @Preview(showBackground = true, showSystemUi = true)
-@Composable fun DataSaverPreview()    { BeatlyTheme { DataSaverScreen(onBackClicked = {}, onUpdated = {}) } }
+@Composable
+fun DataSaverPreview() {
+    BeatlyTheme { DataSaverScreen(onBackClicked = {}, onUpdated = {}) }
+}
 
 @Preview(showBackground = true, showSystemUi = true)
-@Composable fun SecurityPreview()     { BeatlyTheme { SecurityScreen(onBackClicked = {}, onChangePin = {}, onChangePassword = {}) } }
+@Composable
+fun SecurityPreview() {
+    BeatlyTheme { SecurityScreen(onBackClicked = {}, onChangePin = {}, onChangePassword = {}) }
+}
 
 @Preview(showBackground = true, showSystemUi = true)
-@Composable fun LanguagePreview()     { BeatlyTheme { LanguageScreen(onBackClicked = {}, onChanged = {}) } }
+@Composable
+fun LanguagePreview() {
+    BeatlyTheme { LanguageScreen(onBackClicked = {}, onChanged = {}) }
+}

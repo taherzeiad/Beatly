@@ -1,10 +1,12 @@
-package com.beatly.ui.profile
+package com.taher.beatly.ui.profile
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
 data class ProfileSettingItem(
     val id      : String,
@@ -20,7 +22,8 @@ data class ProfileUiState(
     val settings  : List<ProfileSettingItem> = emptyList()
 )
 
-class ProfileViewModel : ViewModel() {
+@HiltViewModel
+class ProfileViewModel @Inject constructor() : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()

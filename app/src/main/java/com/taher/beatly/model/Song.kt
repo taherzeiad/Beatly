@@ -13,7 +13,7 @@ data class Song(
     val imageUrl: String? = null,
     val durationMs: Long = 0L,
     val isLiked: Boolean = false,
-    val isSaved: Boolean = false
+    val isSaved: Boolean = false,
 )
 
 data class Artist(

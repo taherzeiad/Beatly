@@ -14,8 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taher.beatly.ui.components.AuthPrimaryButton
 import com.taher.beatly.ui.theme.BeatlyTheme
 import com.taher.beatly.ui.theme.BodyMediumMedium
@@ -28,10 +28,10 @@ import com.taher.beatly.ui.theme.White
 
 @Composable
 fun PaymentMethodScreen(
-    viewModel      : PaymentMethodViewModel = viewModel(),
+    viewModel      : PaymentMethodViewModel = hiltViewModel(),
     onBackClicked  : () -> Unit,
     onAddCard      : () -> Unit,
-    onContinue     : () -> Unit
+    onContinue     : () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

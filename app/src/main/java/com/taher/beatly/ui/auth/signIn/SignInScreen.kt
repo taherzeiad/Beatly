@@ -1,6 +1,7 @@
 package com.taher.beatly.ui.auth.signIn
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -368,7 +369,7 @@ private fun SocialButton(
             containerColor = containerColor,
             contentColor = contentColor
         ),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Icon(
             painter = painterResource(id = iconRes),
@@ -403,7 +404,9 @@ fun SignInScreenEmptyPreview() {
 @Composable
 fun SignInScreenFilledPreview() {
     BeatlyTheme {
-        val vm = SignInViewModel().apply {
+        val vm = SignInViewModel(
+            authRepository = TODO()
+        ).apply {
             onEmailChanged("mardia@gmail.com")
             onPasswordChanged("***********")
             onRememberMeToggled()

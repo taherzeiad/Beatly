@@ -1,4 +1,4 @@
-package com.beatly.ui.profile
+package com.taher.beatly.ui.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,8 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taher.beatly.ui.components.BeatlyBottomBar
 import com.taher.beatly.ui.components.BeatlyTab
 import com.taher.beatly.ui.components.PlaceholderImage
@@ -46,7 +46,7 @@ import com.taher.beatly.ui.theme.White
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = viewModel(),
+    viewModel: ProfileViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onGetPremium: () -> Unit,
     onShareProfile: () -> Unit,

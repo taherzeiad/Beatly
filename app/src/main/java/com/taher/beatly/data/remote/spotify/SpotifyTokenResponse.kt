@@ -1,0 +1,109 @@
+package com.taher.beatly.data.remote.spotify
+
+
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
+
+// ── Retrofit DTOs ──────────────────────────────────────────────────────────
+
+data class SpotifyTokenResponse(
+    val access_token: String,
+    val token_type: String,
+    val expires_in: Int
+)
+
+data class SpotifyTracksResponse(val tracks: SpotifyTrackPaging)
+data class SpotifyTrackPaging(val items: List<SpotifyTrackItem>)
+
+data class SpotifyTrackItem(
+    val id: String,
+    val name: String,
+    val preview_url: String?,
+    val duration_ms: Long,
+    val artists: List<SpotifyArtistSimple>,
+    val album: SpotifyAlbum
+)
+
+data class SpotifyArtistSimple(val id: String, val name: String)
+
+data class SpotifyAlbum(
+    val name: String,
+    val images: List<SpotifyImage>
+)
+
+data class SpotifyImage(val url: String, val width: Int, val height: Int)
+
+data class SpotifyArtist(
+    val id: String,
+    val name: String,
+    val images: List<SpotifyImage>,
+    val genres: List<String>,
+    val followers: SpotifyFollowers
+)
+
+data class SpotifyFollowers(val total: Long)
+
+data class SpotifyArtistResponse(val artists: SpotifyArtistPaging)
+data class SpotifyArtistPaging(val items: List<SpotifyArtist>)
+
+data class SpotifyArtistTracksResponse(val tracks: List<SpotifyTrackItem>)
+
+data class SpotifySearchResponse(
+    val tracks: SpotifyTrackPaging? = null,
+    val artists: SpotifyArtistPaging? = null
+)
+
+// ── Retrofit Service ───────────────────────────────────────────────────────
+
+interface SpotifyApiService {
+
+    @GET("search")
+    suspend fun search(
+        @Query("q") query: String,
+        @Query("type") type: String = "track,artist",
+        @Query("limit") limit: Int = 20,
+        @Header("Authorization") token: String
+    ): SpotifySearchResponse
+
+    @GET("artists/{id}")
+    suspend fun getArtist(
+        @Path("id") artistId: String,
+        @Header("Authorization") token: String
+    ): SpotifyArtist
+
+    @GET("artists/{id}/top-tracks")
+    suspend fun getArtistTopTracks(
+        @Path("id") artistId: String,
+        @Query("market") market: String = "US",
+        @Header("Authorization") token: String
+    ): SpotifyArtistTracksResponse
+
+    @GET("browse/featured-playlists")
+    suspend fun getFeaturedPlaylists(
+        @Query("limit") limit: Int = 10,
+        @Header("Authorization") token: String
+    ): Any  // parse as needed
+
+    @GET("recommendations")
+    suspend fun getRecommendations(
+        @Query("seed_genres") genres: String = "pop,hip-hop",
+        @Query("limit") limit: Int = 20,
+        @Header("Authorization") token: String
+    ): SpotifyTracksResponse
+}
+
+// ── Token service ──────────────────────────────────────────────────────────
+
+interface SpotifyTokenService {
+    @POST("token")
+    @FormUrlEncoded
+    suspend fun getToken(
+        @Field("grant_type") grantType: String = "client_credentials",
+        @Header("Authorization") basicAuth: String
+    ): SpotifyTokenResponse
+}

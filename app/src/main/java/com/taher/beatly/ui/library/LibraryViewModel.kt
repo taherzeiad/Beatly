@@ -2,7 +2,7 @@ package com.taher.beatly.ui.library
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.taher.beatly.data.MusicRepository
+import com.taher.beatly.domain.repository.MusicRepository
 import com.taher.beatly.model.LibraryFilter
 import com.taher.beatly.model.LibraryItem
 import com.taher.beatly.model.Song
