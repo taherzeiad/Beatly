@@ -2,6 +2,7 @@ package com.taher.beatly.data.remote.spotify
 
 import android.util.Base64
 import android.util.Log
+import com.taher.beatly.BuildConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -9,9 +10,8 @@ import javax.inject.Singleton
 class SpotifyTokenManager @Inject constructor(
     private val tokenService: SpotifyTokenService
 ) {
-    // ⚠️ Store these in local.properties → BuildConfig, never hardcode in prod
-    private val clientId = "YOUR_SPOTIFY_CLIENT_ID"
-    private val clientSecret = "YOUR_SPOTIFY_CLIENT_SECRET"
+    private val clientId = BuildConfig.SPOTIFY_CLIENT_ID
+    private val clientSecret = BuildConfig.SPOTIFY_CLIENT_SECRET
 
     private var accessToken: String = ""
     private var expiresAtMs: Long = 0L

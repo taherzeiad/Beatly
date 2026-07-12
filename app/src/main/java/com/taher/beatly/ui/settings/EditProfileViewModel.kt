@@ -2,7 +2,11 @@ package com.taher.beatly.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.taher.beatly.domain.model.BeatlyResult
+import com.taher.beatly.domain.model.User
+import com.taher.beatly.domain.repository.AuthRepository
 import com.taher.beatly.domain.repository.SettingsRepository
+import com.taher.beatly.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -14,7 +18,8 @@ data class LanguageGroup(val groupTitle: String, val languages: List<String>)
 
 data class LanguageUiState(
     val groups: List<LanguageGroup> = emptyList(),
-    val selectedLang: String = "English (US)"
+    val selectedLang: String = "English (US)",
+    val success: Boolean = false
 )
 
 @HiltViewModel
@@ -45,14 +50,20 @@ class LanguageViewModel @Inject constructor(
     }
 
     fun onLanguageSelected(lang: String) {
-        viewModelScope.launch { settingsRepository.setLanguage(lang) }
+        viewModelScope.launch { 
+            settingsRepository.setLanguage(lang)
+            _uiState.update { it.copy(success = true) }
+        }
     }
 }
 
 // ── Notification ───────────────────────────────────────────────────────────
 
 data class NotificationItem(val id: String, val label: String, val subtitle: String = "Push, Email")
-data class NotificationUiState(val items: List<NotificationItem> = emptyList())
+data class NotificationUiState(
+    val items: List<NotificationItem> = emptyList(),
+    val success: Boolean = false
+)
 
 @HiltViewModel
 class NotificationViewModel @Inject constructor() : ViewModel() {
@@ -79,39 +90,52 @@ class NotificationViewModel @Inject constructor() : ViewModel() {
 // ── Edit Profile ───────────────────────────────────────────────────────────
 
 data class EditProfileUiState(
+    val id: String = "",
     val name: String = "",
     val username: String = "",
     val birthDate: String = "",
     val mail: String = "",
     val gender: String = "Male",
-    val isValid: Boolean = true
+    val isLoading: Boolean = false,
+    val success: Boolean = false
 )
 
 @HiltViewModel
-class EditProfileViewModel @Inject constructor() : ViewModel() {
+class EditProfileViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+    private val authRepository: AuthRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(EditProfileUiState())
     val uiState: StateFlow<EditProfileUiState> = _uiState.asStateFlow()
-    fun onNameChanged(v: String) {
-        _uiState.update { it.copy(name = v) }
+
+    init {
+        viewModelScope.launch {
+            authRepository.currentUser.filterNotNull().collectLatest { user ->
+                _uiState.update { it.copy(
+                    id = user.id,
+                    name = user.name,
+                    username = user.username,
+                    mail = user.email
+                )}
+            }
+        }
     }
 
-    fun onUsernameChanged(v: String) {
-        _uiState.update { it.copy(username = v) }
-    }
+    fun onNameChanged(v: String)     { _uiState.update { it.copy(name = v) } }
+    fun onUsernameChanged(v: String) { _uiState.update { it.copy(username = v) } }
+    fun onBirthDateChanged(v: String){ _uiState.update { it.copy(birthDate = v) } }
+    fun onMailChanged(v: String)     { _uiState.update { it.copy(mail = v) } }
+    fun onGenderChanged(v: String)   { _uiState.update { it.copy(gender = v) } }
 
-    fun onBirthDateChanged(v: String) {
-        _uiState.update { it.copy(birthDate = v) }
-    }
-
-    fun onMailChanged(v: String) {
-        _uiState.update { it.copy(mail = v) }
-    }
-
-    fun onGenderChanged(v: String) {
-        _uiState.update { it.copy(gender = v) }
-    }
-
-    fun onUpdate() { /* TODO: call UserRepository */
+    fun onUpdate() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val state = _uiState.value
+            val result = userRepository.updateProfile(
+                User(id = state.id, name = state.name, email = state.mail, username = state.username)
+            )
+            _uiState.update { it.copy(isLoading = false, success = result is BeatlyResult.Success) }
+        }
     }
 }
 
@@ -120,7 +144,8 @@ class EditProfileViewModel @Inject constructor() : ViewModel() {
 data class AudioVideoUiState(
     val wifiStreamingAudio: String = "High", val cellularStreamingAudio: String = "Automatic",
     val autoAdjustQuality: Boolean = true, val downloadQuality: String = "Normal",
-    val wifiStreamingVideo: String = "High", val cellularStreamingVideo: String = "Medium"
+    val wifiStreamingVideo: String = "High", val cellularStreamingVideo: String = "Medium",
+    val success: Boolean = false
 )
 
 @HiltViewModel
@@ -143,7 +168,10 @@ data class PlaybackSetting(
     val enabled: Boolean
 )
 
-data class PlaybackUiState(val settings: List<PlaybackSetting> = emptyList())
+data class PlaybackUiState(
+    val settings: List<PlaybackSetting> = emptyList(),
+    val success: Boolean = false
+)
 
 @HiltViewModel
 class PlaybackViewModel @Inject constructor() : ViewModel() {
@@ -202,7 +230,8 @@ data class DataSaverUiState(
     val downloadAudioOnly: Boolean = true,
     val streamAudioOnly: Boolean = true,
     val otherAppsStorage: String = "75.4 GB",
-    val cacheStorage: String = "120.6 MB"
+    val cacheStorage: String = "120.6 MB",
+    val success: Boolean = false
 )
 
 @HiltViewModel

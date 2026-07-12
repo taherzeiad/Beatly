@@ -1,6 +1,5 @@
 package com.taher.beatly.data.repository
 
-import android.annotation.SuppressLint
 import com.taher.beatly.data.local.datastore.SettingsDataStore
 import com.taher.beatly.data.remote.firebase.FirebaseAuthDataSource
 import com.taher.beatly.domain.model.BeatlyResult
@@ -16,10 +15,8 @@ class AuthRepositoryImpl @Inject constructor(
     private val dataStore     : SettingsDataStore
 ) : AuthRepository {
 
-    @SuppressLint("NewApi")
     override val currentUser: Flow<User?> = authDataSource.currentUser
 
-    @SuppressLint("NewApi")
     override suspend fun signIn(email: String, password: String): BeatlyResult<User> {
         val result = authDataSource.signIn(email, password)
         if (result is BeatlyResult.Success) dataStore.setUserId(result.data.id)

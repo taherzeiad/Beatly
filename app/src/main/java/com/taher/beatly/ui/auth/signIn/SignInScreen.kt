@@ -50,6 +50,12 @@ fun SignInScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            onSignInSuccess()
+        }
+    }
+
     SignInContent(
         uiState = uiState,
         onBackClicked = onBackClicked,
@@ -57,7 +63,7 @@ fun SignInScreen(
         onPasswordChanged = viewModel::onPasswordChanged,
         onRememberToggled = viewModel::onRememberMeToggled,
         onPasswordToggled = viewModel::onPasswordVisibilityToggled,
-        onContinue = { viewModel.onSignInClicked(); onSignInSuccess() },
+        onContinue = viewModel::onSignInClicked,
         onForgotPassword = onForgotPassword,
         onRegisterClicked = onRegisterClicked,
         onAppleSignIn = onAppleSignIn,
@@ -156,10 +162,22 @@ private fun SignInContent(
 
         Spacer(modifier = Modifier.height(28.dp))
 
+        // ── Error Message ──────────────────────────────────────────────────
+        if (uiState.errorMessage != null) {
+            Text(
+                text = uiState.errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         // ── Continue button ────────────────────────────────────────────────
         Button(
             onClick = onContinue,
-            enabled = uiState.isFormValid,
+            enabled = uiState.isFormValid && !uiState.isLoading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -172,7 +190,15 @@ private fun SignInContent(
             ),
             elevation = ButtonDefaults.buttonElevation(0.dp)
         ) {
-            Text(text = "Continue", style = MaterialTheme.typography.labelLarge)
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(text = "Continue", style = MaterialTheme.typography.labelLarge)
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -283,7 +309,11 @@ private fun BeatlyTextField(
             .fillMaxWidth()
             .height(52.dp),
         placeholder = {
-            Text(text = placeholder, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                text = placeholder,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         },
         textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
         singleLine = true,
@@ -331,7 +361,11 @@ private fun RememberMeCheckbox(
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = "Remember me", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            text = "Remember me",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }
 
@@ -399,26 +433,13 @@ fun SignInScreenEmptyPreview() {
     }
 }
 
+/*
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SignInScreenFilledPreview() {
     BeatlyTheme {
-        val vm = SignInViewModel(
-            authRepository = TODO()
-        ).apply {
-            onEmailChanged("mardia@gmail.com")
-            onPasswordChanged("***********")
-            onRememberMeToggled()
-        }
-        SignInScreen(
-            viewModel = vm,
-            onBackClicked = {},
-            onSignInSuccess = {},
-            onForgotPassword = {},
-            onRegisterClicked = {},
-            onAppleSignIn = {},
-            onFacebookSignIn = {}
-        )
+        // Requires mock repository
     }
 }
+*/

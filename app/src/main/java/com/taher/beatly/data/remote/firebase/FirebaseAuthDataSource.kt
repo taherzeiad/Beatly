@@ -1,7 +1,5 @@
 package com.taher.beatly.data.remote.firebase
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.taher.beatly.domain.model.BeatlyResult
@@ -19,7 +17,6 @@ class FirebaseAuthDataSource @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
     // ── Observe auth state ─────────────────────────────────────────────────
-    @RequiresApi(Build.VERSION_CODES.O)
     val currentUser: Flow<User?> = callbackFlow {
         val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val fbUser = firebaseAuth.currentUser
@@ -48,7 +45,6 @@ class FirebaseAuthDataSource @Inject constructor(
     }
 
     // ── Sign In ────────────────────────────────────────────────────────────
-    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun signIn(email: String, password: String): BeatlyResult<User> = try {
         val result = auth.signInWithEmailAndPassword(email, password).await()
         val fbUser = result.user ?: return BeatlyResult.Error("User not found")

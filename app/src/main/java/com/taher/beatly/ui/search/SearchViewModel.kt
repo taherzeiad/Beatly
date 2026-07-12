@@ -7,10 +7,12 @@ import com.taher.beatly.domain.repository.MusicRepository
 import com.taher.beatly.model.Artist
 import com.taher.beatly.model.SearchFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 data class SearchUiState(
     val query: String = "",
@@ -40,9 +42,10 @@ class SearchViewModel @Inject constructor(
         observeSearch()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeSearch() {
         _query
-            .debounce(250)
+            .debounce(250.milliseconds)
             .distinctUntilChanged()
             .onEach { _isLoading.value = true }
             .mapLatest { query -> repository.searchArtists(query) }

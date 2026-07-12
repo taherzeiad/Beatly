@@ -9,11 +9,15 @@ import com.taher.beatly.data.local.room.BeatlyDatabase
 import com.taher.beatly.data.remote.spotify.SpotifyApiService
 import com.taher.beatly.data.remote.spotify.SpotifyTokenService
 import com.taher.beatly.data.repository.AuthRepositoryImpl
+import com.taher.beatly.data.repository.LibraryRepositoryImpl
 import com.taher.beatly.data.repository.MusicRepositoryImpl
 import com.taher.beatly.data.repository.SettingsRepositoryImpl
+import com.taher.beatly.data.repository.UserRepositoryImpl
 import com.taher.beatly.domain.repository.AuthRepository
+import com.taher.beatly.domain.repository.LibraryRepository
 import com.taher.beatly.domain.repository.MusicRepository
 import com.taher.beatly.domain.repository.SettingsRepository
+import com.taher.beatly.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -94,5 +98,11 @@ abstract class RepositoryModule {
     abstract fun bindMusicRepository(impl: MusicRepositoryImpl): MusicRepository
 
     @Binds @Singleton
+    abstract fun bindLibraryRepository(impl: LibraryRepositoryImpl): LibraryRepository
+
+    @Binds @Singleton
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
+
+    @Binds @Singleton
+    abstract fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
 }

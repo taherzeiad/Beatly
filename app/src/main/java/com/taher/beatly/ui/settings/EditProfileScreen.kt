@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taher.beatly.ui.components.AuthFieldLabel
 import com.taher.beatly.ui.components.AuthTextField
 import com.taher.beatly.ui.components.AuthPrimaryButton
@@ -28,11 +28,17 @@ import com.taher.beatly.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
-    viewModel: EditProfileViewModel = viewModel(),
+    viewModel: EditProfileViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onUpdated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.success) {
+        if (uiState.success) {
+            onUpdated()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -142,7 +148,8 @@ fun EditProfileScreen(
         }
         AuthPrimaryButton(
             "Update",
-            onUpdated,
+            viewModel::onUpdate,
+            enabled = !uiState.isLoading,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 20.dp, vertical = 40.dp)
@@ -156,11 +163,17 @@ fun EditProfileScreen(
 
 @Composable
 fun NotificationScreen(
-    viewModel: NotificationViewModel = viewModel(),
+    viewModel: NotificationViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onUpdated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.success) {
+        if (uiState.success) {
+            onUpdated()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -200,11 +213,17 @@ fun NotificationScreen(
 
 @Composable
 fun AudioVideoScreen(
-    viewModel: AudioVideoViewModel = viewModel(),
+    viewModel: AudioVideoViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onUpdated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.success) {
+        if (uiState.success) {
+            onUpdated()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -255,11 +274,17 @@ fun AudioVideoScreen(
 
 @Composable
 fun PlaybackScreen(
-    viewModel: PlaybackViewModel = viewModel(),
+    viewModel: PlaybackViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onUpdated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.success) {
+        if (uiState.success) {
+            onUpdated()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -303,11 +328,17 @@ fun PlaybackScreen(
 
 @Composable
 fun DataSaverScreen(
-    viewModel: DataSaverViewModel = viewModel(),
+    viewModel: DataSaverViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onUpdated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.success) {
+        if (uiState.success) {
+            onUpdated()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -370,7 +401,7 @@ fun DataSaverScreen(
 
 @Composable
 fun SecurityScreen(
-    viewModel: SecurityViewModel = viewModel(),
+    viewModel: SecurityViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onChangePin: () -> Unit,
     onChangePassword: () -> Unit
@@ -419,11 +450,17 @@ fun SecurityScreen(
 
 @Composable
 fun LanguageScreen(
-    viewModel: LanguageViewModel = viewModel(),
+    viewModel: LanguageViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onChanged: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.success) {
+        if (uiState.success) {
+            onChanged()
+        }
+    }
 
     Box(
         modifier = Modifier
