@@ -1,62 +1,72 @@
 package com.taher.beatly.ui.settings
 
-
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import androidx.lifecycle.viewModelScope
+import com.taher.beatly.domain.model.BeatlyResult
+import com.taher.beatly.domain.model.User
+import com.taher.beatly.domain.repository.AuthRepository
+import com.taher.beatly.domain.repository.SettingsRepository
+import com.taher.beatly.domain.repository.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Edit Profile
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Language ───────────────────────────────────────────────────────────────
 
-data class EditProfileUiState(
-    val name: String = "Wilson9@gmail.com",
-    val username: String = "Wilson45",
-    val birthDate: String = "13/04/2000",
-    val mail: String = "wilson9@gmail.com",
-    val gender: String = "Male",
-    val isValid: Boolean = true
+data class LanguageGroup(val groupTitle: String, val languages: List<String>)
+
+data class LanguageUiState(
+    val groups: List<LanguageGroup> = emptyList(),
+    val selectedLang: String = "English (US)",
+    val success: Boolean = false
 )
 
-class EditProfileViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(EditProfileUiState())
-    val uiState: StateFlow<EditProfileUiState> = _uiState.asStateFlow()
+@HiltViewModel
+class LanguageViewModel @Inject constructor(
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
 
-    fun onNameChanged(v: String) {
-        _uiState.update { it.copy(name = v) }
+    private val _uiState = MutableStateFlow(LanguageUiState())
+    val uiState: StateFlow<LanguageUiState> = _uiState.asStateFlow()
+
+    init {
+        _uiState.update {
+            it.copy(
+                groups = listOf(
+                    LanguageGroup("Suggested", listOf("English (US)", "English (UK)")),
+                    LanguageGroup(
+                        "Others",
+                        listOf("Mandarin", "Hindi", "Spanish", "Arabic", "French", "German")
+                    ),
+                )
+            )
+        }
+        viewModelScope.launch {
+            settingsRepository.language.collectLatest { lang ->
+                _uiState.update { it.copy(selectedLang = lang) }
+            }
+        }
     }
 
-    fun onUsernameChanged(v: String) {
-        _uiState.update { it.copy(username = v) }
-    }
-
-    fun onBirthDateChanged(v: String) {
-        _uiState.update { it.copy(birthDate = v) }
-    }
-
-    fun onMailChanged(v: String) {
-        _uiState.update { it.copy(mail = v) }
-    }
-
-    fun onGenderChanged(v: String) {
-        _uiState.update { it.copy(gender = v) }
-    }
-
-    fun onUpdate() { /* TODO: call repository */
+    fun onLanguageSelected(lang: String) {
+        viewModelScope.launch { 
+            settingsRepository.setLanguage(lang)
+            _uiState.update { it.copy(success = true) }
+        }
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Notification
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Notification ───────────────────────────────────────────────────────────
 
 data class NotificationItem(val id: String, val label: String, val subtitle: String = "Push, Email")
+data class NotificationUiState(
+    val items: List<NotificationItem> = emptyList(),
+    val success: Boolean = false
+)
 
-data class NotificationUiState(val items: List<NotificationItem> = emptyList())
-
-class NotificationViewModel : ViewModel() {
+@HiltViewModel
+class NotificationViewModel @Inject constructor() : ViewModel() {
     private val _uiState = MutableStateFlow(NotificationUiState())
     val uiState: StateFlow<NotificationUiState> = _uiState.asStateFlow()
 
@@ -77,34 +87,79 @@ class NotificationViewModel : ViewModel() {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Audio & Video
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Edit Profile ───────────────────────────────────────────────────────────
 
-data class AudioVideoUiState(
-    val wifiStreamingAudio: String = "High",
-    val cellularStreamingAudio: String = "Automatic",
-    val autoAdjustQuality: Boolean = true,
-    val downloadQuality: String = "Normal",
-    val wifiStreamingVideo: String = "High",
-    val cellularStreamingVideo: String = "Medium"
+data class EditProfileUiState(
+    val id: String = "",
+    val name: String = "",
+    val username: String = "",
+    val birthDate: String = "",
+    val mail: String = "",
+    val gender: String = "Male",
+    val isLoading: Boolean = false,
+    val success: Boolean = false
 )
 
-class AudioVideoViewModel : ViewModel() {
+@HiltViewModel
+class EditProfileViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+    private val authRepository: AuthRepository
+) : ViewModel() {
+    private val _uiState = MutableStateFlow(EditProfileUiState())
+    val uiState: StateFlow<EditProfileUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            authRepository.currentUser.filterNotNull().collectLatest { user ->
+                _uiState.update { it.copy(
+                    id = user.id,
+                    name = user.name,
+                    username = user.username,
+                    mail = user.email
+                )}
+            }
+        }
+    }
+
+    fun onNameChanged(v: String)     { _uiState.update { it.copy(name = v) } }
+    fun onUsernameChanged(v: String) { _uiState.update { it.copy(username = v) } }
+    fun onBirthDateChanged(v: String){ _uiState.update { it.copy(birthDate = v) } }
+    fun onMailChanged(v: String)     { _uiState.update { it.copy(mail = v) } }
+    fun onGenderChanged(v: String)   { _uiState.update { it.copy(gender = v) } }
+
+    fun onUpdate() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val state = _uiState.value
+            val result = userRepository.updateProfile(
+                User(id = state.id, name = state.name, email = state.mail, username = state.username)
+            )
+            _uiState.update { it.copy(isLoading = false, success = result is BeatlyResult.Success) }
+        }
+    }
+}
+
+// ── Audio & Video ─────────────────────────────────────────────────────────
+
+data class AudioVideoUiState(
+    val wifiStreamingAudio: String = "High", val cellularStreamingAudio: String = "Automatic",
+    val autoAdjustQuality: Boolean = true, val downloadQuality: String = "Normal",
+    val wifiStreamingVideo: String = "High", val cellularStreamingVideo: String = "Medium",
+    val success: Boolean = false
+)
+
+@HiltViewModel
+class AudioVideoViewModel @Inject constructor() : ViewModel() {
     private val _uiState = MutableStateFlow(AudioVideoUiState())
     val uiState: StateFlow<AudioVideoUiState> = _uiState.asStateFlow()
-
     fun onAutoAdjustToggled() {
         _uiState.update { it.copy(autoAdjustQuality = !it.autoAdjustQuality) }
     }
 
-    fun onUpdate() { /* TODO */
-    }
+    fun onUpdate() {}
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Playback
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Playback ───────────────────────────────────────────────────────────────
 
 data class PlaybackSetting(
     val id: String,
@@ -113,9 +168,13 @@ data class PlaybackSetting(
     val enabled: Boolean
 )
 
-data class PlaybackUiState(val settings: List<PlaybackSetting> = emptyList())
+data class PlaybackUiState(
+    val settings: List<PlaybackSetting> = emptyList(),
+    val success: Boolean = false
+)
 
-class PlaybackViewModel : ViewModel() {
+@HiltViewModel
+class PlaybackViewModel @Inject constructor() : ViewModel() {
     private val _uiState = MutableStateFlow(PlaybackUiState())
     val uiState: StateFlow<PlaybackUiState> = _uiState.asStateFlow()
 
@@ -160,28 +219,25 @@ class PlaybackViewModel : ViewModel() {
     }
 
     fun onToggled(id: String) {
-        _uiState.update { state ->
-            state.copy(settings = state.settings.map { s -> if (s.id == id) s.copy(enabled = !s.enabled) else s })
-        }
+        _uiState.update { s -> s.copy(settings = s.settings.map { if (it.id == id) it.copy(enabled = !it.enabled) else it }) }
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Data Saver & Storage
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Data Saver ─────────────────────────────────────────────────────────────
 
 data class DataSaverUiState(
     val audioQualitySaver: Boolean = true,
     val downloadAudioOnly: Boolean = true,
     val streamAudioOnly: Boolean = true,
     val otherAppsStorage: String = "75.4 GB",
-    val cacheStorage: String = "120.6 MB"
+    val cacheStorage: String = "120.6 MB",
+    val success: Boolean = false
 )
 
-class DataSaverViewModel : ViewModel() {
+@HiltViewModel
+class DataSaverViewModel @Inject constructor() : ViewModel() {
     private val _uiState = MutableStateFlow(DataSaverUiState())
     val uiState: StateFlow<DataSaverUiState> = _uiState.asStateFlow()
-
     fun onAudioQualityToggled() {
         _uiState.update { it.copy(audioQualitySaver = !it.audioQualitySaver) }
     }
@@ -195,21 +251,18 @@ class DataSaverViewModel : ViewModel() {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Security
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Security ───────────────────────────────────────────────────────────────
 
 data class SecurityUiState(
     val rememberMe: Boolean = true,
     val faceId: Boolean = false,
-    val biometricId: Boolean = true,
-    val googleAuthenticator: Boolean = false
+    val biometricId: Boolean = true
 )
 
-class SecurityViewModel : ViewModel() {
+@HiltViewModel
+class SecurityViewModel @Inject constructor() : ViewModel() {
     private val _uiState = MutableStateFlow(SecurityUiState())
     val uiState: StateFlow<SecurityUiState> = _uiState.asStateFlow()
-
     fun onRememberMeToggled() {
         _uiState.update { it.copy(rememberMe = !it.rememberMe) }
     }
@@ -226,39 +279,5 @@ class SecurityViewModel : ViewModel() {
     }
 
     fun onChangePassword() { /* TODO */
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Language
-// ─────────────────────────────────────────────────────────────────────────────
-
-data class LanguageGroup(val groupTitle: String, val languages: List<String>)
-
-data class LanguageUiState(
-    val groups: List<LanguageGroup> = emptyList(),
-    val selectedLang: String = "English (US)"
-)
-
-class LanguageViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(LanguageUiState())
-    val uiState: StateFlow<LanguageUiState> = _uiState.asStateFlow()
-
-    init {
-        _uiState.update {
-            it.copy(
-                groups = listOf(
-                    LanguageGroup("Suggested", listOf("English (US)", "English (UK)")),
-                    LanguageGroup(
-                        "Others",
-                        listOf("Mandarin", "Hindi", "Spanish", "Arabic", "French", "German")
-                    ),
-                )
-            )
-        }
-    }
-
-    fun onLanguageSelected(lang: String) {
-        _uiState.update { it.copy(selectedLang = lang) }
     }
 }

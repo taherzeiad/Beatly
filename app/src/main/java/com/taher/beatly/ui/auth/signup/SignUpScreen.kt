@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.taher.beatly.ui.auth.signup
 
 import android.annotation.SuppressLint
@@ -27,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,6 +50,12 @@ fun SignUpScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            onSignUpSuccess()
+        }
+    }
+
     SignUpContent(
         uiState                      = uiState,
         onBackClicked                = onBackClicked,
@@ -57,7 +66,7 @@ fun SignUpScreen(
         onPasswordToggled            = viewModel::onPasswordVisibilityToggled,
         onConfirmPasswordToggled     = viewModel::onConfirmPasswordVisibilityToggled,
         onTermsToggled               = viewModel::onTermsToggled,
-        onContinue                   = { viewModel.onSignUpClicked(); onSignUpSuccess() },
+        onContinue                   = viewModel::onSignUpClicked,
         onTermsClicked               = onTermsClicked,
         onPrivacyClicked             = onPrivacyClicked,
     )
@@ -172,10 +181,22 @@ private fun SignUpContent(
 
         Spacer(modifier = Modifier.height(28.dp))
 
+        // ── Error Message ──────────────────────────────────────────────────
+        if (uiState.errorMessage != null) {
+            Text(
+                text = uiState.errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         // ── Continue button ────────────────────────────────────────────────
         Button(
             onClick  = onContinue,
-            enabled  = uiState.isFormValid,
+            enabled  = uiState.isFormValid && !uiState.isLoading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -188,7 +209,15 @@ private fun SignUpContent(
             ),
             elevation = ButtonDefaults.buttonElevation(0.dp)
         ) {
-            Text(text = "Continue", style = MaterialTheme.typography.labelLarge)
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(text = "Continue", style = MaterialTheme.typography.labelLarge)
+            }
         }
     }
 }
@@ -329,18 +358,13 @@ fun SignUpEmptyPreview() {
     BeatlyTheme { SignUpScreen(onBackClicked = {}, onSignUpSuccess = {}, onTermsClicked = {}, onPrivacyClicked = {}) }
 }
 
+/*
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SignUpFilledPreview() {
     BeatlyTheme {
-        val vm = SignUpViewModel().apply {
-            onEmailChanged("Wilson9@gmail.com")
-            onUsernameChanged("Jenny Wilson")
-            onPasswordChanged("***********")
-            onConfirmPasswordChanged("***********")
-            onTermsToggled()
-        }
-        SignUpScreen(vm, onBackClicked = {}, onSignUpSuccess = {}, onTermsClicked = {}, onPrivacyClicked = {})
+        // Requires mock repository
     }
 }
+*/

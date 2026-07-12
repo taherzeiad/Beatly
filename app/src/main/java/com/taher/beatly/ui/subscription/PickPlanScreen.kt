@@ -17,8 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taher.beatly.ui.components.AuthPrimaryButton
 import com.taher.beatly.ui.theme.BeatlyTheme
 import com.taher.beatly.ui.theme.BodySmallRegular
@@ -33,7 +33,7 @@ import com.taher.beatly.ui.theme.White
 
 @Composable
 fun PickPlanScreen(
-    viewModel: PickPlanViewModel = viewModel(),
+    viewModel: PickPlanViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onContinue: () -> Unit
 ) {
@@ -154,9 +154,9 @@ private fun PlanCard(
     onBenefitsToggle: () -> Unit
 ) {
     val price = if (billingCycle == BillingCycle.MONTHLY)
-        "USD ${plan.monthlyPrice.toInt()}\$/Month"
+        "USD ${plan.monthlyPrice.toInt()}/Month"
     else
-        "USD ${plan.yearlyPrice.toInt()}\$/Year"
+        "USD ${plan.yearlyPrice.toInt()}/Year"
 
     Card(
         modifier = Modifier

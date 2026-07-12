@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.taher.beatly.ui.components.RoundIconButton
 import com.taher.beatly.ui.theme.BodyMediumMedium
+import com.taher.beatly.ui.theme.Gray950
 import com.taher.beatly.ui.theme.TextBlack
 
 // Shared top bar reused across all subscription screens
@@ -32,24 +35,32 @@ fun SubscriptionTopBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        RoundIconButton(
-            icon = Icons.Default.ArrowBackIosNew,
+        IconButton(
             onClick = onBackClicked,
-            contentDescription = "Back"
-        )
+            modifier = Modifier.size(44.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBackIosNew,
+                contentDescription = "Back",
+                tint = Gray950
+            )
+        }
+
         Text(
             text = title,
             style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
             color = TextBlack
         )
+
         if (onMoreClicked != null) {
             RoundIconButton(
                 icon = Icons.Default.MoreHoriz,
                 onClick = onMoreClicked,
-                contentDescription = "More"
+                contentDescription = "More",
+                hasBorder = true
             )
         } else {
-            Spacer(modifier = Modifier.size(42.dp))
+            Spacer(modifier = Modifier.size(44.dp))
         }
     }
 }

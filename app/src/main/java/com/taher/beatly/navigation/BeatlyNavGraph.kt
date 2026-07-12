@@ -6,7 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.beatly.ui.profile.ProfileScreen
+import com.taher.beatly.ui.profile.ProfileScreen
 import com.taher.beatly.ui.artist.ArtistDetailScreen
 import com.taher.beatly.ui.auth.ProfileSuccessScreen
 import com.taher.beatly.ui.auth.RecoverySuccessScreen

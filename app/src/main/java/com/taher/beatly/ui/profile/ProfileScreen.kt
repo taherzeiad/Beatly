@@ -1,4 +1,4 @@
-package com.beatly.ui.profile
+package com.taher.beatly.ui.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,8 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taher.beatly.ui.components.BeatlyBottomBar
 import com.taher.beatly.ui.components.BeatlyTab
 import com.taher.beatly.ui.components.PlaceholderImage
@@ -46,7 +46,7 @@ import com.taher.beatly.ui.theme.White
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = viewModel(),
+    viewModel: ProfileViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onGetPremium: () -> Unit,
     onShareProfile: () -> Unit,
@@ -56,6 +56,40 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    // Handle logout navigation
+    LaunchedEffect(uiState.isLoggedOut) {
+        if (uiState.isLoggedOut) {
+            onBackClicked() // Or specific logout action
+        }
+    }
+
+    ProfileContent(
+        uiState = uiState,
+        onBackClicked = onBackClicked,
+        onGetPremium = onGetPremium,
+        onShareProfile = onShareProfile,
+        onEditProfile = onEditProfile,
+        onSettingClicked = onSettingClicked,
+        onNavigateTab = onNavigateTab,
+        onDeleteAccount = viewModel::onDeleteAccount,
+        onLogout = viewModel::onLogout,
+        onDarkModeToggle = viewModel::onDarkModeToggled
+    )
+}
+
+@Composable
+fun ProfileContent(
+    uiState: ProfileUiState,
+    onBackClicked: () -> Unit,
+    onGetPremium: () -> Unit,
+    onShareProfile: () -> Unit,
+    onEditProfile: () -> Unit,
+    onSettingClicked: (String) -> Unit,
+    onNavigateTab: (BeatlyTab) -> Unit,
+    onDeleteAccount: () -> Unit,
+    onLogout: () -> Unit,
+    onDarkModeToggle: () -> Unit
+) {
     // Dialogs state
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
@@ -63,13 +97,13 @@ fun ProfileScreen(
     if (showDeleteDialog) {
         DeleteAccountDialog(
             onDismiss = { showDeleteDialog = false },
-            onConfirm = { showDeleteDialog = false; viewModel.onDeleteAccount() }
+            onConfirm = { showDeleteDialog = false; onDeleteAccount() }
         )
     }
     if (showLogoutDialog) {
         LogoutDialog(
             onDismiss = { showLogoutDialog = false },
-            onConfirm = { showLogoutDialog = false; viewModel.onLogout() }
+            onConfirm = { showLogoutDialog = false; onLogout() }
         )
     }
 
@@ -103,7 +137,7 @@ fun ProfileScreen(
                     style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextBlack
                 )
-                RoundIconButton(Icons.Default.MoreHoriz, {}, "More")
+                RoundIconButton(Icons.Default.MoreHoriz, {}, "More", true)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -148,34 +182,6 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ── Share / Edit buttons ───────────────────────────────────────
-            Row(
-                modifier = Modifier.padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                listOf(
-                    "Share Profile" to onShareProfile,
-                    "Edit Profile" to onEditProfile
-                ).forEach { (label, action) ->
-                    OutlinedButton(
-                        onClick = action,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(44.dp),
-                        shape = RoundedCornerShape(50),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.outline.copy(alpha = 1f),
-                            contentColor = TextBlack
-                        )
-                    ) {
-                        Text(label, style = BodySmallRegular)
-                    }
-                }
-            }
-
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             // ── Premium banner ─────────────────────────────────────────────
             Box(
                 modifier = Modifier
@@ -193,9 +199,11 @@ fun ProfileScreen(
                     .height(180.dp)
                     .width(335.dp)
             ) {
-                Column(modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(20.dp)) {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(20.dp)
+                ) {
                     Text(
                         "Enjoy All Benefits!",
                         fontSize = 20.sp,
@@ -242,7 +250,7 @@ fun ProfileScreen(
                                 else -> onSettingClicked(item.id)
                             }
                         },
-                        onDarkModeToggle = viewModel::onDarkModeToggled
+                        onDarkModeToggle = onDarkModeToggle
                     )
                 }
             }
@@ -484,17 +492,38 @@ fun ShareProfileBottomSheet(onDismiss: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, apiLevel = 35)
 @Composable
 fun ProfileScreenPreview() {
     BeatlyTheme {
-        ProfileScreen(
+        ProfileContent(
+            uiState = ProfileUiState(
+                userName = "Jenny Wilson",
+                email = "jenny.wilson@example.com",
+                settings = listOf(
+                    ProfileSettingItem("profile", "Profile"),
+                    ProfileSettingItem("notification", "Notification"),
+                    ProfileSettingItem("dark_mode", "Dark Mode", isToggle = true, toggled = false),
+                    ProfileSettingItem("audio_video", "Audio & Video"),
+                    ProfileSettingItem("playback", "Playback"),
+                    ProfileSettingItem("downloads", "Data Saver & Storage"),
+                    ProfileSettingItem("security", "Security"),
+                    ProfileSettingItem("language", "Language"),
+                    ProfileSettingItem("privacy_policy", "Privacy Policy"),
+                    ProfileSettingItem("about", "About"),
+                    ProfileSettingItem("delete_account", "Delete Account"),
+                    ProfileSettingItem("logout", "Logout"),
+                )
+            ),
             onBackClicked = {},
             onGetPremium = {},
             onShareProfile = {},
             onEditProfile = {},
             onSettingClicked = {},
-            onNavigateTab = {}
+            onNavigateTab = {},
+            onDeleteAccount = {},
+            onLogout = {},
+            onDarkModeToggle = {}
         )
     }
 }

@@ -15,17 +15,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.taher.beatly.ui.components.AuthPrimaryButton
 import com.taher.beatly.ui.theme.*
 
 @Composable
 fun ReviewSummaryScreen(
-    viewModel    : ReviewSummaryViewModel = viewModel(),
+    viewModel    : ReviewSummaryViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onConfirm    : () -> Unit,
-    onChangeMethod: () -> Unit
+    onChangeMethod: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

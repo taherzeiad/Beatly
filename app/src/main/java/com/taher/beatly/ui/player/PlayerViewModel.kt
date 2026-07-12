@@ -2,7 +2,7 @@ package com.taher.beatly.ui.player
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.taher.beatly.data.MusicRepository
+import com.taher.beatly.domain.repository.MusicRepository
 import com.taher.beatly.model.Song
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
