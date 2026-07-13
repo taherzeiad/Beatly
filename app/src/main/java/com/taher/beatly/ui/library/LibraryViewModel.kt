@@ -63,9 +63,15 @@ class LibraryViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LibraryUiState())
 
-    val likedSongsState: StateFlow<LikedSongsUiState> = musicRepository.getLikedSongs()
-        .map { LikedSongsUiState(songs = it) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LikedSongsUiState())
+    val likedSongsState: StateFlow<LikedSongsUiState> = combine(
+        musicRepository.getLikedSongs(),
+        musicRepository.playerState
+    ) { songs, playerState ->
+        LikedSongsUiState(
+            songs = songs,
+            currentlyPlayingSongId = playerState.currentSong?.id
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LikedSongsUiState())
 
     fun onSearchQueryChanged(query: String) { _searchQuery.value = query }
     fun onFilterSelected(filter: LibraryFilter) { _selectedFilter.value = filter }

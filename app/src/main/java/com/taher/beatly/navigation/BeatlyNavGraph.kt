@@ -220,8 +220,10 @@ fun BeatlyNavGraph() {
             MyLibraryScreen(
                 onBackClick = { popBack() },
                 onLibraryItemClick = { item ->
-                    if (item.id == "l1") { // Hardcoded ID for Liked Songs in FakeRepo
-                        nav.navigate(Screen.LikedSongs.route)
+                    when (item.id) {
+                        "liked_songs" -> nav.navigate(Screen.LikedSongs.route)
+                        "followed_artists" -> { /* nav to followed artists */ }
+                        else -> { /* nav to playlist details */ }
                     }
                 }
             )

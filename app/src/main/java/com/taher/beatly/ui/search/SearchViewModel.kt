@@ -183,6 +183,11 @@ class SearchViewModel @Inject constructor(
     }
 
     fun onLikeToggled(songId: String) {
-        viewModelScope.launch { repository.toggleLikeSong(songId) }
+        viewModelScope.launch {
+            repository.toggleLikeSong(songId)
+            _songs.update { list ->
+                list.map { if (it.id == songId) it.copy(isLiked = !it.isLiked) else it }
+            }
+        }
     }
 }

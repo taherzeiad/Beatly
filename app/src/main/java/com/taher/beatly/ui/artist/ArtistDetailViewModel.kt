@@ -7,9 +7,7 @@ import com.taher.beatly.domain.model.BeatlyResult
 import com.taher.beatly.domain.repository.MusicRepository
 import com.taher.beatly.model.Artist
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -72,7 +70,18 @@ class ArtistDetailViewModel @Inject constructor(
     }
 
     fun onLikeSongToggled(songId: String) {
-        viewModelScope.launch { repository.toggleLikeSong(songId) }
+        viewModelScope.launch {
+            repository.toggleLikeSong(songId)
+            _uiState.update { state ->
+                state.copy(
+                    artist = state.artist?.copy(
+                        popularSongs = state.artist.popularSongs.map {
+                            if (it.id == songId) it.copy(isLiked = !it.isLiked) else it
+                        }
+                    )
+                )
+            }
+        }
     }
 
     fun onPlaySong(song: com.taher.beatly.model.Song) {

@@ -3,8 +3,9 @@ package com.taher.beatly.data.repository
 import com.taher.beatly.data.local.room.*
 import com.taher.beatly.data.remote.spotify.*
 import com.taher.beatly.domain.model.*
-import com.taher.beatly.domain.repository.MusicRepository
+import com.taher.beatly.domain.repository.*
 import com.taher.beatly.model.LibraryItem
+import com.taher.beatly.model.LibraryItemIcon
 import com.taher.beatly.model.PlayerState
 import com.taher.beatly.model.Song as UiSong
 import kotlinx.coroutines.flow.*
@@ -19,6 +20,8 @@ class MusicRepositoryImpl @Inject constructor(
     private val songDao: SongDao,
     private val recentlyDao: RecentlyPlayedDao,
     private val artistDao: ArtistDao,
+    private val libraryRepository: LibraryRepository,
+    private val authRepository: AuthRepository
 ) : MusicRepository {
 
     private val _userName = MutableStateFlow("Mr. Aiden Smith")
@@ -172,8 +175,10 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override suspend fun toggleFollowArtist(artistId: String): BeatlyResult<Boolean> = try {
-        // Implement real Spotify follow logic or just toggle local state
-        BeatlyResult.Success(data = true)
+        val user = authRepository.currentUser.firstOrNull() ?: return BeatlyResult.Error("Not logged in")
+        val token = tokenManager.getValidToken()
+        val artist = spotifyApi.getArtist(artistId, token).toDomain()
+        libraryRepository.toggleFollowArtist(user.id, artist)
     } catch (e: Exception) {
         BeatlyResult.Error(e.message ?: "Failed", e)
     }
@@ -206,28 +211,90 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     // ── Library implementation ─────────────────────────────────────────────
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun getLibraryItems(): Flow<List<LibraryItem>> {
-        // Implement using Room/Firestore
-        return MutableStateFlow(emptyList())
+        val userFlow = authRepository.currentUser
+        return userFlow.flatMapLatest { user ->
+            if (user == null) return@flatMapLatest flowOf(emptyList<LibraryItem>())
+
+            val playlistsFlow = libraryRepository.getLibrary(user.id).map { result ->
+                if (result is BeatlyResult.Success) {
+                    result.data.map { playlist ->
+                        LibraryItem(
+                            id = playlist.id,
+                            name = playlist.name,
+                            songCount = playlist.songCount,
+                            artistCount = 0,
+                            icon = LibraryItemIcon.PLAYLIST,
+                            imageUrl = playlist.imageUrl,
+                            isCustomPlaylist = true
+                        )
+                    }
+                } else emptyList()
+            }
+
+            combine(playlistsFlow, flowOf(user)) { playlists, _ ->
+                val virtualItems = listOf(
+                    LibraryItem(
+                        id = "liked_songs",
+                        name = "Liked Songs",
+                        songCount = 0, // could be dynamic
+                        artistCount = 0,
+                        icon = LibraryItemIcon.LIKED_SONGS
+                    ),
+                    LibraryItem(
+                        id = "followed_artists",
+                        name = "Followed Artists",
+                        songCount = 0,
+                        artistCount = 0,
+                        icon = LibraryItemIcon.FOLLOWED_ARTISTS
+                    )
+                )
+                virtualItems + playlists
+            }
+        }
     }
 
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun getLikedSongs(): Flow<List<UiSong>> {
-        return songDao.getLikedSongs().map { entities ->
-             entities.map { it.toUiModel() }
+        val userFlow = authRepository.currentUser
+        return userFlow.flatMapLatest { user ->
+            if (user == null) return@flatMapLatest flowOf(emptyList<UiSong>())
+            songDao.getLikedSongs().map { entities ->
+                entities.map { it.toUiModel() }
+            }
         }
     }
 
     override suspend fun toggleLikeSong(songId: String) {
-        // Implement toggle logic
+        val user = authRepository.currentUser.firstOrNull() ?: return
+        val songEntity = songDao.getSongById(songId) ?: return
+        val domainSong = Song(
+            id = songEntity.id, title = songEntity.title, artistName = songEntity.artistName,
+            artistId = songEntity.artistId, albumName = songEntity.albumName,
+            imageUrl = songEntity.imageUrl, previewUrl = songEntity.previewUrl,
+            durationMs = songEntity.durationMs, isLiked = !songEntity.isLiked
+        )
+        
+        // Update local Room
+        songDao.setLiked(songId, !songEntity.isLiked)
+        
+        // Update Firestore
+        libraryRepository.toggleLikeSong(user.id, domainSong)
     }
 
     override suspend fun createLibraryPlaylist(name: String) {
-        // Implement creation logic
+        val user = authRepository.currentUser.firstOrNull() ?: return
+        libraryRepository.createPlaylist(user.id, name)
     }
 
     // ── Player implementation ──────────────────────────────────────────────
     override suspend fun playSong(song: UiSong) {
         _playerState.update { it.copy(currentSong = song, isPlaying = true, positionMs = 0, durationMs = song.durationMs) }
+        val user = authRepository.currentUser.firstOrNull()
+        if (user != null) {
+            addToRecentlyPlayed(user.id, song)
+        }
     }
 
     override suspend fun togglePlayPause() {
