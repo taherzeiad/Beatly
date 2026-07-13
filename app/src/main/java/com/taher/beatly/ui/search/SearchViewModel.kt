@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.taher.beatly.domain.model.BeatlyResult
 import com.taher.beatly.domain.repository.MusicRepository
+import com.taher.beatly.model.Album
 import com.taher.beatly.model.Artist
+import com.taher.beatly.model.Playlist
 import com.taher.beatly.model.SearchFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,6 +20,9 @@ data class SearchUiState(
     val query: String = "",
     val selectedFilter: SearchFilter = SearchFilter.ARTISTS,
     val artists: List<Artist> = emptyList(),
+    val songs: List<com.taher.beatly.model.Song> = emptyList(),
+    val albums: List<Album> = emptyList(),
+    val playlists: List<Playlist> = emptyList(),
     val isLoading: Boolean = false
 )
 
@@ -30,12 +35,23 @@ class SearchViewModel @Inject constructor(
     private val _query = MutableStateFlow("")
     private val _selectedFilter = MutableStateFlow(SearchFilter.ARTISTS)
     private val _artists = MutableStateFlow<List<Artist>>(emptyList())
+    private val _songs = MutableStateFlow<List<com.taher.beatly.model.Song>>(emptyList())
+    private val _albums = MutableStateFlow<List<Album>>(emptyList())
+    private val _playlists = MutableStateFlow<List<Playlist>>(emptyList())
     private val _isLoading = MutableStateFlow(false)
 
     val uiState: StateFlow<SearchUiState> = combine(
-        _query, _selectedFilter, _artists, _isLoading
-    ) { query, filter, artists, loading ->
-        SearchUiState(query = query, selectedFilter = filter, artists = artists, isLoading = loading)
+        _query, _selectedFilter, _artists, _songs, _albums, _playlists, _isLoading
+    ) { flows: Array<Any> ->
+        SearchUiState(
+            query = flows[0] as String,
+            selectedFilter = flows[1] as SearchFilter,
+            artists = flows[2] as List<Artist>,
+            songs = flows[3] as List<com.taher.beatly.model.Song>,
+            albums = flows[4] as List<Album>,
+            playlists = flows[5] as List<Playlist>,
+            isLoading = flows[6] as Boolean
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SearchUiState())
 
     init {
@@ -44,32 +60,107 @@ class SearchViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeSearch() {
-        _query
-            .debounce(250.milliseconds)
+        combine(_query.debounce(250.milliseconds), _selectedFilter) { query, filter ->
+            query to filter
+        }
             .distinctUntilChanged()
-            .onEach { _isLoading.value = true }
-            .mapLatest { query -> repository.searchArtists(query) }
+            .onEach { (query, _) ->
+                if (query.isNotBlank()) _isLoading.value = true
+            }
+            .mapLatest { (query, filter) ->
+                if (query.isBlank()) return@mapLatest null
+
+                when (filter) {
+                    SearchFilter.ARTISTS -> repository.searchArtists(query)
+                    SearchFilter.SONGS -> repository.searchSongs(query)
+                    SearchFilter.ALBUMS -> repository.searchAlbums(query)
+                    SearchFilter.PLAYLISTS -> repository.searchPlaylists(query)
+                    else -> repository.searchArtists(query)
+                }
+            }
             .onEach { result ->
                 _isLoading.value = false
+                if (result == null) {
+                    _artists.value = emptyList()
+                    _songs.value = emptyList()
+                    _albums.value = emptyList()
+                    _playlists.value = emptyList()
+                    return@onEach
+                }
+
                 if (result is BeatlyResult.Success) {
-                    // Map domain Artist to UI Artist if necessary
-                    // Assuming for now they are compatible or I handle the mapping
-                    // _artists.value = result.data.map { ... }
-                    // Actually, the repository interface uses domain model Artist.
-                    // Let's assume result.data is List<com.taher.beatly.domain.model.Artist>
-                    // and I need to map to com.taher.beatly.model.Artist if they are different.
-                    
-                    val modelArtists = result.data.map { da ->
-                        Artist(
-                            id = da.id,
-                            name = da.name,
-                            imageUrl = da.imageUrl,
-                            isVerified = da.isVerified,
-                            isFollowing = da.isFollowing,
-                            monthlyListeners = da.monthlyListeners
-                        )
+                    val data = result.data
+                    if (data.isNotEmpty()) {
+                        val first = data.first()
+                        when (first) {
+                            is com.taher.beatly.domain.model.Artist -> {
+                                _artists.value =
+                                    (data as List<com.taher.beatly.domain.model.Artist>).map { da ->
+                                        Artist(
+                                            id = da.id,
+                                            name = da.name,
+                                            imageUrl = da.imageUrl,
+                                            isVerified = da.isVerified,
+                                            isFollowing = da.isFollowing,
+                                            monthlyListeners = da.monthlyListeners
+                                        )
+                                    }
+                                _songs.value = emptyList()
+                                _albums.value = emptyList()
+                                _playlists.value = emptyList()
+                            }
+
+                            is com.taher.beatly.domain.model.Song -> {
+                                _songs.value =
+                                    (data as List<com.taher.beatly.domain.model.Song>).map { ds ->
+                                        com.taher.beatly.model.Song(
+                                            id = ds.id,
+                                            title = ds.title,
+                                            artistName = ds.artistName,
+                                            artistId = ds.artistId,
+                                            imageUrl = ds.imageUrl,
+                                            durationMs = ds.durationMs,
+                                            isLiked = ds.isLiked,
+                                            isSaved = ds.isSaved
+                                        )
+                                    }
+                                _artists.value = emptyList()
+                                _albums.value = emptyList()
+                                _playlists.value = emptyList()
+                            }
+
+                            is com.taher.beatly.domain.model.Album -> {
+                                _albums.value =
+                                    (data as List<com.taher.beatly.domain.model.Album>).map { da ->
+                                        Album(
+                                            id = da.id, name = da.name, artistName = da.artistName,
+                                            imageUrl = da.imageUrl, totalTracks = da.totalTracks
+                                        )
+                                    }
+                                _artists.value = emptyList()
+                                _songs.value = emptyList()
+                                _playlists.value = emptyList()
+                            }
+
+                            is com.taher.beatly.domain.model.Playlist -> {
+                                _playlists.value =
+                                    (data as List<com.taher.beatly.domain.model.Playlist>).map { dp ->
+                                        Playlist(
+                                            id = dp.id, name = dp.name, ownerName = dp.ownerId,
+                                            imageUrl = dp.imageUrl, songCount = dp.songCount
+                                        )
+                                    }
+                                _artists.value = emptyList()
+                                _songs.value = emptyList()
+                                _albums.value = emptyList()
+                            }
+                        }
+                    } else {
+                        _artists.value = emptyList()
+                        _songs.value = emptyList()
+                        _albums.value = emptyList()
+                        _playlists.value = emptyList()
                     }
-                    _artists.value = modelArtists
                 }
             }
             .launchIn(viewModelScope)
@@ -85,5 +176,13 @@ class SearchViewModel @Inject constructor(
 
     fun onFollowToggled(artistId: String) {
         viewModelScope.launch { repository.toggleFollowArtist(artistId) }
+    }
+
+    fun onPlaySong(song: com.taher.beatly.model.Song) {
+        viewModelScope.launch { repository.playSong(song) }
+    }
+
+    fun onLikeToggled(songId: String) {
+        viewModelScope.launch { repository.toggleLikeSong(songId) }
     }
 }

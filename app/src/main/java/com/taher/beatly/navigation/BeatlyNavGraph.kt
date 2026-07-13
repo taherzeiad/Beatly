@@ -52,7 +52,9 @@ sealed class Screen(val route: String) {
 
     // --- Main tabs ---
     data object Home    : Screen("home")
-    data object Search  : Screen("search")
+    data object Search  : Screen("search?query={query}") {
+        fun createRoute(query: String? = null) = if (query != null) "search?query=$query" else "search"
+    }
     data object Library : Screen("library")
     data object Profile : Screen("profile")
 
@@ -196,12 +198,20 @@ fun BeatlyNavGraph() {
         }
 
         // ===================== Search / Explore =====================
-        composable(Screen.Search.route) {
+        composable(
+            route = Screen.Search.route,
+            arguments = listOf(navArgument("query") { nullable = true; defaultValue = null })
+        ) { backStackEntry ->
+            val initialQuery = backStackEntry.arguments?.getString("query")
             SearchArtistsScreen(
                 onBackClick = { popBack() },
                 onArtistClick = { artistId ->
                     nav.navigate(Screen.ArtistDetail.createRoute(artistId))
-                }
+                },
+                onSongClick = { _ ->
+                    nav.navigate(Screen.Player.route)
+                },
+                initialQuery = initialQuery
             )
         }
 
@@ -219,7 +229,12 @@ fun BeatlyNavGraph() {
 
         // ===================== Liked Songs =====================
         composable(Screen.LikedSongs.route) {
-            LikedSongsScreen(onBackClick = { popBack() })
+            LikedSongsScreen(
+                onBackClick = { popBack() },
+                onSongClick = { _ ->
+                    nav.navigate(Screen.Player.route)
+                }
+            )
         }
 
         // ===================== Artist Detail =====================
@@ -229,7 +244,10 @@ fun BeatlyNavGraph() {
         ) {
             ArtistDetailScreen(
                 onBackClick         = { popBack() },
-                onSeeAllSongsClick  = { /* Navigate to all songs */ }
+                onSeeAllSongsClick  = { /* Navigate to all songs */ },
+                onSongClick = { _ ->
+                    nav.navigate(Screen.Player.route)
+                }
             )
         }
 
@@ -237,8 +255,10 @@ fun BeatlyNavGraph() {
         composable(Screen.AllGenre.route) {
             AllGenreScreen(
                 onBackClick   = { popBack() },
-                onSearchClick = { nav.navigate(Screen.Search.route) },
-                onGenreClick  = { /* Navigate to genre details */ }
+                onSearchClick = { nav.navigate(Screen.Search.createRoute()) },
+                onGenreClick  = { genreName ->
+                    nav.navigate(Screen.Search.createRoute(genreName))
+                }
             )
         }
 

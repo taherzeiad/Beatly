@@ -29,9 +29,17 @@ import com.taher.beatly.ui.theme.SurfaceFill
 fun SearchArtistsScreen(
     onBackClick   : () -> Unit,
     onArtistClick : (String) -> Unit,
+    onSongClick   : (com.taher.beatly.model.Song) -> Unit,
+    initialQuery  : String? = null,
     viewModel     : SearchViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    androidx.compose.runtime.LaunchedEffect(initialQuery) {
+        if (initialQuery != null) {
+            viewModel.onQueryChanged(initialQuery)
+        }
+    }
 
     Scaffold { padding ->
         Column(
@@ -62,15 +70,83 @@ fun SearchArtistsScreen(
             )
 
             Spacer(Modifier.height(16.dp))
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                items(uiState.artists, key = { it.id }) { artist ->
-                    ArtistSearchRow(
-                        artist        = artist,
-                        onArtistClick = { onArtistClick(artist.id) },
-                        onFollowClick = { viewModel.onFollowToggled(artist.id) }
-                    )
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    when (uiState.selectedFilter) {
+                        SearchFilter.SONGS -> {
+                            items(uiState.songs, key = { it.id }) { song ->
+                                com.taher.beatly.ui.components.SongRow(
+                                    song = song,
+                                    onLikeClick = { viewModel.onLikeToggled(song.id) },
+                                    onPlayClick = {
+                                        viewModel.onPlaySong(song)
+                                        onSongClick(song)
+                                    }
+                                )
+                            }
+                        }
+                        SearchFilter.ALBUMS -> {
+                            items(uiState.albums, key = { it.id }) { album ->
+                                AlbumSearchRow(album = album, onClick = { /* Navigate to album detail */ })
+                            }
+                        }
+                        SearchFilter.PLAYLISTS -> {
+                            items(uiState.playlists, key = { it.id }) { playlist ->
+                                PlaylistSearchRow(playlist = playlist, onClick = { /* Navigate to playlist detail */ })
+                            }
+                        }
+                        else -> {
+                            items(uiState.artists, key = { it.id }) { artist ->
+                                ArtistSearchRow(
+                                    artist = artist,
+                                    onArtistClick = { onArtistClick(artist.id) },
+                                    onFollowClick = { viewModel.onFollowToggled(artist.id) }
+                                )
+                            }
+                        }
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AlbumSearchRow(album: com.taher.beatly.model.Album, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        com.taher.beatly.ui.components.BeatlyImage(
+            url = album.imageUrl,
+            modifier = Modifier.size(56.dp)
+        )
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text(album.name, style = MaterialTheme.typography.labelLarge)
+            Text(album.artistName, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun PlaylistSearchRow(playlist: com.taher.beatly.model.Playlist, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        com.taher.beatly.ui.components.BeatlyImage(
+            url = playlist.imageUrl,
+            modifier = Modifier.size(56.dp)
+        )
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text(playlist.name, style = MaterialTheme.typography.labelLarge)
+            Text("By ${playlist.ownerName}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -103,7 +179,8 @@ private fun FilterChipsRow(selected: SearchFilter, onFilterSelected: (SearchFilt
             "Top" to SearchFilter.TOP,
             "Songs" to SearchFilter.SONGS,
             "Artists" to SearchFilter.ARTISTS,
-            "Albums" to SearchFilter.ALBUMS
+            "Albums" to SearchFilter.ALBUMS,
+            "Playlists" to SearchFilter.PLAYLISTS
         )
         labels.forEach { (label, filter) ->
             FilterChip(
@@ -129,7 +206,11 @@ private fun ArtistSearchRow(artist: Artist, onArtistClick: () -> Unit, onFollowC
             .clickable(onClick = onArtistClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PlaceholderImage(modifier = Modifier.size(56.dp), shape = CircleShape, showLabel = false)
+        com.taher.beatly.ui.components.BeatlyImage(
+            url = artist.imageUrl,
+            modifier = Modifier.size(56.dp),
+            shape = CircleShape
+        )
         Spacer(Modifier.width(12.dp))
         Row(
             modifier = Modifier.weight(1f),

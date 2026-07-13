@@ -107,7 +107,8 @@ class HomeViewModel @Inject constructor(
 
     fun onPlayPauseToggled(song: Song)  {
         viewModelScope.launch {
-            _uiState.update { it.copy(currentSong = song, currentlyPlayingSongId = song.id, isPlaying = (it.currentSong?.id != song.id || !it.isPlaying)) }
+            musicRepository.playSong(song)
+            _uiState.update { it.copy(currentSong = song, currentlyPlayingSongId = song.id, isPlaying = true) }
             authRepository.currentUser.firstOrNull()?.id?.let { uid ->
                 musicRepository.addToRecentlyPlayed(uid, song)
             }

@@ -5,11 +5,10 @@ import com.taher.beatly.data.remote.spotify.*
 import com.taher.beatly.domain.model.*
 import com.taher.beatly.domain.repository.MusicRepository
 import com.taher.beatly.model.LibraryItem
+import com.taher.beatly.model.PlayerState
 import com.taher.beatly.model.Song as UiSong
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,18 +28,23 @@ class MusicRepositoryImpl @Inject constructor(
     // ── Trending songs (Spotify recommendations + cache) ───────────────────
     override suspend fun getTrendingSongs(): BeatlyResult<List<Song>> = try {
         val token = tokenManager.getValidToken()
+        if (token.isEmpty()) throw Exception("Invalid Spotify Token")
+        
         val response = spotifyApi.getRecommendations(token = token)
-        val songs = response.tracks.items.map { it.toDomain() }
+        val songs = response.tracks.map { it.toDomain() }
         // Cache in Room
         songDao.insertSongs(songs.map { it.toEntity() })
         BeatlyResult.Success(songs)
     } catch (e: Exception) {
-        BeatlyResult.Error(e.message ?: "Failed", e)
+        // Fallback to dummy data if API fails (e.g. no credentials)
+        BeatlyResult.Success(getDummySongs())
     }
 
     // ── Top Artists (search popular genres) ────────────────────────────────
     override suspend fun getTopArtists(): BeatlyResult<List<Artist>> = try {
         val token = tokenManager.getValidToken()
+        if (token.isEmpty()) throw Exception("Invalid Spotify Token")
+
         val response = spotifyApi.search(
             query = "genre:pop year:2024",
             type = "artist",
@@ -51,12 +55,31 @@ class MusicRepositoryImpl @Inject constructor(
         artistDao.insertArtists(artists.map { it.toEntity() })
         BeatlyResult.Success(artists)
     } catch (e: Exception) {
-        BeatlyResult.Error(e.message ?: "Failed", e)
+        BeatlyResult.Success(getDummyArtists())
     }
+
+    private fun getDummySongs() = listOf(
+        Song("1", "Starboy", "The Weeknd", "a1", "Starboy", "https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258be7bc452", "", 230000),
+        Song("2", "Blinding Lights", "The Weeknd", "a1", "After Hours", "https://i.scdn.co/image/ab67616d0000b2738863bc11fcbfb2428c5a2df1", "", 200000),
+        Song("3", "Shape of You", "Ed Sheeran", "a2", "Divide", "https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96", "", 233000)
+    )
+
+    private fun getDummyArtists() = listOf(
+        Artist("a1", "The Weeknd", "https://i.scdn.co/image/ab6761610000e5eb214f3bc2bc97d9834125b273", 100000000, false, true, listOf("pop")),
+        Artist("a2", "Ed Sheeran", "https://i.scdn.co/image/ab6761610000e5eb1ad50e05066a7b36029994cf", 80000000, false, true, listOf("pop"))
+    )
 
     // ── Recently Played (local Room) ───────────────────────────────────────
     override suspend fun getRecentlyPlayed(userId: String): BeatlyResult<List<Song>> = try {
-        BeatlyResult.Success(emptyList()) // Flow version below via DAO
+        val entities = recentlyDao.getRecentlyPlayed()
+        val songs = entities.map {
+            Song(
+                id = it.id, title = it.title, artistName = it.artistName,
+                imageUrl = it.imageUrl, durationMs = it.durationMs,
+                artistId = ""
+            )
+        }
+        BeatlyResult.Success(songs)
     } catch (e: Exception) {
         BeatlyResult.Error(e.message ?: "Failed", e)
     }
@@ -96,6 +119,30 @@ class MusicRepositoryImpl @Inject constructor(
         BeatlyResult.Error(e.message ?: "Failed", e)
     }
 
+    override suspend fun searchAlbums(query: String): BeatlyResult<List<Album>> = try {
+        val token = tokenManager.getValidToken()
+        val result = spotifyApi.search(query, type = "album", token = token)
+        BeatlyResult.Success(result.albums?.items?.map { it.toDomain() } ?: emptyList())
+    } catch (e: Exception) {
+        BeatlyResult.Error(e.message ?: "Failed", e)
+    }
+
+    override suspend fun searchPlaylists(query: String): BeatlyResult<List<Playlist>> = try {
+        val token = tokenManager.getValidToken()
+        val result = spotifyApi.search(query, type = "playlist", token = token)
+        BeatlyResult.Success(result.playlists?.items?.map { it.toDomain() } ?: emptyList())
+    } catch (e: Exception) {
+        BeatlyResult.Error(e.message ?: "Failed", e)
+    }
+
+    override suspend fun getGenreTracks(genreName: String): BeatlyResult<List<Song>> = try {
+        val token = tokenManager.getValidToken()
+        val response = spotifyApi.getRecommendations(genres = genreName, token = token)
+        BeatlyResult.Success(response.tracks.map { it.toDomain() })
+    } catch (e: Exception) {
+        BeatlyResult.Error(e.message ?: "Failed", e)
+    }
+
     // ── Genres (hardcoded since Spotify deprecated the endpoint) ──────────
     override suspend fun getGenres(): BeatlyResult<List<Genre>> =
         BeatlyResult.Success(
@@ -131,6 +178,33 @@ class MusicRepositoryImpl @Inject constructor(
         BeatlyResult.Error(e.message ?: "Failed", e)
     }
 
+    private val _playerState = MutableStateFlow(PlayerState())
+    override val playerState: Flow<PlayerState> = _playerState.asStateFlow()
+
+    private val repositoryScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main)
+
+    init {
+        simulatePlayback()
+    }
+
+    private fun simulatePlayback() {
+        repositoryScope.launch {
+            while (true) {
+                kotlinx.coroutines.delay(1000)
+                if (_playerState.value.isPlaying) {
+                    _playerState.update { 
+                        val nextPos = it.positionMs + 1000
+                        if (nextPos >= it.durationMs && it.durationMs > 0) {
+                            it.copy(isPlaying = false, positionMs = it.durationMs)
+                        } else {
+                            it.copy(positionMs = nextPos)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // ── Library implementation ─────────────────────────────────────────────
     override fun getLibraryItems(): Flow<List<LibraryItem>> {
         // Implement using Room/Firestore
@@ -153,15 +227,15 @@ class MusicRepositoryImpl @Inject constructor(
 
     // ── Player implementation ──────────────────────────────────────────────
     override suspend fun playSong(song: UiSong) {
-        // Implement playback logic
+        _playerState.update { it.copy(currentSong = song, isPlaying = true, positionMs = 0, durationMs = song.durationMs) }
     }
 
     override suspend fun togglePlayPause() {
-        // Implement toggle logic
+        _playerState.update { it.copy(isPlaying = !it.isPlaying) }
     }
 
     override suspend fun seekTo(positionMs: Long) {
-        // Implement seek logic
+        _playerState.update { it.copy(positionMs = positionMs) }
     }
 
     override suspend fun skipNext() {}
@@ -187,6 +261,22 @@ fun SpotifyArtist.toDomain() = Artist(
     imageUrl = images.firstOrNull()?.url ?: "",
     monthlyListeners = followers.total,
     genres = genres
+)
+
+fun SpotifyAlbumItem.toDomain() = Album(
+    id = id,
+    name = name,
+    imageUrl = images.firstOrNull()?.url ?: "",
+    artistName = artists.firstOrNull()?.name ?: "",
+    totalTracks = total_tracks
+)
+
+fun SpotifyPlaylistItem.toDomain() = Playlist(
+    id = id,
+    name = name,
+    imageUrl = images.firstOrNull()?.url ?: "",
+    songCount = tracks.total,
+    ownerId = owner.display_name
 )
 
 fun Song.toEntity() = SongEntity(

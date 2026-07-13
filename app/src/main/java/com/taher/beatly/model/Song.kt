@@ -32,6 +32,22 @@ data class Genre(
     val imageUrl: String? = null
 )
 
+data class Album(
+    val id: String,
+    val name: String,
+    val artistName: String,
+    val imageUrl: String? = null,
+    val totalTracks: Int = 0
+)
+
+data class Playlist(
+    val id: String,
+    val name: String,
+    val ownerName: String,
+    val imageUrl: String? = null,
+    val songCount: Int = 0
+)
+
 enum class LibraryItemIcon { LIKED_SONGS, FOLLOWED_ARTISTS, PLAYLIST, CUSTOM_IMAGE }
 
 data class LibraryItem(
