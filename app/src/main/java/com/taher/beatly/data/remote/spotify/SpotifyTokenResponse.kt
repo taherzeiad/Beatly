@@ -17,6 +17,7 @@ data class SpotifyTokenResponse(
     val expires_in: Int
 )
 
+data class SpotifyRecommendationsResponse(val tracks: List<SpotifyTrackItem>)
 data class SpotifyTracksResponse(val tracks: SpotifyTrackPaging)
 data class SpotifyTrackPaging(val items: List<SpotifyTrackItem>)
 
@@ -55,8 +56,31 @@ data class SpotifyArtistTracksResponse(val tracks: List<SpotifyTrackItem>)
 
 data class SpotifySearchResponse(
     val tracks: SpotifyTrackPaging? = null,
-    val artists: SpotifyArtistPaging? = null
+    val artists: SpotifyArtistPaging? = null,
+    val albums: SpotifyAlbumPaging? = null,
+    val playlists: SpotifyPlaylistPaging? = null
 )
+
+data class SpotifyAlbumPaging(val items: List<SpotifyAlbumItem>)
+data class SpotifyAlbumItem(
+    val id: String,
+    val name: String,
+    val images: List<SpotifyImage>,
+    val artists: List<SpotifyArtistSimple>,
+    val total_tracks: Int
+)
+
+data class SpotifyPlaylistPaging(val items: List<SpotifyPlaylistItem>)
+data class SpotifyPlaylistItem(
+    val id: String,
+    val name: String,
+    val images: List<SpotifyImage>,
+    val owner: SpotifyUserSimple,
+    val tracks: SpotifyPlaylistTracks
+)
+
+data class SpotifyUserSimple(val display_name: String)
+data class SpotifyPlaylistTracks(val total: Int)
 
 // ── Retrofit Service ───────────────────────────────────────────────────────
 
@@ -65,7 +89,7 @@ interface SpotifyApiService {
     @GET("search")
     suspend fun search(
         @Query("q") query: String,
-        @Query("type") type: String = "track,artist",
+        @Query("type") type: String = "track,artist,album,playlist",
         @Query("limit") limit: Int = 20,
         @Header("Authorization") token: String
     ): SpotifySearchResponse
@@ -94,7 +118,7 @@ interface SpotifyApiService {
         @Query("seed_genres") genres: String = "pop,hip-hop",
         @Query("limit") limit: Int = 20,
         @Header("Authorization") token: String
-    ): SpotifyTracksResponse
+    ): SpotifyRecommendationsResponse
 }
 
 // ── Token service ──────────────────────────────────────────────────────────

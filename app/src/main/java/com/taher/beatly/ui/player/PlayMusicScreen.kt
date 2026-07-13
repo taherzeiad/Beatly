@@ -53,7 +53,8 @@ fun PlayMusicScreen(
         }
 
         Spacer(Modifier.height(20.dp))
-        PlaceholderImage(
+        com.taher.beatly.ui.components.BeatlyImage(
+            url = song.imageUrl,
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f),

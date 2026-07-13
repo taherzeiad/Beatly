@@ -49,6 +49,14 @@ data class Playlist(
     val songs       : List<Song> = emptyList()
 )
 
+data class Album(
+    val id: String,
+    val name: String,
+    val imageUrl: String = "",
+    val artistName: String = "",
+    val totalTracks: Int = 0
+)
+
 sealed class BeatlyResult<out T> {
     data class Success<T>(val data: T)                              : BeatlyResult<T>()
     data class Error(val message: String, val cause: Throwable? = null) : BeatlyResult<Nothing>()

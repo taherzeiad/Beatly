@@ -2,8 +2,10 @@ package com.taher.beatly.domain.repository
 
 import com.taher.beatly.domain.model.*
 import com.taher.beatly.model.LibraryItem
+import com.taher.beatly.model.PlayerState
 import com.taher.beatly.model.Song as UiSong
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 interface MusicRepository {
     fun getUserName(): Flow<String>
@@ -14,6 +16,9 @@ interface MusicRepository {
     suspend fun getArtistTopTracks(artistId: String): BeatlyResult<List<Song>>
     suspend fun searchArtists(query: String): BeatlyResult<List<Artist>>
     suspend fun searchSongs(query: String): BeatlyResult<List<Song>>
+    suspend fun searchAlbums(query: String): BeatlyResult<List<Album>>
+    suspend fun searchPlaylists(query: String): BeatlyResult<List<Playlist>>
+    suspend fun getGenreTracks(genreName: String): BeatlyResult<List<Song>>
     suspend fun getGenres(): BeatlyResult<List<Genre>>
     suspend fun addToRecentlyPlayed(userId: String, song: UiSong): BeatlyResult<Unit>
     suspend fun toggleFollowArtist(artistId: String): BeatlyResult<Boolean>
@@ -25,6 +30,7 @@ interface MusicRepository {
     suspend fun createLibraryPlaylist(name: String)
     
     // Player methods
+    val playerState: Flow<PlayerState>
     suspend fun playSong(song: UiSong)
     suspend fun togglePlayPause()
     suspend fun seekTo(positionMs: Long)

@@ -69,7 +69,10 @@ interface SongDao {
 @Dao
 interface RecentlyPlayedDao {
     @Query("SELECT * FROM recently_played ORDER BY playedAt DESC LIMIT 20")
-    fun getRecentlyPlayed(): Flow<List<RecentlyPlayedEntity>>
+    fun getRecentlyPlayedFlow(): Flow<List<RecentlyPlayedEntity>>
+
+    @Query("SELECT * FROM recently_played ORDER BY playedAt DESC LIMIT 20")
+    suspend fun getRecentlyPlayed(): List<RecentlyPlayedEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(song: RecentlyPlayedEntity)

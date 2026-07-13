@@ -91,27 +91,37 @@ fun HomeScreenContent(
             Spacer(Modifier.height(12.dp))
             HomeHeader(userName = uiState.userName, onSearchClick = onSearchClick)
 
-            Spacer(Modifier.height(24.dp))
-            SectionHeader(title = "Trending Now", onSeeAllClick = onSeeAllTrendingClick)
-            Spacer(Modifier.height(12.dp))
-            TrendingRow(songs = uiState.trendingSongs)
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                Spacer(Modifier.height(24.dp))
+                SectionHeader(title = "Trending Now", onSeeAllClick = onSeeAllTrendingClick)
+                Spacer(Modifier.height(12.dp))
+                TrendingRow(songs = uiState.trendingSongs, onSongClick = onSongClick)
 
-            Spacer(Modifier.height(24.dp))
-            SectionHeader(title = "Top Artist", onSeeAllClick = onSeeAllArtistsClick)
-            Spacer(Modifier.height(12.dp))
-            TopArtistRow(artists = uiState.topArtists, onArtistClick = onArtistClick)
+                Spacer(Modifier.height(24.dp))
+                SectionHeader(title = "Top Artist", onSeeAllClick = onSeeAllArtistsClick)
+                Spacer(Modifier.height(12.dp))
+                TopArtistRow(artists = uiState.topArtists, onArtistClick = onArtistClick)
 
-            Spacer(Modifier.height(24.dp))
-            SectionHeader(title = "Recently Played", onSeeAllClick = onSeeAllRecentClick)
-            Spacer(Modifier.height(12.dp))
-            uiState.recentlyPlayed.firstOrNull()?.let { song ->
-                SongRow(
-                    song = song,
-                    onLikeClick = { onLikeClick(song.id) },
-                    onPlayClick = { onSongClick(song) },
-                    onPauseClick = { onPlayPauseClick(song) },
-                    isCurrentlyPlaying = uiState.currentlyPlayingSongId == song.id
-                )
+                Spacer(Modifier.height(24.dp))
+                SectionHeader(title = "Recently Played", onSeeAllClick = onSeeAllRecentClick)
+                Spacer(Modifier.height(12.dp))
+                if (uiState.recentlyPlayed.isEmpty()) {
+                    Text("No recently played songs", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    uiState.recentlyPlayed.firstOrNull()?.let { song ->
+                        SongRow(
+                            song = song,
+                            onLikeClick = { onLikeClick(song.id) },
+                            onPlayClick = { onSongClick(song) },
+                            onPauseClick = { onPlayPauseClick(song) },
+                            isCurrentlyPlaying = uiState.currentlyPlayingSongId == song.id
+                        )
+                    }
+                }
             }
             Spacer(Modifier.height(16.dp))
         }
@@ -154,11 +164,11 @@ private fun HomeHeader(userName: String, onSearchClick: () -> Unit) {
 }
 
 @Composable
-private fun TrendingRow(songs: List<Song>) {
+private fun TrendingRow(songs: List<Song>, onSongClick: (Song) -> Unit) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         items(songs, key = { it.id }) { song ->
-            Column(modifier = Modifier.width(150.dp)) {
-                PlaceholderImage(modifier = Modifier.size(150.dp))
+            Column(modifier = Modifier.width(150.dp).clickable { onSongClick(song) }) {
+                BeatlyImage(url = song.imageUrl, modifier = Modifier.size(150.dp))
                 Spacer(Modifier.height(8.dp))
                 Text(
                     song.title,
@@ -185,18 +195,21 @@ private fun TopArtistRow(artists: List<Artist>, onArtistClick: (String) -> Unit)
     LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
         items(artists, key = { it.id }) { artist ->
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(90.dp)
+                horizontalAlignment = Alignment.CenterHorizontally, 
+                modifier = Modifier.width(90.dp).clickable { onArtistClick(artist.id) }
             ) {
-                PlaceholderImage(
-                    modifier = Modifier.size(90.dp), shape = CircleShape, showLabel = false
+                BeatlyImage(
+                    url = artist.imageUrl,
+                    modifier = Modifier.size(90.dp),
+                    shape = CircleShape
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
                     artist.name,
                     maxLines = 1,
                     fontSize = 13.sp,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.clickable { onArtistClick(artist.id) })
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }

@@ -25,6 +25,7 @@ import com.taher.beatly.ui.components.SongRow
 fun ArtistDetailScreen(
     onBackClick        : () -> Unit,
     onSeeAllSongsClick : () -> Unit,
+    onSongClick        : (com.taher.beatly.model.Song) -> Unit,
     viewModel          : ArtistDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -62,12 +63,12 @@ fun ArtistDetailScreen(
             }
 
             Spacer(Modifier.height(20.dp))
-            PlaceholderImage(
+            com.taher.beatly.ui.components.BeatlyImage(
+                url = artist.imageUrl,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .size(220.dp),
-                shape = CircleShape,
-                showLabel = true
+                shape = CircleShape
             )
 
             Spacer(Modifier.height(16.dp))
@@ -115,6 +116,7 @@ fun ArtistDetailScreen(
                     onClick = {
                         artist.popularSongs.firstOrNull()?.let { song ->
                             viewModel.onPlaySong(song)
+                            onSongClick(song)
                         }
                     },
                     contentDescription = "Play all",
@@ -131,7 +133,10 @@ fun ArtistDetailScreen(
                     SongRow(
                         song = song,
                         onLikeClick = { viewModel.onLikeSongToggled(song.id) },
-                        onPlayClick = { viewModel.onPlaySong(song) }
+                        onPlayClick = { 
+                            viewModel.onPlaySong(song)
+                            onSongClick(song)
+                        }
                     )
                 }
             }

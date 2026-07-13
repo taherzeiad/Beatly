@@ -34,6 +34,7 @@ import com.taher.beatly.ui.components.RoundIconButton
 @Composable
 fun LikedSongsScreen(
     onBackClick : () -> Unit,
+    onSongClick : (Song) -> Unit,
     viewModel   : LibraryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.likedSongsState.collectAsStateWithLifecycle()
@@ -42,7 +43,10 @@ fun LikedSongsScreen(
         uiState = uiState,
         onBackClick = onBackClick,
         onLikeClick = viewModel::onLikeToggled,
-        onSongClick = viewModel::onPlaySong
+        onSongClick = { song ->
+            viewModel.onPlaySong(song)
+            onSongClick(song)
+        }
     )
 }
 
@@ -67,7 +71,11 @@ fun LikedSongsContent(
                 .height(340.dp)
                 .background(MaterialTheme.colorScheme.outline)
         ) {
-            PlaceholderImage(modifier = Modifier.fillMaxSize(), shape = RoundedCornerShape(0.dp))
+            com.taher.beatly.ui.components.BeatlyImage(
+                url = uiState.songs.firstOrNull()?.imageUrl,
+                modifier = Modifier.fillMaxSize(),
+                shape = RoundedCornerShape(0.dp)
+            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -133,7 +141,11 @@ private fun LikedSongRow(song: Song, onLikeClick: () -> Unit, onClick: () -> Uni
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PlaceholderImage(modifier = Modifier.size(56.dp), shape = RoundedCornerShape(12.dp), showLabel = false)
+        com.taher.beatly.ui.components.BeatlyImage(
+            url = song.imageUrl,
+            modifier = Modifier.size(56.dp),
+            shape = RoundedCornerShape(12.dp)
+        )
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(song.title, style = MaterialTheme.typography.labelLarge)

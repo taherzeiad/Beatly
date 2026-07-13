@@ -107,15 +107,27 @@ class HomeViewModel @Inject constructor(
 
     fun onPlayPauseToggled(song: Song)  {
         viewModelScope.launch {
-            _uiState.update { it.copy(currentSong = song, currentlyPlayingSongId = song.id, isPlaying = (it.currentSong?.id != song.id || !it.isPlaying)) }
-            authRepository.currentUser.firstOrNull()?.id?.let { uid ->
-                musicRepository.addToRecentlyPlayed(uid, song)
+            musicRepository.playSong(song)
+            _uiState.update { it.copy(currentSong = song, currentlyPlayingSongId = song.id, isPlaying = true) }
+        }
+    }
+    fun onLikeToggled(id: String) {
+        viewModelScope.launch {
+            musicRepository.toggleLikeSong(id)
+            // The UI state for recentlyPlayed will be refreshed if we observe a Flow,
+            // but for now let's manually update it to show immediate feedback.
+            _uiState.update { state ->
+                state.copy(
+                    recentlyPlayed = state.recentlyPlayed.map {
+                        if (it.id == id) it.copy(isLiked = !it.isLiked) else it
+                    },
+                    trendingSongs = state.trendingSongs.map {
+                        if (it.id == id) it.copy(isLiked = !it.isLiked) else it
+                    }
+                )
             }
         }
     }
-    fun onLikeToggled(id: String)       { _uiState.update { state ->
-        state.copy(recentlyPlayed = state.recentlyPlayed.map { if (it.id == id) it.copy(isLiked = !it.isLiked) else it })
-    }}
 
     private fun getGreeting() = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
         in 5..11  -> "Good Morning!"

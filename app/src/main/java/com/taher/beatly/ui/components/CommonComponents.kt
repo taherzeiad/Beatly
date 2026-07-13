@@ -26,6 +26,9 @@ import com.taher.beatly.ui.theme.Gray500
 import com.taher.beatly.ui.theme.Gray950
 import com.taher.beatly.model.Song
 
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.SubcomposeAsyncImage
+
 /** Placeholder image box, used everywhere real artwork is unavailable. */
 @Composable
 fun PlaceholderImage(
@@ -58,6 +61,26 @@ fun PlaceholderImage(
             }
         }
     }
+}
+
+@Composable
+fun BeatlyImage(
+    url: String?,
+    modifier: Modifier = Modifier,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(16.dp),
+    contentDescription: String? = null,
+    contentScale: ContentScale = ContentScale.Crop
+) {
+    SubcomposeAsyncImage(
+        model = url,
+        contentDescription = contentDescription,
+        modifier = modifier
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.outline, shape),
+        contentScale = contentScale,
+        loading = { PlaceholderImage(modifier = Modifier.fillMaxSize(), shape = shape) },
+        error = { PlaceholderImage(modifier = Modifier.fillMaxSize(), shape = shape) }
+    )
 }
 
 enum class BeatlyTab { HOME, EXPLORE, LIBRARY, PROFILE }
@@ -152,7 +175,8 @@ fun SongRow(
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PlaceholderImage(
+        BeatlyImage(
+            url = song.imageUrl,
             modifier = Modifier
                 .width(115.dp)
                 .height(130.dp),
@@ -276,7 +300,7 @@ fun RoundIconButton(
         if (hasBorder) {
             Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(28.dp)
                     .border(width = 1.dp, color = Color.Black, shape = CircleShape)
                     .clip(CircleShape),
                 contentAlignment = Alignment.Center

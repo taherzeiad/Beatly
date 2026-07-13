@@ -155,9 +155,9 @@ fun ProfileContent(
                     )
                     Box(
                         modifier = Modifier
-                            .size(22.dp)
+                            .size(18.dp)
                             .align(Alignment.BottomEnd)
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(4.dp))
                             .background(Purple500),
                         contentAlignment = Alignment.Center
                     ) {
@@ -165,7 +165,7 @@ fun ProfileContent(
                             Icons.Default.Edit,
                             null,
                             tint = White,
-                            modifier = Modifier.size(12.dp)
+                            modifier = Modifier.size(15.dp)
                         )
                     }
                 }
