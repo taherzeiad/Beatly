@@ -93,6 +93,7 @@ fun ProfileContent(
     // Dialogs state
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showShareSheet by remember { mutableStateOf(false) }
 
     if (showDeleteDialog) {
         DeleteAccountDialog(
@@ -105,6 +106,9 @@ fun ProfileContent(
             onDismiss = { showLogoutDialog = false },
             onConfirm = { showLogoutDialog = false; onLogout() }
         )
+    }
+    if (showShareSheet) {
+        ShareProfileBottomSheet(onDismiss = { showShareSheet = false })
     }
 
     Scaffold(
@@ -137,7 +141,7 @@ fun ProfileContent(
                     style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextBlack
                 )
-                RoundIconButton(Icons.Default.MoreHoriz, {}, "More", true)
+                RoundIconButton(Icons.Default.MoreHoriz, { showShareSheet = true }, "More", true)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -158,7 +162,8 @@ fun ProfileContent(
                             .size(18.dp)
                             .align(Alignment.BottomEnd)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(Purple500),
+                            .background(Purple500)
+                            .clickable { onEditProfile() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(

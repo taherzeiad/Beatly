@@ -10,7 +10,7 @@ plugins {
 android {
     namespace = "com.taher.beatly"
     compileSdk = 35
-    
+
     kotlin {
         jvmToolchain(17)
     }
@@ -25,10 +25,26 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Keys stored in local.properties
-        buildConfigField("String", "SPOTIFY_CLIENT_ID", "\"${project.findProperty("SPOTIFY_CLIENT_ID") ?: ""}\"")
-        buildConfigField("String", "SPOTIFY_CLIENT_SECRET", "\"${project.findProperty("SPOTIFY_CLIENT_SECRET") ?: ""}\"")
-        buildConfigField("String", "SUPABASE_URL", "\"${project.findProperty("SUPABASE_URL") ?: ""}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${project.findProperty("SUPABASE_ANON_KEY") ?: ""}\"")
+        buildConfigField(
+            "String",
+            "SPOTIFY_CLIENT_ID",
+            "\"${project.findProperty("SPOTIFY_CLIENT_ID") ?: ""}\""
+        )
+        buildConfigField(
+            "String",
+            "SPOTIFY_CLIENT_SECRET",
+            "\"${project.findProperty("SPOTIFY_CLIENT_SECRET") ?: ""}\""
+        )
+        buildConfigField(
+            "String",
+            "SUPABASE_URL",
+            "\"${project.findProperty("SUPABASE_URL") ?: ""}\""
+        )
+        buildConfigField(
+            "String",
+            "SUPABASE_ANON_KEY",
+            "\"${project.findProperty("SUPABASE_ANON_KEY") ?: ""}\""
+        )
     }
 
     buildTypes {

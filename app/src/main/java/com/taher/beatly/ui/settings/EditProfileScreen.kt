@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -199,7 +200,7 @@ fun NotificationScreen(
         }
         AuthPrimaryButton(
             "Update",
-            onUpdated,
+            viewModel::onUpdate,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 20.dp, vertical = 40.dp)
@@ -260,7 +261,7 @@ fun AudioVideoScreen(
         }
         AuthPrimaryButton(
             "Update",
-            onUpdated,
+            viewModel::onUpdate,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 20.dp, vertical = 40.dp)
@@ -314,7 +315,7 @@ fun PlaybackScreen(
         }
         AuthPrimaryButton(
             "Update",
-            onUpdated,
+            viewModel::onUpdate,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 20.dp, vertical = 40.dp)
@@ -387,7 +388,7 @@ fun DataSaverScreen(
         }
         AuthPrimaryButton(
             "Update",
-            onUpdated,
+            viewModel::onUpdate,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 20.dp, vertical = 40.dp)
@@ -408,39 +409,53 @@ fun SecurityScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(White)
-            .verticalScroll(rememberScrollState())
-    ) {
-        SettingsTopBar("Security", onBackClicked)
-        Spacer(Modifier.height(20.dp))
-        Column(
-            modifier = Modifier.padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            SettingsToggleRow(
-                "Remember me",
-                checked = uiState.rememberMe,
-                onToggle = viewModel::onRememberMeToggled
-            )
-            SettingsToggleRow(
-                "Face ID",
-                checked = uiState.faceId,
-                onToggle = viewModel::onFaceIdToggled
-            )
-            SettingsToggleRow(
-                "Biometric ID",
-                checked = uiState.biometricId,
-                onToggle = viewModel::onBiometricToggled
-            )
-            SettingsValueRow("Google Authenticator", onClick = {})
-            Spacer(Modifier.height(8.dp))
-            AuthPrimaryButton("Change Pin", onChangePin, enabled = false)
-            AuthPrimaryButton("Change Password", onChangePassword, enabled = false)
+    LaunchedEffect(uiState.success) {
+        if (uiState.success) {
+            onBackClicked()
         }
-        Spacer(Modifier.height(40.dp))
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(White)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 120.dp)
+        ) {
+            SettingsTopBar("Security", onBackClicked)
+            Spacer(Modifier.height(20.dp))
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                SettingsToggleRow(
+                    "Remember me",
+                    checked = uiState.rememberMe,
+                    onToggle = viewModel::onRememberMeToggled
+                )
+                SettingsToggleRow(
+                    "Face ID",
+                    checked = uiState.faceId,
+                    onToggle = viewModel::onFaceIdToggled
+                )
+                SettingsToggleRow(
+                    "Biometric ID",
+                    checked = uiState.biometricId,
+                    onToggle = viewModel::onBiometricToggled
+                )
+                SettingsValueRow("Google Authenticator", onClick = {})
+                Spacer(Modifier.height(8.dp))
+                AuthPrimaryButton("Change Pin", onChangePin, enabled = false)
+                AuthPrimaryButton("Change Password", onChangePassword, enabled = false)
+            }
+        }
+        AuthPrimaryButton(
+            "Update",
+            viewModel::onUpdate,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 20.dp, vertical = 40.dp)
+        )
     }
 }
 
@@ -574,4 +589,66 @@ fun SecurityPreview() {
 @Composable
 fun LanguagePreview() {
     BeatlyTheme { LanguageScreen(onBackClicked = {}, onChanged = {}) }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// About & Privacy
+// ═════════════════════════════════════════════════════════════════════════════
+
+@Composable
+fun AboutScreen(onBackClicked: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
+    ) {
+        SettingsTopBar("About", onBackClicked)
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(Modifier.height(40.dp))
+            com.taher.beatly.ui.components.BeatlyLogoIcon(size = 80.dp)
+            Spacer(Modifier.height(16.dp))
+            Text("Beatly Music", style = MaterialTheme.typography.headlineSmall, color = TextBlack)
+            Text("Version 1.0.0", style = BodySmallRegular, color = Gray500)
+            Spacer(Modifier.height(32.dp))
+            Text(
+                "Beatly is a premium music streaming experience designed for true audiophiles. Enjoy millions of songs, high-quality audio, and personalized recommendations.",
+                style = BodySmallRegular,
+                color = Gray600,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun PrivacyPolicyScreen(onBackClicked: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
+    ) {
+        SettingsTopBar("Privacy Policy", onBackClicked)
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                "Your privacy is important to us. Beatly collects minimal data to provide you with the best music experience. We do not sell your personal information to third parties.",
+                style = BodySmallRegular,
+                color = Gray600
+            )
+            Spacer(Modifier.height(16.dp))
+            Text("1. Data Collection", style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold))
+            Text("We collect your email and name to create your account.", style = BodySmallRegular, color = Gray600)
+            Spacer(Modifier.height(16.dp))
+            Text("2. Usage", style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold))
+            Text("Your listening history is used to improve your recommendations.", style = BodySmallRegular, color = Gray600)
+        }
+    }
 }

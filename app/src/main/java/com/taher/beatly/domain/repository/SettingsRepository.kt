@@ -5,7 +5,40 @@ import kotlinx.coroutines.flow.Flow
 interface SettingsRepository {
     val isDarkMode: Flow<Boolean>
     val language: Flow<String>
+    
+    // Audio & Video
+    val wifiAudio: Flow<String>
+    val cellularAudio: Flow<String>
+    val autoAdjustQuality: Flow<Boolean>
+    val downloadQuality: Flow<String>
+
+    // Playback
+    val gapless: Flow<Boolean>
+    val automix: Flow<Boolean>
+    val explicit: Flow<Boolean>
+    val normalize: Flow<Boolean>
+
+    // Security
+    val rememberMe: Flow<Boolean>
+    val faceId: Flow<Boolean>
+    val biometricId: Flow<Boolean>
+
     suspend fun setDarkMode(enabled: Boolean)
     suspend fun setLanguage(lang: String)
+    
+    suspend fun setWifiAudio(v: String)
+    suspend fun setCellularAudio(v: String)
+    suspend fun setAutoAdjustQuality(v: Boolean)
+    suspend fun setDownloadQuality(v: String)
+
+    suspend fun setGapless(v: Boolean)
+    suspend fun setAutomix(v: Boolean)
+    suspend fun setExplicit(v: Boolean)
+    suspend fun setNormalize(v: Boolean)
+
+    suspend fun setRememberMe(v: Boolean)
+    suspend fun setFaceId(v: Boolean)
+    suspend fun setBiometricId(v: Boolean)
+
     suspend fun clearAll()
 }
