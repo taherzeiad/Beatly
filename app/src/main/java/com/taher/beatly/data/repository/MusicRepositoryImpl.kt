@@ -376,31 +376,53 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     // ── Player implementation ──────────────────────────────────────────────
+    // ── Player implementation ──────────────────────────────────────────────
     override suspend fun playSong(song: UiSong) {
         if (song.id == _playerState.value.currentSong?.id) {
             if (!player.isPlaying) player.play()
             return
         }
 
-        // Set state first for snappy UI
+        // تحديث حالة المشغل فوراً في الواجهة
         _playerState.update { it.copy(currentSong = song, isPlaying = true, positionMs = 0) }
 
-        // Start real playback
-        val token = tokenManager.getValidToken()
-        // We use domain Song here to get previewUrl
-        val foundTrack = spotifyApi.search(
-            song.title,
-            type = "track",
-            token = token
-        ).tracks?.items?.find { it.id == song.id }
+        try {
+            // الحصول على Token صالح
+            val token = tokenManager.getValidToken()
+            if (token.isEmpty()) {
+                android.util.Log.e(
+                    "MusicRepository",
+                    "فشل الحصول على Spotify Token. تأكد من إعدادات Client ID و Secret."
+                )
+                return
+            }
 
-        val url = foundTrack?.preview_url ?: ""
-        if (url.isNotEmpty()) {
-            player.setMediaItem(androidx.media3.common.MediaItem.fromUri(url))
-            player.prepare()
-            player.play()
+            // البحث عن المسار للحصول على رابط المعاينة (preview_url)
+            val response = spotifyApi.search(song.title, type = "track", token = token)
+            val foundTrack = response.tracks?.items?.find { it.id == song.id }
+                ?: response.tracks?.items?.firstOrNull()
+
+            val url = foundTrack?.preview_url ?: ""
+            if (url.isNotEmpty()) {
+                player.setMediaItem(androidx.media3.common.MediaItem.fromUri(url))
+                player.prepare()
+                player.play()
+            } else {
+                android.util.Log.w(
+                    "MusicRepository",
+                    "لم يتم العثور على رابط معاينة (preview_url) لهذه الأغنية: ${song.title}"
+                )
+            }
+        } catch (e: Exception) {
+            // معالجة الخطأ HTTP 400 أو أي خطأ شبكة آخر ومنع انهيار التطبيق
+            android.util.Log.e(
+                "MusicRepository",
+                "خطأ أثناء محاولة تشغيل الأغنية: ${song.title}",
+                e
+            )
         }
 
+        // إضافة الأغنية إلى قائمة "المشغلة مؤخراً"
         val user = authRepository.currentUser.firstOrNull()
         if (user != null) {
             addToRecentlyPlayed(user.id, song)
