@@ -19,6 +19,8 @@ interface MusicRepository {
     suspend fun searchAlbums(query: String): BeatlyResult<List<Album>>
     suspend fun searchPlaylists(query: String): BeatlyResult<List<Playlist>>
     suspend fun getGenreTracks(genreName: String): BeatlyResult<List<Song>>
+    suspend fun getPlaylistTracks(playlistId: String): BeatlyResult<List<Song>>
+    suspend fun getAlbumTracks(albumId: String): BeatlyResult<List<Song>>
     suspend fun getGenres(): BeatlyResult<List<Genre>>
     suspend fun addToRecentlyPlayed(userId: String, song: UiSong): BeatlyResult<Unit>
     suspend fun toggleFollowArtist(artistId: String): BeatlyResult<Boolean>

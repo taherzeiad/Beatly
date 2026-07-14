@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface LibraryRepository {
     fun getLibrary(userId: String): Flow<BeatlyResult<List<Playlist>>>
+    fun getLikedSongsFlow(userId: String): Flow<BeatlyResult<List<Song>>>
+    fun getFollowedArtistsFlow(userId: String): Flow<BeatlyResult<List<Artist>>>
     suspend fun createPlaylist(userId: String, name: String): BeatlyResult<Playlist>
     suspend fun deletePlaylist(playlistId: String): BeatlyResult<Unit>
     suspend fun addSongToPlaylist(playlistId: String, song: Song): BeatlyResult<Unit>
