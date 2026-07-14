@@ -30,6 +30,8 @@ fun SearchArtistsScreen(
     onBackClick   : () -> Unit,
     onArtistClick : (String) -> Unit,
     onSongClick   : (com.taher.beatly.model.Song) -> Unit,
+    onAlbumClick  : (com.taher.beatly.model.Album) -> Unit,
+    onPlaylistClick: (com.taher.beatly.model.Playlist) -> Unit,
     initialQuery  : String? = null,
     viewModel     : SearchViewModel = hiltViewModel(),
 ) {
@@ -91,12 +93,12 @@ fun SearchArtistsScreen(
                         }
                         SearchFilter.ALBUMS -> {
                             items(uiState.albums, key = { it.id }) { album ->
-                                AlbumSearchRow(album = album, onClick = { /* Navigate to album detail */ })
+                                AlbumSearchRow(album = album, onClick = { onAlbumClick(album) })
                             }
                         }
                         SearchFilter.PLAYLISTS -> {
                             items(uiState.playlists, key = { it.id }) { playlist ->
-                                PlaylistSearchRow(playlist = playlist, onClick = { /* Navigate to playlist detail */ })
+                                PlaylistSearchRow(playlist = playlist, onClick = { onPlaylistClick(playlist) })
                             }
                         }
                         else -> {

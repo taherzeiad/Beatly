@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.taher.beatly.ui.profile.ProfileScreen
 import com.taher.beatly.ui.artist.ArtistDetailScreen
+import com.taher.beatly.ui.artist.FollowedArtistsScreen
 import com.taher.beatly.ui.auth.ProfileSuccessScreen
 import com.taher.beatly.ui.auth.RecoverySuccessScreen
 import com.taher.beatly.ui.auth.forgotpassword.ForgotPasswordScreen
@@ -16,6 +17,8 @@ import com.taher.beatly.ui.auth.resetpassword.ResetPasswordScreen
 import com.taher.beatly.ui.auth.signIn.SignInScreen
 import com.taher.beatly.ui.auth.signup.SignUpScreen
 import com.taher.beatly.ui.components.BeatlyTab
+import com.taher.beatly.ui.components.SongListScreen
+import com.taher.beatly.ui.components.SongListSource
 import com.taher.beatly.ui.genre.AllGenreScreen
 import com.taher.beatly.ui.home.HomeScreen
 import com.taher.beatly.ui.library.LikedSongsScreen
@@ -61,9 +64,14 @@ sealed class Screen(val route: String) {
     // --- Home / library sub-screens ---
     data object AllGenre   : Screen("genres")
     data object LikedSongs : Screen("liked_songs")
+    data object FollowedArtists : Screen("followed_artists")
     data object Player     : Screen("player")
     data object ArtistDetail : Screen("artist/{artistId}") {
         fun createRoute(artistId: String) = "artist/$artistId"
+    }
+    data object SongList : Screen("song_list/{source}/{id}?title={title}") {
+        fun createRoute(source: SongListSource, id: String, title: String? = null) =
+            "song_list/${source.name}/$id" + if (title != null) "?title=$title" else ""
     }
 
     // --- Profile sub-screens ---
@@ -179,7 +187,9 @@ fun BeatlyNavGraph() {
                 onSearchClick          = { nav.navigate(Screen.Search.route) },
                 onSeeAllTrendingClick  = { nav.navigate(Screen.AllGenre.route) },
                 onSeeAllArtistsClick   = { nav.navigate(Screen.Search.route) },
-                onSeeAllRecentClick    = { /* Navigate to recent list */ },
+                onSeeAllRecentClick    = {
+                    nav.navigate(Screen.SongList.createRoute(SongListSource.RECENT, "recent", "Recently Played"))
+                },
                 onArtistClick = { artistId ->
                     nav.navigate(Screen.ArtistDetail.createRoute(artistId))
                 },
@@ -211,6 +221,12 @@ fun BeatlyNavGraph() {
                 onSongClick = { _ ->
                     nav.navigate(Screen.Player.route)
                 },
+                onAlbumClick = { album ->
+                    nav.navigate(Screen.SongList.createRoute(SongListSource.ALBUM, album.id, album.name))
+                },
+                onPlaylistClick = { playlist ->
+                    nav.navigate(Screen.SongList.createRoute(SongListSource.PLAYLIST, playlist.id, playlist.name))
+                },
                 initialQuery = initialQuery
             )
         }
@@ -222,8 +238,10 @@ fun BeatlyNavGraph() {
                 onLibraryItemClick = { item ->
                     when (item.id) {
                         "liked_songs" -> nav.navigate(Screen.LikedSongs.route)
-                        "followed_artists" -> { /* nav to followed artists */ }
-                        else -> { /* nav to playlist details */ }
+                        "followed_artists" -> nav.navigate(Screen.FollowedArtists.route)
+                        else -> {
+                            nav.navigate(Screen.SongList.createRoute(SongListSource.PLAYLIST, item.id, item.name))
+                        }
                     }
                 }
             )
@@ -235,6 +253,16 @@ fun BeatlyNavGraph() {
                 onBackClick = { popBack() },
                 onSongClick = { _ ->
                     nav.navigate(Screen.Player.route)
+                }
+            )
+        }
+
+        // ===================== Followed Artists =====================
+        composable(Screen.FollowedArtists.route) {
+            FollowedArtistsScreen(
+                onBackClick = { popBack() },
+                onArtistClick = { artistId ->
+                    nav.navigate(Screen.ArtistDetail.createRoute(artistId))
                 }
             )
         }
@@ -259,7 +287,24 @@ fun BeatlyNavGraph() {
                 onBackClick   = { popBack() },
                 onSearchClick = { nav.navigate(Screen.Search.createRoute()) },
                 onGenreClick  = { genreName ->
-                    nav.navigate(Screen.Search.createRoute(genreName))
+                    nav.navigate(Screen.SongList.createRoute(SongListSource.GENRE, genreName, genreName))
+                }
+            )
+        }
+
+        // ===================== Song List (Album/Playlist/Genre) =====================
+        composable(
+            route = Screen.SongList.route,
+            arguments = listOf(
+                navArgument("source") { type = NavType.StringType },
+                navArgument("id") { type = NavType.StringType },
+                navArgument("title") { nullable = true; defaultValue = null }
+            )
+        ) {
+            SongListScreen(
+                onBackClick = { popBack() },
+                onSongClick = { _ ->
+                    nav.navigate(Screen.Player.route)
                 }
             )
         }

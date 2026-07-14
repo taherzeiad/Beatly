@@ -9,9 +9,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,14 +21,33 @@ import com.taher.beatly.ui.components.PlaceholderImage
 import com.taher.beatly.ui.components.RoundIconButton
 import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayMusicScreen(
     onBackClick   : () -> Unit,
-    onLyricsClick : () -> Unit = {},
     viewModel     : PlayerViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val song = uiState.song ?: return
+
+    var showLyrics by androidx.compose.runtime.remember { mutableStateOf(false) }
+
+    if (showLyrics) {
+        ModalBottomSheet(onDismissRequest = { showLyrics = false }) {
+            Column(
+                Modifier.fillMaxWidth().padding(24.dp).padding(bottom = 40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Lyrics", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    "Lyrics are currently unavailable for this track.\nCheck back later!",
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -114,7 +131,7 @@ fun PlayMusicScreen(
 
         Spacer(Modifier.height(12.dp))
         TextButton(
-            onClick = onLyricsClick,
+            onClick = { showLyrics = true },
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {

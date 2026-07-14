@@ -18,6 +18,12 @@ class LibraryRepositoryImpl @Inject constructor(
     override fun getLibrary(userId: String): Flow<BeatlyResult<List<Playlist>>> = 
         dataSource.getLibrary(userId)
 
+    override fun getLikedSongsFlow(userId: String): Flow<BeatlyResult<List<Song>>> =
+        dataSource.getLikedSongsFlow(userId)
+
+    override fun getFollowedArtistsFlow(userId: String): Flow<BeatlyResult<List<Artist>>> =
+        dataSource.getFollowedArtistsFlow(userId)
+
     override suspend fun createPlaylist(userId: String, name: String): BeatlyResult<Playlist> = 
         dataSource.createPlaylist(userId, name)
 

@@ -62,6 +62,30 @@ class FirestoreLibraryDataSource @Inject constructor(
         }
     } catch (e: Exception) { BeatlyResult.Error(e.message ?: "Toggle like failed", e) }
 
+    // ── Get liked songs (real-time) ─────────────────────────────────────────
+    fun getLikedSongsFlow(userId: String): Flow<BeatlyResult<List<Song>>> = callbackFlow {
+        val ref = firestore.collection("users").document(userId).collection("liked_songs")
+        val listener = ref.addSnapshotListener { snap, err ->
+            if (err != null) { trySend(BeatlyResult.Error(err.message ?: "Firestore error")); return@addSnapshotListener }
+            val songs = snap?.documents?.map { doc -> mapToSong(doc.id, doc.data ?: emptyMap()) } ?: emptyList()
+            trySend(BeatlyResult.Success(songs))
+        }
+        awaitClose { listener.remove() }
+    }
+
+    // ── Get followed artists (real-time) ────────────────────────────────────
+    fun getFollowedArtistsFlow(userId: String): Flow<BeatlyResult<List<Artist>>> = callbackFlow {
+        val ref = firestore.collection("users").document(userId).collection("followed_artists")
+        val listener = ref.addSnapshotListener { snap, err ->
+            if (err != null) { trySend(BeatlyResult.Error(err.message ?: "Firestore error")); return@addSnapshotListener }
+            val artists = snap?.documents?.map { doc ->
+                Artist(id = doc.id, name = doc.getString("name") ?: "", imageUrl = doc.getString("imageUrl") ?: "", isFollowing = true)
+            } ?: emptyList()
+            trySend(BeatlyResult.Success(artists))
+        }
+        awaitClose { listener.remove() }
+    }
+
     // ── Get liked songs ────────────────────────────────────────────────────
     suspend fun getLikedSongs(userId: String): BeatlyResult<List<Song>> = try {
         val snap = firestore.collection("users").document(userId).collection("liked_songs").get().await()

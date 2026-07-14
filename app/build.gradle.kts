@@ -107,6 +107,11 @@ dependencies {
     // --- Image Loading ---
     implementation(libs.coil.compose)
 
+    // --- Media3 ---
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.session)
+    implementation(libs.media3.ui)
+
     // --- Testing Frameworks ---
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

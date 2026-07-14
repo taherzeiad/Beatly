@@ -119,7 +119,23 @@ interface SpotifyApiService {
         @Query("limit") limit: Int = 20,
         @Header("Authorization") token: String
     ): SpotifyRecommendationsResponse
+
+    @GET("albums/{id}/tracks")
+    suspend fun getAlbumTracks(
+        @Path("id") albumId: String,
+        @Header("Authorization") token: String
+    ): SpotifyAlbumTracksResponse
+
+    @GET("playlists/{id}/tracks")
+    suspend fun getPlaylistTracks(
+        @Path("id") playlistId: String,
+        @Header("Authorization") token: String
+    ): SpotifyPlaylistTracksResponse
 }
+
+data class SpotifyAlbumTracksResponse(val items: List<SpotifyTrackItem>)
+data class SpotifyPlaylistTracksResponse(val items: List<SpotifyPlaylistTrackItem>)
+data class SpotifyPlaylistTrackItem(val track: SpotifyTrackItem)
 
 // ── Token service ──────────────────────────────────────────────────────────
 
