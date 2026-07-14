@@ -4,7 +4,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
@@ -47,7 +50,10 @@ fun HomeScreen(
         onSeeAllArtistsClick = onSeeAllArtistsClick,
         onSeeAllRecentClick = onSeeAllRecentClick,
         onArtistClick = onArtistClick,
-        onSongClick = onSongClick,
+        onSongClick = { song ->
+            viewModel.onPlayPauseToggled(song)
+            onSongClick(song)
+        },
         onNavigateTab = onNavigateTab,
         onLikeClick = viewModel::onLikeToggled,
         onPlayPauseClick = viewModel::onPlayPauseToggled
@@ -89,47 +95,102 @@ fun HomeScreenContent(
                 .padding(horizontal = 20.dp)
         ) {
             Spacer(Modifier.height(12.dp))
-            HomeHeader(userName = uiState.userName, onSearchClick = onSearchClick)
+            HomeHeader(uiState = uiState, onSearchClick = onSearchClick)
 
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             } else {
-                Spacer(Modifier.height(24.dp))
-                SectionHeader(title = "Trending Now", onSeeAllClick = onSeeAllTrendingClick)
-                Spacer(Modifier.height(12.dp))
-                TrendingRow(songs = uiState.trendingSongs, onSongClick = onSongClick)
+                val scrollState = androidx.compose.foundation.rememberScrollState()
+                Column(modifier = Modifier.verticalScroll(scrollState)) {
+                    Spacer(Modifier.height(24.dp))
+                    HomePromotedCard()
 
-                Spacer(Modifier.height(24.dp))
-                SectionHeader(title = "Top Artist", onSeeAllClick = onSeeAllArtistsClick)
-                Spacer(Modifier.height(12.dp))
-                TopArtistRow(artists = uiState.topArtists, onArtistClick = onArtistClick)
-
-                Spacer(Modifier.height(24.dp))
-                SectionHeader(title = "Recently Played", onSeeAllClick = onSeeAllRecentClick)
-                Spacer(Modifier.height(12.dp))
-                if (uiState.recentlyPlayed.isEmpty()) {
-                    Text("No recently played songs", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                } else {
-                    uiState.recentlyPlayed.firstOrNull()?.let { song ->
-                        SongRow(
-                            song = song,
-                            onLikeClick = { onLikeClick(song.id) },
-                            onPlayClick = { onSongClick(song) },
-                            onPauseClick = { onPlayPauseClick(song) },
-                            isCurrentlyPlaying = uiState.currentlyPlayingSongId == song.id
-                        )
+                    Spacer(Modifier.height(24.dp))
+                    SectionHeader(title = "Trending Now", onSeeAllClick = onSeeAllTrendingClick)
+                    Spacer(Modifier.height(12.dp))
+                    if (uiState.trendingSongs.isEmpty()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    } else {
+                        TrendingRow(songs = uiState.trendingSongs, onSongClick = onSongClick)
                     }
+
+                    Spacer(Modifier.height(24.dp))
+                    SectionHeader(title = "Top Artist", onSeeAllClick = onSeeAllArtistsClick)
+                    Spacer(Modifier.height(12.dp))
+                    if (uiState.topArtists.isEmpty()) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    } else {
+                        TopArtistRow(artists = uiState.topArtists, onArtistClick = onArtistClick)
+                    }
+
+                    Spacer(Modifier.height(24.dp))
+                    SectionHeader(title = "Recently Played", onSeeAllClick = onSeeAllRecentClick)
+                    Spacer(Modifier.height(12.dp))
+                    if (uiState.recentlyPlayed.isEmpty()) {
+                        Text(
+                            "No recently played songs",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            uiState.recentlyPlayed.take(3).forEach { song ->
+                                SongRow(
+                                    song = song,
+                                    onLikeClick = { onLikeClick(song.id) },
+                                    onPlayClick = { onSongClick(song) },
+                                    onPauseClick = { onPlayPauseClick(song) },
+                                    isCurrentlyPlaying = uiState.currentlyPlayingSongId == song.id
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(32.dp))
                 }
             }
-            Spacer(Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-private fun HomeHeader(userName: String, onSearchClick: () -> Unit) {
+private fun HomePromotedCard() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize().padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "New Album",
+                    color = MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                    style = MaterialTheme.typography.labelMedium
+                )
+                Text(
+                    "Happier Than Ever",
+                    color = MaterialTheme.colorScheme.background,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+                Text(
+                    "Billie Eilish",
+                    color = MaterialTheme.colorScheme.background,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            PlaceholderImage(modifier = Modifier.size(100.dp), shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp), showLabel = false)
+        }
+    }
+}
+
+@Composable
+private fun HomeHeader(uiState: HomeUiState, onSearchClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -142,11 +203,11 @@ private fun HomeHeader(userName: String, onSearchClick: () -> Unit) {
             Spacer(Modifier.width(12.dp))
             Column {
                 Text(
-                    "Good Morning!",
+                    uiState.greeting,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text(userName, fontSize = 17.sp, style = MaterialTheme.typography.titleMedium)
+                Text(uiState.userName, fontSize = 17.sp, style = MaterialTheme.typography.titleMedium)
             }
         }
         Row {

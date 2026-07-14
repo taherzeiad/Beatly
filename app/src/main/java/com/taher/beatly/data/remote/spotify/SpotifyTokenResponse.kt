@@ -113,6 +113,12 @@ interface SpotifyApiService {
         @Header("Authorization") token: String
     ): Any  // parse as needed
 
+    @GET("browse/new-releases")
+    suspend fun getNewReleases(
+        @Query("limit") limit: Int = 10,
+        @Header("Authorization") token: String
+    ): SpotifyNewReleasesResponse
+
     @GET("recommendations")
     suspend fun getRecommendations(
         @Query("seed_genres") genres: String = "pop,hip-hop",
@@ -133,6 +139,7 @@ interface SpotifyApiService {
     ): SpotifyPlaylistTracksResponse
 }
 
+data class SpotifyNewReleasesResponse(val albums: SpotifyAlbumPaging)
 data class SpotifyAlbumTracksResponse(val items: List<SpotifyTrackItem>)
 data class SpotifyPlaylistTracksResponse(val items: List<SpotifyPlaylistTrackItem>)
 data class SpotifyPlaylistTrackItem(val track: SpotifyTrackItem)
