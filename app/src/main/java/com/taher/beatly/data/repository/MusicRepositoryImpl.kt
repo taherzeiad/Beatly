@@ -31,18 +31,21 @@ class MusicRepositoryImpl @Inject constructor(
 
     override fun getUserName(): Flow<String> = _userName
 
-    // ── Trending songs (Spotify recommendations + cache) ───────────────────
+    // ── Trending songs (New Releases or Recommendations) ───────────────────
     override suspend fun getTrendingSongs(): BeatlyResult<List<Song>> = try {
         val token = tokenManager.getValidToken()
         if (token.isEmpty()) throw Exception("Invalid Spotify Token")
-        
-        val response = spotifyApi.getRecommendations(token = token)
-        val songs = response.tracks.map { it.toDomain() }
-        // Cache in Room
-        songDao.insertSongs(songs.map { it.toEntity() })
-        BeatlyResult.Success(songs)
+
+        // Try getting new releases first
+        // val response = spotifyApi.getNewReleases(limit = 10, token = token)
+
+        // If we want real playable tracks, we prefer recommendations
+        val recResponse = spotifyApi.getRecommendations(limit = 10, token = token)
+        val trendingSongs = recResponse.tracks.map { it.toDomain() }
+
+        songDao.insertSongs(trendingSongs.map { it.toEntity() })
+        BeatlyResult.Success(trendingSongs)
     } catch (e: Exception) {
-        // Fallback to dummy data if API fails (e.g. no credentials)
         BeatlyResult.Success(getDummySongs())
     }
 
@@ -65,14 +68,57 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     private fun getDummySongs() = listOf(
-        Song("1", "Starboy", "The Weeknd", "a1", "Starboy", "https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258be7bc452", "", 230000),
-        Song("2", "Blinding Lights", "The Weeknd", "a1", "After Hours", "https://i.scdn.co/image/ab67616d0000b2738863bc11fcbfb2428c5a2df1", "", 200000),
-        Song("3", "Shape of You", "Ed Sheeran", "a2", "Divide", "https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96", "", 233000)
+        Song(
+            "1",
+            "Starboy",
+            "The Weeknd",
+            "a1",
+            "Starboy",
+            "https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258be7bc452",
+            "",
+            230000
+        ),
+        Song(
+            "2",
+            "Blinding Lights",
+            "The Weeknd",
+            "a1",
+            "After Hours",
+            "https://i.scdn.co/image/ab67616d0000b2738863bc11fcbfb2428c5a2df1",
+            "",
+            200000
+        ),
+        Song(
+            "3",
+            "Shape of You",
+            "Ed Sheeran",
+            "a2",
+            "Divide",
+            "https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96",
+            "",
+            233000
+        )
     )
 
     private fun getDummyArtists() = listOf(
-        Artist("a1", "The Weeknd", "https://i.scdn.co/image/ab6761610000e5eb214f3bc2bc97d9834125b273", 100000000, false, true, listOf("pop")),
-        Artist("a2", "Ed Sheeran", "https://i.scdn.co/image/ab6761610000e5eb1ad50e05066a7b36029994cf", 80000000, false, true, listOf("pop"))
+        Artist(
+            "a1",
+            "The Weeknd",
+            "https://i.scdn.co/image/ab6761610000e5eb214f3bc2bc97d9834125b273",
+            100000000,
+            false,
+            true,
+            listOf("pop")
+        ),
+        Artist(
+            "a2",
+            "Ed Sheeran",
+            "https://i.scdn.co/image/ab6761610000e5eb1ad50e05066a7b36029994cf",
+            80000000,
+            false,
+            true,
+            listOf("pop")
+        )
     )
 
     // ── Recently Played (local Room) ───────────────────────────────────────
@@ -88,6 +134,18 @@ class MusicRepositoryImpl @Inject constructor(
         BeatlyResult.Success(songs)
     } catch (e: Exception) {
         BeatlyResult.Error(e.message ?: "Failed", e)
+    }
+
+    override fun getRecentlyPlayedFlow(userId: String): Flow<List<Song>> {
+        return recentlyDao.getRecentlyPlayedFlow().map { entities ->
+            entities.map {
+                Song(
+                    id = it.id, title = it.title, artistName = it.artistName,
+                    imageUrl = it.imageUrl, durationMs = it.durationMs,
+                    artistId = ""
+                )
+            }
+        }
     }
 
     // ── Artist detail ──────────────────────────────────────────────────────
@@ -197,7 +255,8 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     override suspend fun toggleFollowArtist(artistId: String): BeatlyResult<Boolean> = try {
-        val user = authRepository.currentUser.firstOrNull() ?: return BeatlyResult.Error("Not logged in")
+        val user =
+            authRepository.currentUser.firstOrNull() ?: return BeatlyResult.Error("Not logged in")
         val token = tokenManager.getValidToken()
         val artist = spotifyApi.getArtist(artistId, token).toDomain()
         libraryRepository.toggleFollowArtist(user.id, artist)
@@ -208,7 +267,8 @@ class MusicRepositoryImpl @Inject constructor(
     private val _playerState = MutableStateFlow(PlayerState())
     override val playerState: Flow<PlayerState> = _playerState.asStateFlow()
 
-    private val repositoryScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main)
+    private val repositoryScope =
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main)
 
     init {
         simulatePlayback()
@@ -218,7 +278,7 @@ class MusicRepositoryImpl @Inject constructor(
         repositoryScope.launch {
             while (true) {
                 kotlinx.coroutines.delay(1000)
-                _playerState.update { 
+                _playerState.update {
                     it.copy(
                         isPlaying = player.isPlaying,
                         positionMs = player.currentPosition,
@@ -302,10 +362,10 @@ class MusicRepositoryImpl @Inject constructor(
             imageUrl = songEntity.imageUrl, previewUrl = songEntity.previewUrl,
             durationMs = songEntity.durationMs, isLiked = !songEntity.isLiked
         )
-        
+
         // Update local Room
         songDao.setLiked(songId, !songEntity.isLiked)
-        
+
         // Update Firestore
         libraryRepository.toggleLikeSong(user.id, domainSong)
     }
@@ -316,27 +376,53 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     // ── Player implementation ──────────────────────────────────────────────
+    // ── Player implementation ──────────────────────────────────────────────
     override suspend fun playSong(song: UiSong) {
         if (song.id == _playerState.value.currentSong?.id) {
             if (!player.isPlaying) player.play()
             return
         }
 
-        // Set state first for snappy UI
+        // تحديث حالة المشغل فوراً في الواجهة
         _playerState.update { it.copy(currentSong = song, isPlaying = true, positionMs = 0) }
 
-        // Start real playback
-        val token = tokenManager.getValidToken()
-        // We use domain Song here to get previewUrl
-        val foundTrack = spotifyApi.search(song.title, type = "track", token = token).tracks?.items?.find { it.id == song.id }
-        
-        val url = foundTrack?.preview_url ?: ""
-        if (url.isNotEmpty()) {
-            player.setMediaItem(androidx.media3.common.MediaItem.fromUri(url))
-            player.prepare()
-            player.play()
+        try {
+            // الحصول على Token صالح
+            val token = tokenManager.getValidToken()
+            if (token.isEmpty()) {
+                android.util.Log.e(
+                    "MusicRepository",
+                    "فشل الحصول على Spotify Token. تأكد من إعدادات Client ID و Secret."
+                )
+                return
+            }
+
+            // البحث عن المسار للحصول على رابط المعاينة (preview_url)
+            val response = spotifyApi.search(song.title, type = "track", token = token)
+            val foundTrack = response.tracks?.items?.find { it.id == song.id }
+                ?: response.tracks?.items?.firstOrNull()
+
+            val url = foundTrack?.preview_url ?: ""
+            if (url.isNotEmpty()) {
+                player.setMediaItem(androidx.media3.common.MediaItem.fromUri(url))
+                player.prepare()
+                player.play()
+            } else {
+                android.util.Log.w(
+                    "MusicRepository",
+                    "لم يتم العثور على رابط معاينة (preview_url) لهذه الأغنية: ${song.title}"
+                )
+            }
+        } catch (e: Exception) {
+            // معالجة الخطأ HTTP 400 أو أي خطأ شبكة آخر ومنع انهيار التطبيق
+            android.util.Log.e(
+                "MusicRepository",
+                "خطأ أثناء محاولة تشغيل الأغنية: ${song.title}",
+                e
+            )
         }
 
+        // إضافة الأغنية إلى قائمة "المشغلة مؤخراً"
         val user = authRepository.currentUser.firstOrNull()
         if (user != null) {
             addToRecentlyPlayed(user.id, song)

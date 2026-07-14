@@ -49,7 +49,18 @@ class HomeViewModel @Inject constructor(
                     userName = user?.name ?: "",
                     greeting = getGreeting()
                 )}
-                user?.id?.let { loadRecentlyPlayed(it) }
+                user?.id?.let { userId ->
+                    musicRepository.getRecentlyPlayedFlow(userId).collectLatest { domainSongs ->
+                        val uiSongs = domainSongs.map { ds ->
+                            Song(
+                                id = ds.id, title = ds.title, artistName = ds.artistName,
+                                artistId = ds.artistId, imageUrl = ds.imageUrl,
+                                durationMs = ds.durationMs, isLiked = ds.isLiked, isSaved = ds.isSaved
+                            )
+                        }
+                        _uiState.update { it.copy(recentlyPlayed = uiSongs) }
+                    }
+                }
             }
         }
     }
