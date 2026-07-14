@@ -82,6 +82,8 @@ sealed class Screen(val route: String) {
     data object DataSaver    : Screen("data_saver")
     data object Security     : Screen("security")
     data object Language     : Screen("language")
+    data object PrivacyPolicy : Screen("privacy_policy")
+    data object About         : Screen("about")
 
     // --- Subscription flow ---
     data object PickPlan        : Screen("pick_plan")
@@ -330,6 +332,8 @@ fun BeatlyNavGraph() {
                         "downloads"    -> nav.navigate(Screen.DataSaver.route)
                         "security"     -> nav.navigate(Screen.Security.route)
                         "language"     -> nav.navigate(Screen.Language.route)
+                        "privacy_policy" -> nav.navigate(Screen.PrivacyPolicy.route)
+                        "about"        -> nav.navigate(Screen.About.route)
                         else -> { }
                     }
                 },
@@ -365,6 +369,12 @@ fun BeatlyNavGraph() {
         }
         composable(Screen.Language.route) {
             LanguageScreen(onBackClicked = { popBack() }, onChanged = { popBack() })
+        }
+        composable(Screen.PrivacyPolicy.route) {
+            com.taher.beatly.ui.settings.PrivacyPolicyScreen(onBackClicked = { popBack() })
+        }
+        composable(Screen.About.route) {
+            com.taher.beatly.ui.settings.AboutScreen(onBackClicked = { popBack() })
         }
 
         // ===================== Subscription Flow =====================

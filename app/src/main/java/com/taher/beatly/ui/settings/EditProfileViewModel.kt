@@ -85,6 +85,8 @@ class NotificationViewModel @Inject constructor() : ViewModel() {
             )
         }
     }
+
+    fun onUpdate() { _uiState.update { it.copy(success = true) } }
 }
 
 // ── Edit Profile ───────────────────────────────────────────────────────────
@@ -149,14 +151,45 @@ data class AudioVideoUiState(
 )
 
 @HiltViewModel
-class AudioVideoViewModel @Inject constructor() : ViewModel() {
+class AudioVideoViewModel @Inject constructor(
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(AudioVideoUiState())
     val uiState: StateFlow<AudioVideoUiState> = _uiState.asStateFlow()
-    fun onAutoAdjustToggled() {
-        _uiState.update { it.copy(autoAdjustQuality = !it.autoAdjustQuality) }
+
+    init {
+        combine(
+            settingsRepository.wifiAudio,
+            settingsRepository.cellularAudio,
+            settingsRepository.autoAdjustQuality,
+            settingsRepository.downloadQuality,
+            settingsRepository.isDarkMode // Just to have 5 flows if needed, or just combine 4
+        ) { wifi, cellular, auto, download, _ ->
+            AudioVideoUiState(
+                wifiStreamingAudio = wifi,
+                cellularStreamingAudio = cellular,
+                autoAdjustQuality = auto,
+                downloadQuality = download
+            )
+        }.onEach { state ->
+            _uiState.update { it.copy(
+                wifiStreamingAudio = state.wifiStreamingAudio,
+                cellularStreamingAudio = state.cellularStreamingAudio,
+                autoAdjustQuality = state.autoAdjustQuality,
+                downloadQuality = state.downloadQuality
+            )}
+        }.launchIn(viewModelScope)
     }
 
-    fun onUpdate() {}
+    fun onAutoAdjustToggled() {
+        viewModelScope.launch {
+            settingsRepository.setAutoAdjustQuality(!_uiState.value.autoAdjustQuality)
+        }
+    }
+
+    fun onUpdate() {
+        _uiState.update { it.copy(success = true) }
+    }
 }
 
 // ── Playback ───────────────────────────────────────────────────────────────
@@ -174,53 +207,44 @@ data class PlaybackUiState(
 )
 
 @HiltViewModel
-class PlaybackViewModel @Inject constructor() : ViewModel() {
+class PlaybackViewModel @Inject constructor(
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(PlaybackUiState())
     val uiState: StateFlow<PlaybackUiState> = _uiState.asStateFlow()
 
     init {
-        _uiState.update {
-            it.copy(
-                settings = listOf(
-                    PlaybackSetting("gapless", "Gapless", "Allows gapless playback.", true),
-                    PlaybackSetting(
-                        "automixte",
-                        "Automixte",
-                        "Transitions between songs on select playlists.",
-                        true
-                    ),
-                    PlaybackSetting(
-                        "explicit",
-                        "Allow Explicit Content",
-                        "Turn on play explicit content.",
-                        false
-                    ),
-                    PlaybackSetting(
-                        "normalize",
-                        "Normalize Volume",
-                        "Set the same volume level for all tracks.",
-                        true
-                    ),
-                    PlaybackSetting(
-                        "canvas",
-                        "Canvas",
-                        "Display short, looping visuals on tracks.",
-                        false
-                    ),
-                    PlaybackSetting(
-                        "broadcast",
-                        "Device Broadcast Status",
-                        "Allow other apps on your device to see what you are listening to.",
-                        true
-                    ),
-                )
+        combine(
+            settingsRepository.gapless,
+            settingsRepository.automix,
+            settingsRepository.explicit,
+            settingsRepository.normalize
+        ) { gapless, automix, explicit, normalize ->
+            listOf(
+                PlaybackSetting("gapless", "Gapless", "Allows gapless playback.", gapless),
+                PlaybackSetting("automix", "Automixte", "Transitions between songs on select playlists.", automix),
+                PlaybackSetting("explicit", "Allow Explicit Content", "Turn on play explicit content.", explicit),
+                PlaybackSetting("normalize", "Normalize Volume", "Set the same volume level for all tracks.", normalize),
+                PlaybackSetting("canvas", "Canvas", "Display short, looping visuals on tracks.", false),
+                PlaybackSetting("broadcast", "Device Broadcast Status", "Allow other apps on your device to see what you are listening to.", true),
             )
-        }
+        }.onEach { settings ->
+            _uiState.update { it.copy(settings = settings) }
+        }.launchIn(viewModelScope)
     }
 
     fun onToggled(id: String) {
-        _uiState.update { s -> s.copy(settings = s.settings.map { if (it.id == id) it.copy(enabled = !it.enabled) else it }) }
+        viewModelScope.launch {
+            when (id) {
+                "gapless" -> settingsRepository.setGapless(!_uiState.value.settings.find { it.id == "gapless" }!!.enabled)
+                "automix" -> settingsRepository.setAutomix(!_uiState.value.settings.find { it.id == "automix" }!!.enabled)
+                "explicit" -> settingsRepository.setExplicit(!_uiState.value.settings.find { it.id == "explicit" }!!.enabled)
+                "normalize" -> settingsRepository.setNormalize(!_uiState.value.settings.find { it.id == "normalize" }!!.enabled)
+            }
+        }
     }
+
+    fun onUpdate() { _uiState.update { it.copy(success = true) } }
 }
 
 // ── Data Saver ─────────────────────────────────────────────────────────────
@@ -249,6 +273,8 @@ class DataSaverViewModel @Inject constructor() : ViewModel() {
     fun onStreamAudioToggled() {
         _uiState.update { it.copy(streamAudioOnly = !it.streamAudioOnly) }
     }
+
+    fun onUpdate() { _uiState.update { it.copy(success = true) } }
 }
 
 // ── Security ───────────────────────────────────────────────────────────────
@@ -256,28 +282,47 @@ class DataSaverViewModel @Inject constructor() : ViewModel() {
 data class SecurityUiState(
     val rememberMe: Boolean = true,
     val faceId: Boolean = false,
-    val biometricId: Boolean = true
+    val biometricId: Boolean = true,
+    val success: Boolean = false
 )
 
 @HiltViewModel
-class SecurityViewModel @Inject constructor() : ViewModel() {
+class SecurityViewModel @Inject constructor(
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(SecurityUiState())
     val uiState: StateFlow<SecurityUiState> = _uiState.asStateFlow()
+
+    init {
+        combine(
+            settingsRepository.rememberMe,
+            settingsRepository.faceId,
+            settingsRepository.biometricId
+        ) { rememberMe, faceId, biometricId ->
+            SecurityUiState(
+                rememberMe = rememberMe,
+                faceId = faceId,
+                biometricId = biometricId
+            )
+        }.onEach { state ->
+            _uiState.update { state }
+        }.launchIn(viewModelScope)
+    }
+
     fun onRememberMeToggled() {
-        _uiState.update { it.copy(rememberMe = !it.rememberMe) }
+        viewModelScope.launch { settingsRepository.setRememberMe(!_uiState.value.rememberMe) }
     }
 
     fun onFaceIdToggled() {
-        _uiState.update { it.copy(faceId = !it.faceId) }
+        viewModelScope.launch { settingsRepository.setFaceId(!_uiState.value.faceId) }
     }
 
     fun onBiometricToggled() {
-        _uiState.update { it.copy(biometricId = !it.biometricId) }
+        viewModelScope.launch { settingsRepository.setBiometricId(!_uiState.value.biometricId) }
     }
 
-    fun onChangePin() { /* TODO */
-    }
+    fun onChangePin() { /* TODO */ }
+    fun onChangePassword() { /* TODO */ }
 
-    fun onChangePassword() { /* TODO */
-    }
+    fun onUpdate() { _uiState.update { it.copy(success = true) } }
 }
