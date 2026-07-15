@@ -1,35 +1,24 @@
-<div align="center">
-  <img src="https://raw.githubusercontent.com/taherzeiad/Beatly/main/art/logo.png" alt="Beatly Logo" width="120" height="120" style="border-radius: 24px;"/>
-  
-  # 🎵 Beatly
+# 🎵 Beatly
 
-  **A premium Android application designed to create stunning music videos and slideshows seamlessly synced with the rhythm and beats.**
+**A premium Android application designed to create stunning music videos and slideshows seamlessly synced with the rhythm and beats.**
 
-  [![Android Platform](https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/)
-  [![Kotlin](https://img.shields.io/badge/Language-Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
-  [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
-  [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+[![Android Platform](https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/)
+[![Kotlin](https://img.shields.io/badge/Language-Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-  <p align="center">
-    <a href="#-features">Features</a> •
-    <a href="#-architecture">Architecture</a> •
-    <a href="#%EF%B8%8F-tech-stack">Tech Stack</a> •
-    <a href="#-getting-started">Getting Started</a> •
-    <a href="#-license">License</a>
-  </p>
-</div>
+<p align="center">
+  <a href="#-overview">Overview</a> •
+  <a href="#-features">Features</a> •
+  <a href="#-architecture">Architecture</a> •
+  <a href="#-tech-stack--libraries">Tech Stack</a>
+</p>
 
 ---
 
 ## 📱 Overview
 
 **Beatly** is an intuitive, creator-focused Android application that allows users to transform ordinary photos and video clips into professional, high-energy short videos. By leveraging automated beat-matching technology, transitions and effects perfectly align with the music track, offering an engaging visual experience.
-
-<div align="center">
-  <!-- Place your app screenshots here once available -->
-  <img src="https://raw.githubusercontent.com/taherzeiad/Beatly/main/art/screenshot1.png" width="250" alt="Screen 1" style="margin: 10px; border-radius: 10px;" />
-  <img src="https://raw.githubusercontent.com/taherzeiad/Beatly/main/art/screenshot2.png" width="250" alt="Screen 2" style="margin: 10px; border-radius: 10px;" />
-</div>
 
 ---
 
