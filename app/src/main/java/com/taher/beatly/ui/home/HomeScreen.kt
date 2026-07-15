@@ -1,5 +1,6 @@
 package com.taher.beatly.ui.home
 
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -36,10 +37,10 @@ fun HomeScreen(
     onSeeAllTrendingClick: () -> Unit,
     onSeeAllArtistsClick: () -> Unit,
     onSeeAllRecentClick: () -> Unit,
-    onArtistClick         : (String) -> Unit,
-    onSongClick           : (Song) -> Unit,
-    onNavigateTab         : (BeatlyTab) -> Unit,
-    viewModel             : HomeViewModel = hiltViewModel(),
+    onArtistClick: (String) -> Unit,
+    onSongClick: (Song) -> Unit,
+    onNavigateTab: (BeatlyTab) -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -73,17 +74,17 @@ fun HomeScreenContent(
     onSearchClick: () -> Unit = {},
     onSeeAllTrendingClick: () -> Unit = {},
     onSeeAllArtistsClick: () -> Unit = {},
-    onSeeAllRecentClick : () -> Unit = {},
-    onArtistClick       : (String) -> Unit = {},
-    onSongClick         : (Song) -> Unit = {},
-    onNavigateTab       : (BeatlyTab) -> Unit = {},
-    onLikeClick         : (String) -> Unit = {},
-    onPlayPauseClick    : (Song) -> Unit = {},
+    onSeeAllRecentClick: () -> Unit = {},
+    onArtistClick: (String) -> Unit = {},
+    onSongClick: (Song) -> Unit = {},
+    onNavigateTab: (BeatlyTab) -> Unit = {},
+    onLikeClick: (String) -> Unit = {},
+    onPlayPauseClick: (Song) -> Unit = {},
 ) {
     Scaffold(
         bottomBar = {
             BeatlyBottomBar(
-                selectedTab   = BeatlyTab.HOME,
+                selectedTab = BeatlyTab.HOME,
                 onTabSelected = onNavigateTab
             )
         }
@@ -149,6 +150,7 @@ fun HomeScreenContent(
         }
     }
 }
+
 @Composable
 private fun HomeHeader(uiState: HomeUiState, onSearchClick: () -> Unit) {
     Row(
@@ -167,7 +169,11 @@ private fun HomeHeader(uiState: HomeUiState, onSearchClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text(uiState.userName, fontSize = 17.sp, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    uiState.userName,
+                    fontSize = 17.sp,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
         Row {
@@ -188,7 +194,10 @@ private fun HomeHeader(uiState: HomeUiState, onSearchClick: () -> Unit) {
 private fun TrendingRow(songs: List<Song>, onSongClick: (Song) -> Unit) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         items(songs, key = { it.id }) { song ->
-            Column(modifier = Modifier.width(150.dp).clickable { onSongClick(song) }) {
+            Column(
+                modifier = Modifier
+                    .width(150.dp)
+                    .clickable { onSongClick(song) }) {
                 BeatlyImage(url = song.imageUrl, modifier = Modifier.size(150.dp))
                 Spacer(Modifier.height(8.dp))
                 Text(
@@ -216,8 +225,10 @@ private fun TopArtistRow(artists: List<Artist>, onArtistClick: (String) -> Unit)
     LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
         items(artists, key = { it.id }) { artist ->
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally, 
-                modifier = Modifier.width(90.dp).clickable { onArtistClick(artist.id) }
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .width(90.dp)
+                    .clickable { onArtistClick(artist.id) }
             ) {
                 BeatlyImage(
                     url = artist.imageUrl,
@@ -294,7 +305,7 @@ private fun HomeScreenPreview() {
 @Preview(
     showBackground = true,
     name = "Home – Dark",
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+    uiMode = Configuration.UI_MODE_NIGHT_YES
 )
 @Composable
 private fun HomeScreenPreviewDark() {
