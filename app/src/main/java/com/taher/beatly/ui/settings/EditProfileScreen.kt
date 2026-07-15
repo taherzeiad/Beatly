@@ -3,6 +3,7 @@ package com.taher.beatly.ui.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -21,6 +22,8 @@ import com.taher.beatly.ui.components.AuthFieldLabel
 import com.taher.beatly.ui.components.AuthTextField
 import com.taher.beatly.ui.components.AuthPrimaryButton
 import com.taher.beatly.ui.theme.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Edit Profile
@@ -41,6 +44,34 @@ fun EditProfileScreen(
         }
     }
 
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val date = Date(millis)
+                        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        viewModel.onBirthDateChanged(formatter.format(date))
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("OK", color = Purple500)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel", color = Gray500)
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -55,6 +86,38 @@ fun EditProfileScreen(
             SettingsTopBar("Edit Profile", onBackClicked)
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            // Avatar Section
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                com.taher.beatly.ui.components.BeatlyImage(
+                    url = uiState.avatarUrl,
+                    modifier = Modifier.fillMaxSize(),
+                    shape = CircleShape
+                )
+                Surface(
+                    onClick = { /* Launch image picker */ },
+                    shape = CircleShape,
+                    color = Purple500,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .align(Alignment.BottomEnd)
+                ) {
+                    Icon(
+                        Icons.Default.CameraAlt,
+                        contentDescription = "Change Avatar",
+                        tint = White,
+                        modifier = Modifier
+                            .padding(6.dp)
+                            .fillMaxSize()
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             Column(
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -78,10 +141,11 @@ fun EditProfileScreen(
                     Spacer(Modifier.height(8.dp))
                     OutlinedTextField(
                         value = uiState.birthDate,
-                        onValueChange = viewModel::onBirthDateChanged,
+                        onValueChange = {},
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp),
+                        readOnly = true,
                         textStyle = BodySmallRegular.copy(color = Gray950),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
@@ -91,7 +155,21 @@ fun EditProfileScreen(
                             unfocusedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
                             focusedBorderColor = Purple500
                         ),
-                        trailingIcon = { Icon(Icons.Default.CalendarMonth, null, tint = Gray400) }
+                        trailingIcon = {
+                            IconButton(onClick = { showDatePicker = true }) {
+                                Icon(Icons.Default.CalendarMonth, null, tint = Gray400)
+                            }
+                        },
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                            .also { interactionSource ->
+                                LaunchedEffect(interactionSource) {
+                                    interactionSource.interactions.collect {
+                                        if (it is androidx.compose.foundation.interaction.PressInteraction.Release) {
+                                            showDatePicker = true
+                                        }
+                                    }
+                                }
+                            }
                     )
                 }
                 // Mail
@@ -145,6 +223,13 @@ fun EditProfileScreen(
                         }
                     }
                 }
+
+                // Dark Mode Toggle
+                SettingsToggleRow(
+                    label = "Dark Mode",
+                    checked = uiState.isDarkMode,
+                    onToggle = viewModel::onDarkModeToggled
+                )
             }
         }
         AuthPrimaryButton(
@@ -415,7 +500,11 @@ fun SecurityScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(White)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -645,10 +734,18 @@ fun PrivacyPolicyScreen(onBackClicked: () -> Unit) {
             )
             Spacer(Modifier.height(16.dp))
             Text("1. Data Collection", style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold))
-            Text("We collect your email and name to create your account.", style = BodySmallRegular, color = Gray600)
+            Text(
+                "We collect your email and name to create your account.",
+                style = BodySmallRegular,
+                color = Gray600
+            )
             Spacer(Modifier.height(16.dp))
             Text("2. Usage", style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold))
-            Text("Your listening history is used to improve your recommendations.", style = BodySmallRegular, color = Gray600)
+            Text(
+                "Your listening history is used to improve your recommendations.",
+                style = BodySmallRegular,
+                color = Gray600
+            )
         }
     }
 }

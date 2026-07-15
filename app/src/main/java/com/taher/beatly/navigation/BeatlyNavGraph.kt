@@ -26,6 +26,7 @@ import com.taher.beatly.ui.library.MyLibraryScreen
 import com.taher.beatly.ui.onboarding.OnboardingScreen
 import com.taher.beatly.ui.player.PlayMusicScreen
 import com.taher.beatly.ui.search.SearchArtistsScreen
+import com.taher.beatly.ui.search.ExploreScreen
 import com.taher.beatly.ui.settings.AudioVideoScreen
 import com.taher.beatly.ui.settings.DataSaverScreen
 import com.taher.beatly.ui.settings.EditProfileScreen
@@ -55,6 +56,7 @@ sealed class Screen(val route: String) {
 
     // --- Main tabs ---
     data object Home : Screen("home")
+    data object Explore : Screen("explore")
     data object Search : Screen("search?query={query}") {
         fun createRoute(query: String? = null) =
             if (query != null) "search?query=$query" else "search"
@@ -210,11 +212,29 @@ fun BeatlyNavGraph() {
                 onNavigateTab = { tab ->
                     when (tab) {
                         BeatlyTab.HOME -> {}
-                        BeatlyTab.EXPLORE -> nav.navigate(Screen.Search.route)
+                        BeatlyTab.EXPLORE -> nav.navigate(Screen.Explore.route)
                         BeatlyTab.LIBRARY -> nav.navigate(Screen.Library.route)
                         BeatlyTab.PROFILE -> nav.navigate(Screen.Profile.route)
                     }
                 }
+            )
+        }
+
+        // ===================== Explore =====================
+        composable(Screen.Explore.route) {
+            ExploreScreen(
+                onSearchClick = { nav.navigate(Screen.Search.route) },
+                onGenreClick = { genre: String ->
+                    nav.navigate(
+                        Screen.SongList.createRoute(
+                            SongListSource.GENRE,
+                            genre,
+                            genre
+                        )
+                    )
+                },
+                onSongClick = { _: com.taher.beatly.model.Song -> nav.navigate(Screen.Player.route) },
+                onSeeAllGenres = { nav.navigate(Screen.AllGenre.route) }
             )
         }
 
@@ -373,7 +393,7 @@ fun BeatlyNavGraph() {
                 onNavigateTab = { tab ->
                     when (tab) {
                         BeatlyTab.HOME -> goTo(Screen.Home)
-                        BeatlyTab.EXPLORE -> nav.navigate(Screen.Search.route)
+                        BeatlyTab.EXPLORE -> nav.navigate(Screen.Explore.route)
                         BeatlyTab.LIBRARY -> nav.navigate(Screen.Library.route)
                         BeatlyTab.PROFILE -> {}
                     }

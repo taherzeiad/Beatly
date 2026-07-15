@@ -33,7 +33,9 @@ class FirebaseAuthDataSource @Inject constructor(
                                 email = fbUser.email ?: "",
                                 username = doc.getString("username") ?: "",
                                 avatarUrl = doc.getString("avatarUrl") ?: "",
-                                isPremium = doc.getBoolean("isPremium") ?: false
+                                isPremium = doc.getBoolean("isPremium") ?: false,
+                                birthDate = doc.getString("birthDate") ?: "",
+                                gender    = doc.getString("gender") ?: ""
                             )
                         )
                     }
@@ -56,7 +58,9 @@ class FirebaseAuthDataSource @Inject constructor(
                 email = fbUser.email ?: "",
                 username = doc.getString("username") ?: "",
                 avatarUrl = doc.getString("avatarUrl") ?: "",
-                isPremium = doc.getBoolean("isPremium") ?: false
+                isPremium = doc.getBoolean("isPremium") ?: false,
+                birthDate = doc.getString("birthDate") ?: "",
+                gender    = doc.getString("gender") ?: ""
             )
         )
     } catch (e: Exception) {
@@ -76,6 +80,8 @@ class FirebaseAuthDataSource @Inject constructor(
                 "email" to email,
                 "avatarUrl" to "",
                 "isPremium" to false,
+                "birthDate" to "",
+                "gender" to "",
                 "createdAt" to com.google.firebase.Timestamp.now()
             )
             firestore.collection("users").document(fbUser.uid).set(userDoc).await()

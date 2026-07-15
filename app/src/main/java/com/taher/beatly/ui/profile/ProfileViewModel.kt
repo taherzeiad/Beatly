@@ -20,6 +20,8 @@ data class ProfileSettingItem(
 data class ProfileUiState(
     val userName  : String                 = "",
     val email     : String                 = "",
+    val avatarUrl : String                 = "",
+    val isPremium : Boolean                = false,
     val isDarkMode: Boolean                = false,
     val isLoggedOut: Boolean               = false,
     val settings  : List<ProfileSettingItem> = emptyList()
@@ -63,7 +65,9 @@ class ProfileViewModel @Inject constructor(
             .onEach { user ->
                 _uiState.update { it.copy(
                     userName = user?.name ?: "Guest",
-                    email = user?.email ?: ""
+                    email = user?.email ?: "",
+                    avatarUrl = user?.avatarUrl ?: "",
+                    isPremium = user?.isPremium ?: false
                 )}
             }
             .launchIn(viewModelScope)

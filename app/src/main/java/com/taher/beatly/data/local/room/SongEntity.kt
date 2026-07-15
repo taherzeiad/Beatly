@@ -28,13 +28,14 @@ data class SongEntity(
 
 @Entity(tableName = "recently_played")
 data class RecentlyPlayedEntity(
-    @PrimaryKey val id       : String,
-    val title      : String,
+    @PrimaryKey val id : String,
+    val title : String,
     val artistName : String,
-    val imageUrl   : String  = "",
-    val previewUrl : String  = "",
-    val durationMs : Long    = 0L,
-    val playedAt   : Long    = System.currentTimeMillis()
+    val artistId : String = "",
+    val imageUrl : String = "",
+    val previewUrl : String = "",
+    val durationMs : Long = 0L,
+    val playedAt : Long = System.currentTimeMillis()
 )
 
 @Entity(tableName = "artists")
@@ -97,7 +98,7 @@ interface ArtistDao {
 
 @Database(
     entities = [SongEntity::class, RecentlyPlayedEntity::class, ArtistEntity::class],
-    version  = 1,
+    version  = 2,
     exportSchema = false
 )
 abstract class BeatlyDatabase : RoomDatabase() {

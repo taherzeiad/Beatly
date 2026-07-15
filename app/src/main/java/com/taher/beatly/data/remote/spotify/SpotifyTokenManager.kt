@@ -24,6 +24,10 @@ class SpotifyTokenManager @Inject constructor(
     }
 
     private suspend fun refreshToken(): String {
+        if (clientId.isNullOrEmpty() || clientSecret.isNullOrEmpty()) {
+            Log.e("SpotifyToken", "Spotify Client ID or Secret is missing in BuildConfig")
+            return ""
+        }
         return try {
             val credentials = Base64.encodeToString(
                 "$clientId:$clientSecret".toByteArray(), Base64.NO_WRAP
@@ -33,7 +37,7 @@ class SpotifyTokenManager @Inject constructor(
             expiresAtMs = System.currentTimeMillis() + (response.expires_in * 1000L) - 60_000L
             "Bearer $accessToken"
         } catch (e: Exception) {
-            Log.e("SpotifyToken", "Failed to refresh token", e)
+            Log.e("SpotifyToken", "Failed to refresh token: ${e.message}", e)
             ""
         }
     }

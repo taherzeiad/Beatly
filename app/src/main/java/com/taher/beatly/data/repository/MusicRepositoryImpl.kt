@@ -40,7 +40,7 @@ class MusicRepositoryImpl @Inject constructor(
         // val response = spotifyApi.getNewReleases(limit = 10, token = token)
 
         // If we want real playable tracks, we prefer recommendations
-        val recResponse = spotifyApi.getRecommendations(limit = 10, token = token)
+        val recResponse = spotifyApi.getRecommendations(genres = "pop,hip-hop", limit = 10, token = token)
         val trendingSongs = recResponse.tracks.map { it.toDomain() }
 
         songDao.insertSongs(trendingSongs.map { it.toEntity() })
@@ -55,10 +55,7 @@ class MusicRepositoryImpl @Inject constructor(
         if (token.isEmpty()) throw Exception("Invalid Spotify Token")
 
         val response = spotifyApi.search(
-            query = "genre:pop year:2024",
-            type = "artist",
-            limit = 10,
-            token = token
+            query = "genre:pop year:2024", type = "artist", limit = 10, token = token
         )
         val artists = response.artists?.items?.map { it.toDomain() } ?: emptyList()
         artistDao.insertArtists(artists.map { it.toEntity() })
@@ -77,8 +74,7 @@ class MusicRepositoryImpl @Inject constructor(
             "https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258be7bc452",
             "",
             230000
-        ),
-        Song(
+        ), Song(
             "2",
             "Blinding Lights",
             "The Weeknd",
@@ -87,8 +83,7 @@ class MusicRepositoryImpl @Inject constructor(
             "https://i.scdn.co/image/ab67616d0000b2738863bc11fcbfb2428c5a2df1",
             "",
             200000
-        ),
-        Song(
+        ), Song(
             "3",
             "Shape of You",
             "Ed Sheeran",
@@ -109,8 +104,7 @@ class MusicRepositoryImpl @Inject constructor(
             false,
             true,
             listOf("pop")
-        ),
-        Artist(
+        ), Artist(
             "a2",
             "Ed Sheeran",
             "https://i.scdn.co/image/ab6761610000e5eb1ad50e05066a7b36029994cf",
@@ -126,8 +120,11 @@ class MusicRepositoryImpl @Inject constructor(
         val entities = recentlyDao.getRecentlyPlayed()
         val songs = entities.map {
             Song(
-                id = it.id, title = it.title, artistName = it.artistName,
-                imageUrl = it.imageUrl, durationMs = it.durationMs,
+                id = it.id,
+                title = it.title,
+                artistName = it.artistName,
+                imageUrl = it.imageUrl,
+                durationMs = it.durationMs,
                 artistId = ""
             )
         }
@@ -140,8 +137,11 @@ class MusicRepositoryImpl @Inject constructor(
         return recentlyDao.getRecentlyPlayedFlow().map { entities ->
             entities.map {
                 Song(
-                    id = it.id, title = it.title, artistName = it.artistName,
-                    imageUrl = it.imageUrl, durationMs = it.durationMs,
+                    id = it.id,
+                    title = it.title,
+                    artistName = it.artistName,
+                    imageUrl = it.imageUrl,
+                    durationMs = it.durationMs,
                     artistId = ""
                 )
             }
@@ -160,8 +160,8 @@ class MusicRepositoryImpl @Inject constructor(
     // ── Artist top tracks ──────────────────────────────────────────────────
     override suspend fun getArtistTopTracks(artistId: String): BeatlyResult<List<Song>> = try {
         val token = tokenManager.getValidToken()
-        val tracks = spotifyApi.getArtistTopTracks(artistId, token = token)
-        BeatlyResult.Success(tracks.tracks.map { it.toDomain() })
+        val response = spotifyApi.getArtistTopTracks(artistId, market = "US", token = token)
+        BeatlyResult.Success(response.tracks.map { it.toDomain() })
     } catch (e: Exception) {
         BeatlyResult.Error(e.message ?: "Failed", e)
     }
@@ -227,25 +227,32 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     // ── Genres (hardcoded since Spotify deprecated the endpoint) ──────────
-    override suspend fun getGenres(): BeatlyResult<List<Genre>> =
-        BeatlyResult.Success(
-            listOf(
-                Genre("latin", "Latin"), Genre("pop", "Pop"), Genre("jazz", "Jazz"),
-                Genre("classical", "Classical"), Genre("minimal", "Minimal"),
-                Genre("indie", "Indie"), Genre("rock", "Rock"),
-                Genre("hip-hop", "Hip Hop"), Genre("romance", "Romance")
-            )
+    override suspend fun getGenres(): BeatlyResult<List<Genre>> = BeatlyResult.Success(
+        listOf(
+            Genre("latin", "Latin"),
+            Genre("pop", "Pop"),
+            Genre("jazz", "Jazz"),
+            Genre("classical", "Classical"),
+            Genre("minimal", "Minimal"),
+            Genre("indie", "Indie"),
+            Genre("rock", "Rock"),
+            Genre("hip-hop", "Hip Hop"),
+            Genre("romance", "Romance")
         )
+    )
 
     // ── Add to recently played ─────────────────────────────────────────────
     override suspend fun addToRecentlyPlayed(
-        userId: String,
-        song: UiSong
+        userId: String, song: UiSong
     ): BeatlyResult<Unit> = try {
         recentlyDao.insert(
             RecentlyPlayedEntity(
-                id = song.id, title = song.title, artistName = song.artistName,
-                imageUrl = song.imageUrl!!, durationMs = song.durationMs
+                id = song.id,
+                title = song.title,
+                artistName = song.artistName,
+                artistId = song.artistId,
+                imageUrl = song.imageUrl ?: "",
+                durationMs = song.durationMs
             )
         )
         recentlyDao.trimOld()
@@ -294,7 +301,7 @@ class MusicRepositoryImpl @Inject constructor(
     override fun getLibraryItems(): Flow<List<LibraryItem>> {
         val userFlow = authRepository.currentUser
         return userFlow.flatMapLatest { user ->
-            if (user == null) return@flatMapLatest flowOf(emptyList<LibraryItem>())
+            if (user == null) return@flatMapLatest flowOf(emptyList())
 
             val playlistsFlow = libraryRepository.getLibrary(user.id).map { result ->
                 if (result is BeatlyResult.Success) {
@@ -312,20 +319,27 @@ class MusicRepositoryImpl @Inject constructor(
                 } else emptyList()
             }
 
-            combine(playlistsFlow, flowOf(user)) { playlists, _ ->
+            val likedSongsFlow = libraryRepository.getLikedSongsFlow(user.id)
+            val followedArtistsFlow = libraryRepository.getFollowedArtistsFlow(user.id)
+
+            combine(
+                playlistsFlow, likedSongsFlow, followedArtistsFlow
+            ) { playlists, likedResult, followedResult ->
+                val likedCount = (likedResult as? BeatlyResult.Success)?.data?.size ?: 0
+                val followedCount = (followedResult as? BeatlyResult.Success)?.data?.size ?: 0
+
                 val virtualItems = listOf(
                     LibraryItem(
                         id = "liked_songs",
-                        name = "Liked Songs",
-                        songCount = 0, // could be dynamic
-                        artistCount = 0,
+                        name = "Liked songs",
+                        songCount = 100,
+                        artistCount = 24,
                         icon = LibraryItemIcon.LIKED_SONGS
-                    ),
-                    LibraryItem(
+                    ), LibraryItem(
                         id = "followed_artists",
-                        name = "Followed Artists",
-                        songCount = 0,
-                        artistCount = 0,
+                        name = "Artist you follow",
+                        songCount = 100,
+                        artistCount = 12,
                         icon = LibraryItemIcon.FOLLOWED_ARTISTS
                     )
                 )
@@ -343,8 +357,12 @@ class MusicRepositoryImpl @Inject constructor(
                 if (result is BeatlyResult.Success) {
                     result.data.map { ds ->
                         UiSong(
-                            id = ds.id, title = ds.title, artistName = ds.artistName,
-                            artistId = ds.artistId, imageUrl = ds.imageUrl,
+                            id = ds.id,
+                            title = ds.title,
+                            artistName = ds.artistName,
+                            artistId = ds.artistId,
+                            imageUrl = ds.imageUrl,
+                            previewUrl = ds.previewUrl,
                             durationMs = ds.durationMs
                         )
                     }
@@ -357,10 +375,15 @@ class MusicRepositoryImpl @Inject constructor(
         val user = authRepository.currentUser.firstOrNull() ?: return
         val songEntity = songDao.getSongById(songId) ?: return
         val domainSong = Song(
-            id = songEntity.id, title = songEntity.title, artistName = songEntity.artistName,
-            artistId = songEntity.artistId, albumName = songEntity.albumName,
-            imageUrl = songEntity.imageUrl, previewUrl = songEntity.previewUrl,
-            durationMs = songEntity.durationMs, isLiked = !songEntity.isLiked
+            id = songEntity.id,
+            title = songEntity.title,
+            artistName = songEntity.artistName,
+            artistId = songEntity.artistId,
+            albumName = songEntity.albumName,
+            imageUrl = songEntity.imageUrl,
+            previewUrl = songEntity.previewUrl,
+            durationMs = songEntity.durationMs,
+            isLiked = !songEntity.isLiked
         )
 
         // Update local Room
@@ -383,48 +406,29 @@ class MusicRepositoryImpl @Inject constructor(
             return
         }
 
-        // تحديث حالة المشغل فوراً في الواجهة
         _playerState.update { it.copy(currentSong = song, isPlaying = true, positionMs = 0) }
 
         try {
-            // الحصول على Token صالح
-            val token = tokenManager.getValidToken()
-            if (token.isEmpty()) {
-                android.util.Log.e(
-                    "MusicRepository",
-                    "فشل الحصول على Spotify Token. تأكد من إعدادات Client ID و Secret."
-                )
-                return
+            val url = if (!song.previewUrl.isNullOrEmpty()) {
+                song.previewUrl
+            } else {
+                val token = tokenManager.getValidToken()
+                if (token.isEmpty()) return
+                val response = spotifyApi.search(song.title, type = "track", token = token)
+                response.tracks?.items?.find { it.id == song.id }?.preview_url
+                    ?: response.tracks?.items?.firstOrNull()?.preview_url
             }
 
-            // البحث عن المسار للحصول على رابط المعاينة (preview_url)
-            val response = spotifyApi.search(song.title, type = "track", token = token)
-            val foundTrack = response.tracks?.items?.find { it.id == song.id }
-                ?: response.tracks?.items?.firstOrNull()
-
-            val url = foundTrack?.preview_url ?: ""
-            if (url.isNotEmpty()) {
+            if (!url.isNullOrEmpty()) {
                 player.setMediaItem(androidx.media3.common.MediaItem.fromUri(url))
                 player.prepare()
                 player.play()
-            } else {
-                android.util.Log.w(
-                    "MusicRepository",
-                    "لم يتم العثور على رابط معاينة (preview_url) لهذه الأغنية: ${song.title}"
-                )
             }
         } catch (e: Exception) {
-            // معالجة الخطأ HTTP 400 أو أي خطأ شبكة آخر ومنع انهيار التطبيق
-            android.util.Log.e(
-                "MusicRepository",
-                "خطأ أثناء محاولة تشغيل الأغنية: ${song.title}",
-                e
-            )
+            android.util.Log.e("MusicRepository", "Error playing: ${song.title}", e)
         }
 
-        // إضافة الأغنية إلى قائمة "المشغلة مؤخراً"
-        val user = authRepository.currentUser.firstOrNull()
-        if (user != null) {
+        authRepository.currentUser.firstOrNull()?.let { user ->
             addToRecentlyPlayed(user.id, song)
         }
     }
@@ -484,8 +488,14 @@ fun SpotifyPlaylistItem.toDomain() = Playlist(
 )
 
 fun Song.toEntity() = SongEntity(
-    id = id, title = title, artistName = artistName, artistId = artistId,
-    albumName = albumName, imageUrl = imageUrl, previewUrl = previewUrl, durationMs = durationMs
+    id = id,
+    title = title,
+    artistName = artistName,
+    artistId = artistId,
+    albumName = albumName,
+    imageUrl = imageUrl,
+    previewUrl = previewUrl,
+    durationMs = durationMs
 )
 
 fun Artist.toEntity() = ArtistEntity(
@@ -497,6 +507,10 @@ fun Artist.toEntity() = ArtistEntity(
 )
 
 fun SongEntity.toUiModel() = UiSong(
-    id = id, title = title, artistName = artistName, artistId = artistId,
-    imageUrl = imageUrl, durationMs = durationMs
+    id = id,
+    title = title,
+    artistName = artistName,
+    artistId = artistId,
+    imageUrl = imageUrl,
+    durationMs = durationMs
 )

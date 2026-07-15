@@ -11,6 +11,7 @@ data class Song(
     val artistName: String,
     val artistId: String,
     val imageUrl: String? = null,
+    val previewUrl: String? = null,
     val durationMs: Long = 0L,
     val isLiked: Boolean = false,
     val isSaved: Boolean = false,

@@ -98,6 +98,8 @@ data class EditProfileUiState(
     val birthDate: String = "",
     val mail: String = "",
     val gender: String = "Male",
+    val avatarUrl: String = "",
+    val isDarkMode: Boolean = false,
     val isLoading: Boolean = false,
     val success: Boolean = false
 )
@@ -105,7 +107,8 @@ data class EditProfileUiState(
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(EditProfileUiState())
     val uiState: StateFlow<EditProfileUiState> = _uiState.asStateFlow()
@@ -117,8 +120,16 @@ class EditProfileViewModel @Inject constructor(
                     id = user.id,
                     name = user.name,
                     username = user.username,
-                    mail = user.email
+                    mail = user.email,
+                    birthDate = user.birthDate,
+                    avatarUrl = user.avatarUrl,
+                    gender = if (user.gender.isNotEmpty()) user.gender else it.gender
                 )}
+            }
+        }
+        viewModelScope.launch {
+            settingsRepository.isDarkMode.collectLatest { isDark ->
+                _uiState.update { it.copy(isDarkMode = isDark) }
             }
         }
     }
@@ -128,13 +139,28 @@ class EditProfileViewModel @Inject constructor(
     fun onBirthDateChanged(v: String){ _uiState.update { it.copy(birthDate = v) } }
     fun onMailChanged(v: String)     { _uiState.update { it.copy(mail = v) } }
     fun onGenderChanged(v: String)   { _uiState.update { it.copy(gender = v) } }
+    fun onAvatarChanged(v: String)   { _uiState.update { it.copy(avatarUrl = v) } }
+
+    fun onDarkModeToggled() {
+        viewModelScope.launch {
+            settingsRepository.setDarkMode(!_uiState.value.isDarkMode)
+        }
+    }
 
     fun onUpdate() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             val state = _uiState.value
             val result = userRepository.updateProfile(
-                User(id = state.id, name = state.name, email = state.mail, username = state.username)
+                User(
+                    id = state.id,
+                    name = state.name,
+                    email = state.mail,
+                    username = state.username,
+                    birthDate = state.birthDate,
+                    gender = state.gender,
+                    avatarUrl = state.avatarUrl
+                )
             )
             _uiState.update { it.copy(isLoading = false, success = result is BeatlyResult.Success) }
         }
@@ -259,19 +285,48 @@ data class DataSaverUiState(
 )
 
 @HiltViewModel
-class DataSaverViewModel @Inject constructor() : ViewModel() {
+class DataSaverViewModel @Inject constructor(
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(DataSaverUiState())
     val uiState: StateFlow<DataSaverUiState> = _uiState.asStateFlow()
+
+    init {
+        combine(
+            settingsRepository.audioQualitySaver,
+            settingsRepository.downloadAudioOnly,
+            settingsRepository.streamAudioOnly
+        ) { audio, download, stream ->
+            DataSaverUiState(
+                audioQualitySaver = audio,
+                downloadAudioOnly = download,
+                streamAudioOnly = stream
+            )
+        }.onEach { state ->
+            _uiState.update { it.copy(
+                audioQualitySaver = state.audioQualitySaver,
+                downloadAudioOnly = state.downloadAudioOnly,
+                streamAudioOnly = state.streamAudioOnly
+            )}
+        }.launchIn(viewModelScope)
+    }
+
     fun onAudioQualityToggled() {
-        _uiState.update { it.copy(audioQualitySaver = !it.audioQualitySaver) }
+        viewModelScope.launch {
+            settingsRepository.setAudioQualitySaver(!_uiState.value.audioQualitySaver)
+        }
     }
 
     fun onDownloadAudioToggled() {
-        _uiState.update { it.copy(downloadAudioOnly = !it.downloadAudioOnly) }
+        viewModelScope.launch {
+            settingsRepository.setDownloadAudioOnly(!_uiState.value.downloadAudioOnly)
+        }
     }
 
     fun onStreamAudioToggled() {
-        _uiState.update { it.copy(streamAudioOnly = !it.streamAudioOnly) }
+        viewModelScope.launch {
+            settingsRepository.setStreamAudioOnly(!_uiState.value.streamAudioOnly)
+        }
     }
 
     fun onUpdate() { _uiState.update { it.copy(success = true) } }
