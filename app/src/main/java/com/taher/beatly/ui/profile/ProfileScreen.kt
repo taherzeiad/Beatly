@@ -193,17 +193,10 @@ fun ProfileContent(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
                     .clip(RoundedCornerShape(20.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                Color(0xFF6B4EFF),
-                                Color(0xFF9B7FFF)
-                            )
-                        )
-                    )
+                    .background(Color(0xFF424242)) // Grey-ish background as per Image 20
                     .height(180.dp)
-                    .width(335.dp)
             ) {
+                // Pattern / Image background could be added here
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
@@ -217,13 +210,13 @@ fun ProfileContent(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "Enjoy listening songs & \n podcasts with better audio \n quality, without restrictions, and \n without ads.",
+                        "Enjoy listening songs & podcasts with better audio quality, without restrictions, and without ads.",
                         style = BodyXSmallRegular, color = White.copy(alpha = 0.85f),
-                        modifier = Modifier.widthIn(max = 200.dp)
+                        modifier = Modifier.widthIn(max = 240.dp)
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(
-                        onClick = onGetPremium, modifier = Modifier.height(32.dp),
+                        onClick = onGetPremium, modifier = Modifier.height(36.dp),
                         shape = RoundedCornerShape(50),
                         colors = ButtonDefaults.buttonColors(containerColor = White),
                         contentPadding = PaddingValues(horizontal = 18.dp)

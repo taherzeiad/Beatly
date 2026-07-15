@@ -6,7 +6,9 @@ data class User(
     val email     : String,
     val username  : String  = "",
     val avatarUrl : String  = "",
-    val isPremium : Boolean = false
+    val isPremium : Boolean = false,
+    val birthDate : String  = "",
+    val gender    : String  = ""
 )
 
 data class Song(

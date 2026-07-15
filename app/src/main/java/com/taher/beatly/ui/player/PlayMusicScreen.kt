@@ -2,7 +2,9 @@ package com.taher.beatly.ui.player
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -13,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,6 +56,7 @@ fun PlayMusicScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         Spacer(Modifier.height(12.dp))
         Row(
@@ -66,7 +70,7 @@ fun PlayMusicScreen(
                 contentDescription = "Back"
             )
             Text("Music", style = MaterialTheme.typography.titleMedium)
-            RoundIconButton(icon = Icons.Filled.MoreVert, onClick = { }, contentDescription = "More")
+            RoundIconButton(icon = Icons.Filled.MoreVert, onClick = { }, contentDescription = "More", hasBorder = true)
         }
 
         Spacer(Modifier.height(20.dp))
@@ -79,8 +83,8 @@ fun PlayMusicScreen(
         )
 
         Spacer(Modifier.height(24.dp))
-        Text(song.title, style = MaterialTheme.typography.titleLarge)
-        Text("Ft. ${song.artistName}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+        Text(song.title, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), modifier = Modifier.align(Alignment.CenterHorizontally))
+        Text("Ft. ${song.artistName}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.align(Alignment.CenterHorizontally))
 
         Spacer(Modifier.height(16.dp))
         Slider(
@@ -97,8 +101,8 @@ fun PlayMusicScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(formatDuration(uiState.positionMs))
-            Text(formatDuration(uiState.durationMs))
+            Text(formatDuration(uiState.positionMs), style = MaterialTheme.typography.bodySmall)
+            Text(formatDuration(uiState.durationMs), style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(Modifier.height(12.dp))
@@ -107,15 +111,19 @@ fun PlayMusicScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous", modifier = Modifier
-                .size(32.dp)
-                .clickableNoRipple(viewModel::onSkipPrevious))
-            Icon(Icons.Filled.Replay10, contentDescription = "Replay 10s", modifier = Modifier.size(28.dp))
+            IconButton(onClick = viewModel::onSkipPrevious) {
+                Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous", modifier = Modifier.size(32.dp))
+            }
+            IconButton(onClick = { /* Replay 10 */ }) {
+                Icon(Icons.Filled.Replay10, contentDescription = "Replay 10s", modifier = Modifier.size(28.dp))
+            }
             PlayPauseButton(isPlaying = uiState.isPlaying, onClick = viewModel::onPlayPauseClicked)
-            Icon(Icons.Filled.Forward10, contentDescription = "Forward 10s", modifier = Modifier.size(28.dp))
-            Icon(Icons.Filled.SkipNext, contentDescription = "Next", modifier = Modifier
-                .size(32.dp)
-                .clickableNoRipple(viewModel::onSkipNext))
+            IconButton(onClick = { /* Forward 10 */ }) {
+                Icon(Icons.Filled.Forward10, contentDescription = "Forward 10s", modifier = Modifier.size(28.dp))
+            }
+            IconButton(onClick = viewModel::onSkipNext) {
+                Icon(Icons.Filled.SkipNext, contentDescription = "Next", modifier = Modifier.size(32.dp))
+            }
         }
 
         Spacer(Modifier.height(16.dp))
@@ -123,22 +131,23 @@ fun PlayMusicScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(Icons.Outlined.Speed, contentDescription = "Playback speed")
-            Icon(Icons.Outlined.Timer, contentDescription = "Sleep timer")
-            Icon(Icons.Filled.Cast, contentDescription = "Cast")
-            Icon(Icons.Filled.MoreVert, contentDescription = "More options")
+            IconButton(onClick = {}) { Icon(Icons.Outlined.Speed, contentDescription = "Playback speed") }
+            IconButton(onClick = {}) { Icon(Icons.Outlined.Timer, contentDescription = "Sleep timer") }
+            IconButton(onClick = {}) { Icon(Icons.Filled.Cast, contentDescription = "Cast") }
+            IconButton(onClick = {}) { Icon(Icons.Filled.MoreVert, contentDescription = "More options") }
         }
 
-        Spacer(Modifier.height(12.dp))
-        TextButton(
-            onClick = { showLyrics = true },
-            modifier = Modifier.fillMaxWidth()
+        Spacer(Modifier.height(20.dp))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showLyrics = true }
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null)
-                Text("Lyrics")
-            }
+            Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null)
+            Text("Lyrics", style = MaterialTheme.typography.labelLarge)
         }
+        Spacer(Modifier.height(20.dp))
     }
 }
 
@@ -159,15 +168,6 @@ private fun PlayPauseButton(isPlaying: Boolean, onClick: () -> Unit) {
         )
     }
 }
-
-@Composable
-private fun Modifier.clickableNoRipple(onClick: () -> Unit): Modifier = this.then(
-    Modifier.clickable(
-        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-        indication = null,
-        onClick = onClick
-    )
-)
 
 private fun formatDuration(ms: Long): String {
     val minutes = TimeUnit.MILLISECONDS.toMinutes(ms)
