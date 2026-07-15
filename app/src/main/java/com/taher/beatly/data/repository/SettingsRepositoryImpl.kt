@@ -27,6 +27,10 @@ class SettingsRepositoryImpl @Inject constructor(
     override val faceId: Flow<Boolean> = dataStore.faceId
     override val biometricId: Flow<Boolean> = dataStore.biometricId
 
+    override val audioQualitySaver: Flow<Boolean> = dataStore.audioQualitySaver
+    override val downloadAudioOnly: Flow<Boolean> = dataStore.downloadAudioOnly
+    override val streamAudioOnly: Flow<Boolean> = dataStore.streamAudioOnly
+
     override suspend fun setDarkMode(enabled: Boolean) = dataStore.setDarkMode(enabled)
     override suspend fun setLanguage(lang: String) = dataStore.setLanguage(lang)
     
@@ -43,6 +47,10 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setRememberMe(v: Boolean) = dataStore.setRememberMe(v)
     override suspend fun setFaceId(v: Boolean) = dataStore.setFaceId(v)
     override suspend fun setBiometricId(v: Boolean) = dataStore.setBiometricId(v)
+
+    override suspend fun setAudioQualitySaver(v: Boolean) = dataStore.setAudioQualitySaver(v)
+    override suspend fun setDownloadAudioOnly(v: Boolean) = dataStore.setDownloadAudioOnly(v)
+    override suspend fun setStreamAudioOnly(v: Boolean) = dataStore.setStreamAudioOnly(v)
 
     override suspend fun clearAll() = dataStore.clearAll()
 }

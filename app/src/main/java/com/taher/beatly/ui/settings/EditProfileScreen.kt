@@ -3,6 +3,7 @@ package com.taher.beatly.ui.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -85,6 +86,38 @@ fun EditProfileScreen(
             SettingsTopBar("Edit Profile", onBackClicked)
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            // Avatar Section
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                com.taher.beatly.ui.components.BeatlyImage(
+                    url = uiState.avatarUrl,
+                    modifier = Modifier.fillMaxSize(),
+                    shape = CircleShape
+                )
+                Surface(
+                    onClick = { /* Launch image picker */ },
+                    shape = CircleShape,
+                    color = Purple500,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .align(Alignment.BottomEnd)
+                ) {
+                    Icon(
+                        Icons.Default.CameraAlt,
+                        contentDescription = "Change Avatar",
+                        tint = White,
+                        modifier = Modifier
+                            .padding(6.dp)
+                            .fillMaxSize()
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             Column(
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -467,9 +500,11 @@ fun SecurityScreen(
         }
     }
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(White)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()

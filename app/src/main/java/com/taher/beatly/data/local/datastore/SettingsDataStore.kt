@@ -39,6 +39,11 @@ class SettingsDataStore @Inject constructor(
         val KEY_REMEMBER_ME = booleanPreferencesKey("remember_me")
         val KEY_FACE_ID = booleanPreferencesKey("face_id")
         val KEY_BIOMETRIC_ID = booleanPreferencesKey("biometric_id")
+
+        // Data Saver
+        val KEY_AUDIO_QUALITY_SAVER = booleanPreferencesKey("audio_quality_saver")
+        val KEY_DOWNLOAD_AUDIO_ONLY = booleanPreferencesKey("download_audio_only")
+        val KEY_STREAM_AUDIO_ONLY = booleanPreferencesKey("stream_audio_only")
     }
 
     // ── Dark mode ──────────────────────────────────────────────────────────
@@ -80,6 +85,15 @@ class SettingsDataStore @Inject constructor(
     suspend fun setRememberMe(v: Boolean) { context.dataStore.edit { it[KEY_REMEMBER_ME] = v } }
     suspend fun setFaceId(v: Boolean) { context.dataStore.edit { it[KEY_FACE_ID] = v } }
     suspend fun setBiometricId(v: Boolean) { context.dataStore.edit { it[KEY_BIOMETRIC_ID] = v } }
+
+    // ── Data Saver ─────────────────────────────────────────────────────────
+    val audioQualitySaver: Flow<Boolean> = context.dataStore.data.map { it[KEY_AUDIO_QUALITY_SAVER] ?: true }
+    val downloadAudioOnly: Flow<Boolean> = context.dataStore.data.map { it[KEY_DOWNLOAD_AUDIO_ONLY] ?: true }
+    val streamAudioOnly: Flow<Boolean> = context.dataStore.data.map { it[KEY_STREAM_AUDIO_ONLY] ?: true }
+
+    suspend fun setAudioQualitySaver(v: Boolean) { context.dataStore.edit { it[KEY_AUDIO_QUALITY_SAVER] = v } }
+    suspend fun setDownloadAudioOnly(v: Boolean) { context.dataStore.edit { it[KEY_DOWNLOAD_AUDIO_ONLY] = v } }
+    suspend fun setStreamAudioOnly(v: Boolean) { context.dataStore.edit { it[KEY_STREAM_AUDIO_ONLY] = v } }
 
     // ── Language ───────────────────────────────────────────────────────────
     val language: Flow<String> = context.dataStore.data

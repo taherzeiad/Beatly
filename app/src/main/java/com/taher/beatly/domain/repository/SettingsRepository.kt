@@ -23,6 +23,11 @@ interface SettingsRepository {
     val faceId: Flow<Boolean>
     val biometricId: Flow<Boolean>
 
+    // Data Saver
+    val audioQualitySaver: Flow<Boolean>
+    val downloadAudioOnly: Flow<Boolean>
+    val streamAudioOnly: Flow<Boolean>
+
     suspend fun setDarkMode(enabled: Boolean)
     suspend fun setLanguage(lang: String)
     
@@ -39,6 +44,10 @@ interface SettingsRepository {
     suspend fun setRememberMe(v: Boolean)
     suspend fun setFaceId(v: Boolean)
     suspend fun setBiometricId(v: Boolean)
+
+    suspend fun setAudioQualitySaver(v: Boolean)
+    suspend fun setDownloadAudioOnly(v: Boolean)
+    suspend fun setStreamAudioOnly(v: Boolean)
 
     suspend fun clearAll()
 }

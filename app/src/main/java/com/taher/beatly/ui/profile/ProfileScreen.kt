@@ -152,10 +152,10 @@ fun ProfileContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box {
-                    PlaceholderImage(
+                    com.taher.beatly.ui.components.BeatlyImage(
+                        url = uiState.avatarUrl,
                         modifier = Modifier.size(72.dp),
-                        shape = CircleShape,
-                        showLabel = false
+                        shape = CircleShape
                     )
                     Box(
                         modifier = Modifier
@@ -188,44 +188,65 @@ fun ProfileContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             // ── Premium banner ─────────────────────────────────────────────
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFF424242)) // Grey-ish background as per Image 20
-                    .height(180.dp)
-            ) {
-                // Pattern / Image background could be added here
-                Column(
+            if (!uiState.isPremium) {
+                Box(
                     modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xFF424242)) // Grey-ish background as per Image 20
+                        .height(180.dp)
                 ) {
-                    Text(
-                        "Enjoy All Benefits!",
-                        fontSize = 20.sp,
-                        style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
-                        color = White
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        "Enjoy listening songs & podcasts with better audio quality, without restrictions, and without ads.",
-                        style = BodyXSmallRegular, color = White.copy(alpha = 0.85f),
-                        modifier = Modifier.widthIn(max = 240.dp)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Button(
-                        onClick = onGetPremium, modifier = Modifier.height(36.dp),
-                        shape = RoundedCornerShape(50),
-                        colors = ButtonDefaults.buttonColors(containerColor = White),
-                        contentPadding = PaddingValues(horizontal = 18.dp)
+                    // Pattern / Image background could be added here
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(20.dp)
                     ) {
                         Text(
-                            "Get Premium",
-                            style = BodySmallRegular.copy(fontWeight = FontWeight.SemiBold),
-                            color = Purple500,
-                            fontSize = 14.sp
+                            "Enjoy All Benefits!",
+                            fontSize = 20.sp,
+                            style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
+                            color = White
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Enjoy listening songs & podcasts with better audio quality, without restrictions, and without ads.",
+                            style = BodyXSmallRegular, color = White.copy(alpha = 0.85f),
+                            modifier = Modifier.widthIn(max = 240.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            onClick = onGetPremium, modifier = Modifier.height(36.dp),
+                            shape = RoundedCornerShape(50),
+                            colors = ButtonDefaults.buttonColors(containerColor = White),
+                            contentPadding = PaddingValues(horizontal = 18.dp)
+                        ) {
+                            Text(
+                                "Get Premium",
+                                style = BodySmallRegular.copy(fontWeight = FontWeight.SemiBold),
+                                color = Purple500,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Brush.horizontalGradient(listOf(Purple500, Color(0xFF9C27B0))))
+                        .height(100.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.Star, null, tint = White, modifier = Modifier.size(32.dp))
+                        Text(
+                            "You are a Premium Member",
+                            style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
+                            color = White
                         )
                     }
                 }
@@ -414,6 +435,9 @@ fun LogoutDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShareProfileBottomSheet(onDismiss: () -> Unit) {
+    val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
+    val profileLink = "https://beatly.com/profile/jenny_wilson" // Mock link
+
     ModalBottomSheet(
         onDismissRequest = onDismiss, containerColor = White,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
@@ -471,7 +495,7 @@ fun ShareProfileBottomSheet(onDismiss: () -> Unit) {
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     Text(
-                        "lstr-2458Jenny Wilson profil...",
+                        profileLink,
                         style = BodySmallRegular,
                         color = Gray500,
                         maxLines = 1
@@ -479,7 +503,9 @@ fun ShareProfileBottomSheet(onDismiss: () -> Unit) {
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
-                    onClick = {}, shape = RoundedCornerShape(50),
+                    onClick = {
+                        clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(profileLink))
+                    }, shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(containerColor = Purple500),
                     modifier = Modifier.height(44.dp)
                 ) {
