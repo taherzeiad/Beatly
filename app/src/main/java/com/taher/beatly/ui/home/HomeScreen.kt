@@ -102,11 +102,8 @@ fun HomeScreenContent(
                     CircularProgressIndicator()
                 }
             } else {
-                val scrollState = androidx.compose.foundation.rememberScrollState()
+                val scrollState = rememberScrollState()
                 Column(modifier = Modifier.verticalScroll(scrollState)) {
-                    Spacer(Modifier.height(24.dp))
-                    HomePromotedCard()
-
                     Spacer(Modifier.height(24.dp))
                     SectionHeader(title = "Trending Now", onSeeAllClick = onSeeAllTrendingClick)
                     Spacer(Modifier.height(12.dp))
@@ -152,43 +149,6 @@ fun HomeScreenContent(
         }
     }
 }
-
-@Composable
-private fun HomePromotedCard() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(160.dp),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize().padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "New Album",
-                    color = MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
-                    style = MaterialTheme.typography.labelMedium
-                )
-                Text(
-                    "Happier Than Ever",
-                    color = MaterialTheme.colorScheme.background,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                )
-                Text(
-                    "Billie Eilish",
-                    color = MaterialTheme.colorScheme.background,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-            PlaceholderImage(modifier = Modifier.size(100.dp), shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp), showLabel = false)
-        }
-    }
-}
-
 @Composable
 private fun HomeHeader(uiState: HomeUiState, onSearchClick: () -> Unit) {
     Row(
