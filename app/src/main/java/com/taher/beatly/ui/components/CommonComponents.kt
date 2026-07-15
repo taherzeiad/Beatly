@@ -167,82 +167,74 @@ fun SongRow(
     isCurrentlyPlaying: Boolean = false,
     onPauseClick: () -> Unit = {},
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(140.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        BeatlyImage(
+            url = song.imageUrl,
             modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BeatlyImage(
-                url = song.imageUrl,
-                modifier = Modifier.size(85.dp),
-                shape = RoundedCornerShape(16.dp)
+                .width(115.dp)
+                .height(130.dp),
+            shape = RoundedCornerShape(12.dp)
+        )
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                song.title,
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                fontSize = 15.sp,
+                overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    song.title,
-                    style = MaterialTheme.typography.labelLarge,
-                    maxLines = 1,
-                    fontSize = 15.sp,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    song.artistName,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1
-                )
-                Spacer(Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                song.artistName,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1
+            )
+            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onLikeClick, modifier = Modifier.size(28.dp)) {
                     Icon(
-                        imageVector = if (song.isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                        imageVector = if (song.isLiked) Icons.Filled.CheckCircle else Icons.Outlined.FavoriteBorder,
                         contentDescription = "Like",
-                        tint = if (song.isLiked) MaterialTheme.colorScheme.primary else Gray500,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable { onLikeClick() }
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Icon(
-                        imageVector = Icons.Filled.CheckCircle,
-                        contentDescription = "Saved",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Icon(
-                        imageVector = Icons.Outlined.BookmarkBorder,
-                        contentDescription = "Bookmark",
-                        tint = Gray500,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable { onSaveClick() }
+                        tint = if (song.isLiked) MaterialTheme.colorScheme.primary else Gray500
                     )
                 }
+                Spacer(Modifier.width(8.dp))
+                IconButton(onClick = onSaveClick, modifier = Modifier.size(28.dp)) {
+                    Icon(Icons.Outlined.BookmarkBorder, contentDescription = "Save", tint = Gray500)
+                }
             }
-
+        }
+        if (isCurrentlyPlaying) {
             Button(
-                onClick = if (isCurrentlyPlaying) onPauseClick else onPlayClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isCurrentlyPlaying) Gray500 else MaterialTheme.colorScheme.primary
-                ),
-                shape = RoundedCornerShape(50),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-                modifier = Modifier.height(36.dp)
+                onClick = onPauseClick,
+                colors = ButtonDefaults.buttonColors(containerColor = Gray500),
+                shape = RoundedCornerShape(50)
+            ) {
+                Icon(Icons.Filled.Pause, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Pause")
+            }
+        } else {
+            Button(
+                onClick = onPlayClick,
+                colors = ButtonDefaults.buttonColors(containerColor = Gray500),
+                shape = RoundedCornerShape(50)
             ) {
                 Icon(
-                    imageVector = if (isCurrentlyPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    Icons.Filled.PlayArrow,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(18.dp)
                 )
                 Spacer(Modifier.width(4.dp))
-                Text(if (isCurrentlyPlaying) "Pause" else "Play", fontSize = 12.sp)
+                Text("Play")
             }
         }
     }
