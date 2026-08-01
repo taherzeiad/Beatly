@@ -21,7 +21,6 @@ class SettingsDataStore @Inject constructor(
         val KEY_DARK_MODE = booleanPreferencesKey("dark_mode")
         val KEY_LANGUAGE  = stringPreferencesKey("language")
         val KEY_USER_ID   = stringPreferencesKey("user_id")
-        val KEY_AUTH_TOKEN= stringPreferencesKey("auth_token")
 
         // Audio & Video
         val KEY_WIFI_AUDIO = stringPreferencesKey("wifi_audio")

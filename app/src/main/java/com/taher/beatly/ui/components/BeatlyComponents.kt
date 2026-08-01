@@ -32,7 +32,7 @@ fun BeatlyLogoIcon(
         painter = painterResource(id = R.drawable.music),
         contentDescription = "Beatly Logo",
         tint = tint,
-        modifier = Modifier.size(size)
+        modifier = Modifier.size(size),
     )
 }
 
@@ -123,13 +123,3 @@ fun RegisterFooter(
     }
 }
 
-// ── Section divider (reusable) ─────────────────────────────────────────────
-
-@Composable
-fun BeatlyDivider(modifier: Modifier = Modifier) {
-    HorizontalDivider(
-        modifier  = modifier,
-        thickness = 1.dp,
-        color     = MaterialTheme.colorScheme.outline.copy(alpha = 0.20f)
-    )
-}

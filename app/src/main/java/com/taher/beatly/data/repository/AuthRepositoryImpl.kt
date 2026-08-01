@@ -19,19 +19,25 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun signIn(email: String, password: String): BeatlyResult<User> {
         val result = authDataSource.signIn(email, password)
-        if (result is BeatlyResult.Success) dataStore.setUserId(result.data.id)
+        if (result is BeatlyResult.Success) {
+            dataStore.setUserId(result.data.id)
+        }
         return result
     }
 
     override suspend fun signUp(email: String, password: String, username: String): BeatlyResult<User> {
         val result = authDataSource.signUp(email, password, username)
-        if (result is BeatlyResult.Success) dataStore.setUserId(result.data.id)
+        if (result is BeatlyResult.Success) {
+            dataStore.setUserId(result.data.id)
+        }
         return result
     }
 
     override suspend fun signOut(): BeatlyResult<Unit> {
         val result = authDataSource.signOut()
-        if (result is BeatlyResult.Success) dataStore.clearAll()
+        if (result is BeatlyResult.Success) {
+            dataStore.clearAll()
+        }
         return result
     }
 

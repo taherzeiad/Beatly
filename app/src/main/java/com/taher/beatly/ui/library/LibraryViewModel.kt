@@ -2,7 +2,6 @@ package com.taher.beatly.ui.library
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.taher.beatly.domain.model.BeatlyResult
 import com.taher.beatly.domain.repository.AuthRepository
 import com.taher.beatly.domain.repository.LibraryRepository
 import com.taher.beatly.domain.repository.MusicRepository

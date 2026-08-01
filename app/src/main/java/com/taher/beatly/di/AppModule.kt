@@ -5,36 +5,42 @@ import android.content.Context
 import androidx.room.Room
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.media3.exoplayer.ExoPlayer
 import com.taher.beatly.data.local.room.BeatlyDatabase
 import com.taher.beatly.data.remote.spotify.SpotifyApiService
 import com.taher.beatly.data.remote.spotify.SpotifyTokenService
-import com.taher.beatly.data.repository.AuthRepositoryImpl
-import com.taher.beatly.data.repository.LibraryRepositoryImpl
-import com.taher.beatly.data.repository.MusicRepositoryImpl
-import com.taher.beatly.data.repository.SettingsRepositoryImpl
-import com.taher.beatly.data.repository.UserRepositoryImpl
-import com.taher.beatly.domain.repository.AuthRepository
-import com.taher.beatly.domain.repository.LibraryRepository
-import com.taher.beatly.domain.repository.MusicRepository
-import com.taher.beatly.domain.repository.SettingsRepository
-import com.taher.beatly.domain.repository.UserRepository
+import com.taher.beatly.data.repository.*
+import com.taher.beatly.domain.repository.*
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Named
 import javax.inject.Singleton
-import kotlin.jvm.java
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    // ── Dispatchers ──────────────────────────────────────────────────────────
+    @Provides @Singleton @Named("IO")
+    fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
+
+    @Provides @Singleton @Named("Main")
+    fun provideMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
+
+    // ── Player ─────────────────────────────────────────────────────────────
+    @Provides @Singleton
+    fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer =
+        ExoPlayer.Builder(context).build()
 
     // ── Firebase ───────────────────────────────────────────────────────────
     @Provides @Singleton fun provideFirebaseAuth()      = FirebaseAuth.getInstance()

@@ -16,16 +16,18 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getProfile(userId: String): BeatlyResult<User> = try {
         val doc = firestore.collection("users").document(userId).get().await()
         if (doc.exists()) {
-            BeatlyResult.Success(User(
-                id = doc.id,
-                name = doc.getString("name") ?: "",
-                email = doc.getString("email") ?: "",
-                username = doc.getString("username") ?: "",
-                avatarUrl = doc.getString("avatarUrl") ?: "",
-                isPremium = doc.getBoolean("isPremium") ?: false,
-                birthDate = doc.getString("birthDate") ?: "",
-                gender = doc.getString("gender") ?: ""
-            ))
+            BeatlyResult.Success(
+                User(
+                    id = doc.id,
+                    name = doc.getString("name") ?: "",
+                    email = doc.getString("email") ?: "",
+                    username = doc.getString("username") ?: "",
+                    avatarUrl = doc.getString("avatarUrl") ?: "",
+                    isPremium = doc.getBoolean("isPremium") ?: false,
+                    birthDate = doc.getString("birthDate") ?: "",
+                    gender = doc.getString("gender") ?: "",
+                )
+            )
         } else {
             BeatlyResult.Error("User not found")
         }
@@ -39,7 +41,7 @@ class UserRepositoryImpl @Inject constructor(
             "username" to user.username,
             "avatarUrl" to user.avatarUrl,
             "birthDate" to user.birthDate,
-            "gender" to user.gender
+            "gender" to user.gender,
         )
         firestore.collection("users").document(user.id).update(data).await()
         BeatlyResult.Success(Unit)

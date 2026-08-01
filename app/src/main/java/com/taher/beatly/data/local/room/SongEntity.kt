@@ -23,7 +23,7 @@ data class SongEntity(
     val previewUrl  : String = "",
     val durationMs  : Long   = 0L,
     val isLiked     : Boolean = false,
-    val isSaved     : Boolean = false
+    val isSaved     : Boolean = false,
 )
 
 @Entity(tableName = "recently_played")
