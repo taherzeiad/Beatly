@@ -1,46 +1,25 @@
-# Implementation Plan - Unused Code Removal
+# Implementation Plan - Fix Music Playback Issues
 
-This plan focuses on removing redundant files, methods, DTOs, and imports to clean up the codebase without impacting the app's functionality.
+The user is experiencing issues where music doesn't play. This plan focuses on improving the robustness of the playback system, adding error handling, and ensuring proper player configuration.
 
 ## Proposed Changes
 
-### File Deletion
-
-#### [DELETE] [SupabaseStorageDataSource.kt](file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/data/remote/supabase/SupabaseStorageDataSource.kt)
-- This file is unconfigured and not injected anywhere in the project.
-
-#### [DELETE] [PlaylistSelectorDialog.kt](file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/ui/library/PlaylistSelectorDialog.kt)
-- This composable is not referenced by any other file.
-
-### Data Layer Cleanup
-
-#### [MODIFY] [SpotifyTokenResponse.kt](file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/data/remote/spotify/SpotifyTokenResponse.kt)
-- Remove unused DTOs: `SpotifyTracksResponse`, `SpotifyArtistResponse`, `SpotifyPlaylistTracksResponse`, `SpotifyPlaylistTrackItem`.
-- Remove unused methods from `SpotifyApiService`: `getFeaturedPlaylists`, `getNewReleases`.
+### Data Layer
 
 #### [MODIFY] [MusicRepositoryImpl.kt](file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/data/repository/MusicRepositoryImpl.kt)
-- Remove commented-out code and unused imports.
+- **Audio Attributes**: Configure `ExoPlayer` with `AudioAttributes` for music to handle audio focus correctly.
+- **Improved Fallback**: Update the fallback URL to a more reliable test stream.
+- **Error Listening**: Add `onPlayerError` to the listener to log and handle playback failures.
+- **Preparation Logic**: Use `setPlayWhenReady(true)` and `prepare()` correctly.
 
-#### [MODIFY] [SettingsDataStore.kt](file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/data/local/datastore/SettingsDataStore.kt)
-- Remove unused `KEY_AUTH_TOKEN`.
+### Dependency Injection
 
-### ViewModel Cleanup
-
-#### [MODIFY] [LibraryViewModel.kt](file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/ui/library/LibraryViewModel.kt)
-- Remove unused `BeatlyResult` import.
-
-#### [MODIFY] [ProfileViewModel.kt](file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/ui/profile/ProfileViewModel.kt)
-- Remove unused `BeatlyResult` import.
-
-#### [MODIFY] [EditProfileViewModel.kt](file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/ui/settings/EditProfileViewModel.kt)
-- Remove unused functions: `onAvatarChanged`, `onChangePin`, `onChangePassword`.
+#### [MODIFY] [AppModule.kt](file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/di/AppModule.kt)
+- Ensure `ExoPlayer` is initialized with standard configurations if needed (though current is fine, but attributes are better).
 
 ## Verification Plan
 
-### Automated Tests
-- Run `gradle build` to ensure that removing these components doesn't break any dependencies.
-- Verify that `find_usages` returns no results for the deleted files/methods.
-
 ### Manual Verification
-- Basic smoke test: Launch app, navigate to Home, Library, and Profile.
-- Verify music playback still works.
+1.  **Play Song**: Click a song on the Home screen.
+2.  **Logs**: Check Logcat for "MusicRepository" or "ExoPlayer" errors.
+3.  **Fallback Test**: Temporarily force the fallback URL to verify it plays correctly.

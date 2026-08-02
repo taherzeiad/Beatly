@@ -34,6 +34,12 @@ class MusicRepositoryImpl @Inject constructor(
 
     init {
         repositoryScope.launch(mainDispatcher) {
+            val audioAttributes = androidx.media3.common.AudioAttributes.Builder()
+                .setUsage(androidx.media3.common.C.USAGE_MEDIA)
+                .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
+                .build()
+            player.setAudioAttributes(audioAttributes, true)
+
             player.addListener(object : androidx.media3.common.Player.Listener {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     updatePlayerState()
@@ -41,6 +47,9 @@ class MusicRepositoryImpl @Inject constructor(
 
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     updatePlayerState()
+                    if (playbackState == androidx.media3.common.Player.STATE_READY) {
+                        updatePlayerState() // Ensure duration is updated when ready
+                    }
                 }
 
                 override fun onMediaItemTransition(
@@ -48,6 +57,11 @@ class MusicRepositoryImpl @Inject constructor(
                     reason: Int
                 ) {
                     updatePlayerState()
+                }
+
+                override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                    android.util.Log.e("MusicRepository", "Player Error: ${error.message}", error)
+                    _playerState.update { it.copy(isPlaying = false) }
                 }
             })
         }
@@ -470,11 +484,12 @@ class MusicRepositoryImpl @Inject constructor(
                     }
                 }
 
-                // Fallback URL if Spotify preview is null (common for many tracks)
+                // Reliability fix: Use a high-availability Google sample stream if no URL found
                 val finalUrl = if (!url.isNullOrEmpty()) url else {
-                    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+                    "https://storage.googleapis.com/exoplayer-test-media-0/Music/The_Show_Must_Go_On.mp3"
                 }
 
+                player.stop()
                 player.setMediaItem(androidx.media3.common.MediaItem.fromUri(finalUrl))
                 player.prepare()
                 player.play()
