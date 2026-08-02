@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -24,26 +26,32 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Keys stored in local.properties
+        // Load keys from local.properties
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(localPropertiesFile.inputStream())
+        }
+
         buildConfigField(
             "String",
             "SPOTIFY_CLIENT_ID",
-            "\"${project.findProperty("SPOTIFY_CLIENT_ID") ?: ""}\""
+            "\"${localProperties.getProperty("SPOTIFY_CLIENT_ID") ?: ""}\""
         )
         buildConfigField(
             "String",
             "SPOTIFY_CLIENT_SECRET",
-            "\"${project.findProperty("SPOTIFY_CLIENT_SECRET") ?: ""}\""
+            "\"${localProperties.getProperty("SPOTIFY_CLIENT_SECRET") ?: ""}\""
         )
         buildConfigField(
             "String",
             "SUPABASE_URL",
-            "\"${project.findProperty("SUPABASE_URL") ?: ""}\""
+            "\"${localProperties.getProperty("SUPABASE_URL") ?: ""}\""
         )
         buildConfigField(
             "String",
             "SUPABASE_ANON_KEY",
-            "\"${project.findProperty("SUPABASE_ANON_KEY") ?: ""}\""
+            "\"${localProperties.getProperty("SUPABASE_ANON_KEY") ?: ""}\""
         )
     }
 

@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 data class PasswordRule(
     val label: String,
-    val isMet: Boolean
+    val isMet: Boolean,
 )
 
 data class ResetPasswordUiState(
@@ -26,9 +26,9 @@ data class ResetPasswordUiState(
 )
 
 private fun defaultRules() = listOf(
-    PasswordRule("Use at least 8 characters", false),
-    PasswordRule("Use a mix of letters, numbers, and special characters (e.g.: #\$!%)", false),
-    PasswordRule("Try combining words and symbols into a unique phrase", false)
+    PasswordRule("Use at least 8 characters", isMet = false),
+    PasswordRule("Use a mix of letters, numbers, and special characters (e.g.: #$!%)", isMet = false),
+    PasswordRule("Try combining words and symbols into a unique phrase", isMet = false)
 )
 
 @HiltViewModel
@@ -57,7 +57,7 @@ class ResetPasswordViewModel @Inject constructor() : ViewModel() {
 
     fun onContinueClicked() {
         _uiState.update { it.copy(isLoading = true) }
-        // TODO: call auth repository → reset password
+        // TODO: call auth repository → send recovery email
     }
 
     private fun validate() {
@@ -68,15 +68,16 @@ class ResetPasswordViewModel @Inject constructor() : ViewModel() {
                 s.password.length >= 8
             ),
             PasswordRule(
-                "Use a mix of letters, numbers, and special characters (e.g.: #\$!%)",
-                s.password.any { it.isLetter() } && s.password.any { it.isDigit() } && s.password.any { !it.isLetterOrDigit() }),
+                "Use a mix of letters, numbers, and special characters (e.g.: #$!%)",
+                (s.password.any { it.isLetter() } && s.password.any { it.isDigit() } && s.password.any { !it.isLetterOrDigit() })
+            ),
             PasswordRule(
                 "Try combining words and symbols into a unique phrase",
                 s.password.length >= 12
             )
         )
         val allMet = rules.all { it.isMet }
-        val match = s.password == s.confirmPassword && s.confirmPassword.isNotEmpty()
+        val match = (s.password == s.confirmPassword && s.confirmPassword.isNotEmpty())
         _uiState.update {
             it.copy(
                 passwordRules = rules,

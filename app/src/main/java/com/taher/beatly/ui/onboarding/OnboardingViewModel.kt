@@ -13,7 +13,7 @@ import javax.inject.Inject
 data class OnboardingUiState(
     val pages          : List<OnboardingPage> = emptyList(),
     val currentPageIndex: Int     = 0,
-    val isLastPage     : Boolean  = false
+    val isLastPage     : Boolean  = false,
 )
 
 @HiltViewModel
@@ -49,7 +49,7 @@ class OnboardingViewModel @Inject constructor() : ViewModel() {
         _uiState.update { state ->
             state.copy(
                 currentPageIndex = index,
-                isLastPage       = index == onboardingPages.size - 1
+                isLastPage       = (index == onboardingPages.size - 1)
             )
         }
     }

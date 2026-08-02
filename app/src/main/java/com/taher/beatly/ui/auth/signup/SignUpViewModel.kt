@@ -24,7 +24,7 @@ data class SignUpUiState(
     val isLoading               : Boolean = false,
     val passwordMatchError      : Boolean = false,
     val errorMessage            : String? = null,
-    val isSuccess               : Boolean = false
+    val isSuccess               : Boolean = false,
 )
 
 @HiltViewModel
@@ -58,7 +58,7 @@ class SignUpViewModel @Inject constructor(
 
     private fun validate() {
         val s      = _uiState.value
-        val match  = s.password == s.confirmPassword && s.confirmPassword.isNotEmpty()
+        val match  = (s.password == s.confirmPassword && s.confirmPassword.isNotEmpty())
         _uiState.update { it.copy(
             passwordMatchError = s.confirmPassword.isNotEmpty() && !match,
             isFormValid        = s.email.isNotBlank() && s.username.isNotBlank()

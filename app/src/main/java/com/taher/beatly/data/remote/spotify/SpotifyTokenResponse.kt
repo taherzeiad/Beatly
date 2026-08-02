@@ -18,7 +18,6 @@ data class SpotifyTokenResponse(
 )
 
 data class SpotifyRecommendationsResponse(val tracks: List<SpotifyTrackItem>)
-data class SpotifyTracksResponse(val tracks: SpotifyTrackPaging)
 data class SpotifyTrackPaging(val items: List<SpotifyTrackItem>)
 
 data class SpotifyTrackItem(
@@ -49,7 +48,6 @@ data class SpotifyArtist(
 
 data class SpotifyFollowers(val total: Long)
 
-data class SpotifyArtistResponse(val artists: SpotifyArtistPaging)
 data class SpotifyArtistPaging(val items: List<SpotifyArtist>)
 
 data class SpotifyArtistTracksResponse(val tracks: List<SpotifyTrackItem>)
@@ -107,18 +105,6 @@ interface SpotifyApiService {
         @Header("Authorization") token: String
     ): SpotifyArtistTracksResponse
 
-    @GET("browse/featured-playlists")
-    suspend fun getFeaturedPlaylists(
-        @Query("limit") limit: Int = 10,
-        @Header("Authorization") token: String
-    ): Any  // parse as needed
-
-    @GET("browse/new-releases")
-    suspend fun getNewReleases(
-        @Query("limit") limit: Int = 10,
-        @Header("Authorization") token: String
-    ): SpotifyNewReleasesResponse
-
     @GET("recommendations")
     suspend fun getRecommendations(
         @Query("seed_genres") genres: String = "pop,hip-hop",
@@ -139,7 +125,6 @@ interface SpotifyApiService {
     ): SpotifyPlaylistTracksResponse
 }
 
-data class SpotifyNewReleasesResponse(val albums: SpotifyAlbumPaging)
 data class SpotifyAlbumTracksResponse(val items: List<SpotifyTrackItem>)
 data class SpotifyPlaylistTracksResponse(val items: List<SpotifyPlaylistTrackItem>)
 data class SpotifyPlaylistTrackItem(val track: SpotifyTrackItem)

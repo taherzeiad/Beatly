@@ -23,7 +23,7 @@ data class SearchUiState(
     val songs: List<com.taher.beatly.model.Song> = emptyList(),
     val albums: List<Album> = emptyList(),
     val playlists: List<Playlist> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading      : Boolean = false,
 )
 
 @OptIn(FlowPreview::class)
@@ -50,7 +50,7 @@ class SearchViewModel @Inject constructor(
             songs = flows[3] as List<com.taher.beatly.model.Song>,
             albums = flows[4] as List<Album>,
             playlists = flows[5] as List<Playlist>,
-            isLoading = flows[6] as Boolean
+            isLoading = flows[6] as Boolean,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SearchUiState())
 
@@ -91,8 +91,7 @@ class SearchViewModel @Inject constructor(
                 if (result is BeatlyResult.Success) {
                     val data = result.data
                     if (data.isNotEmpty()) {
-                        val first = data.first()
-                        when (first) {
+                        when (data.first()) {
                             is com.taher.beatly.domain.model.Artist -> {
                                 _artists.value =
                                     (data as List<com.taher.beatly.domain.model.Artist>).map { da ->

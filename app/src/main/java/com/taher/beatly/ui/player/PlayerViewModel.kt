@@ -21,19 +21,18 @@ class PlayerViewModel @Inject constructor(
     private val repository: MusicRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<PlayerUiState> = repository.playerState
-        .map { state ->
-            PlayerUiState(
-                song = state.currentSong,
-                isPlaying = state.isPlaying,
-                positionMs = state.positionMs,
-                durationMs = if (state.durationMs > 0) state.durationMs else 1L
-            )
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = PlayerUiState()
+    val uiState: StateFlow<PlayerUiState> = repository.playerState.map { state ->
+        PlayerUiState(
+            song = state.currentSong,
+            isPlaying = state.isPlaying,
+            positionMs = state.positionMs,
+            durationMs = if (state.durationMs > 0) state.durationMs else 1L
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = PlayerUiState()
+    )
 
     fun onPlayPauseClicked() {
         viewModelScope.launch { repository.togglePlayPause() }
@@ -45,6 +44,11 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun onSkipNext() { viewModelScope.launch { repository.skipNext() } }
-    fun onSkipPrevious() { viewModelScope.launch { repository.skipPrevious() } }
+    fun onSkipNext() {
+        viewModelScope.launch { repository.skipNext() }
+    }
+
+    fun onSkipPrevious() {
+        viewModelScope.launch { repository.skipPrevious() }
+    }
 }

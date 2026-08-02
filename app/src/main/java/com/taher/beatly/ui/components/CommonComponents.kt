@@ -40,10 +40,10 @@ fun PlaceholderImage(
         modifier = modifier
             .background(MaterialTheme.colorScheme.outline, shape)
             .clip(shape),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
                 imageVector = Icons.Outlined.Image,
@@ -145,12 +145,12 @@ fun SectionHeader(title: String, onSeeAllClick: (() -> Unit)? = null) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(title, fontSize = 18.sp, style = MaterialTheme.typography.titleMedium)
-        if (onSeeAllClick != null) {
+        onSeeAllClick?.let {
             Text(
                 text     = "See All",
                 color    = MaterialTheme.colorScheme.primary,
                 style    = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.clickable(onClick = onSeeAllClick),
+                modifier = Modifier.clickable(onClick = it),
             )
         }
     }
@@ -295,7 +295,7 @@ fun RoundIconButton(
             .size(44.dp)
             .clip(CircleShape)
             .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         if (hasBorder) {
             Box(
@@ -303,7 +303,7 @@ fun RoundIconButton(
                     .size(28.dp)
                     .border(width = 1.dp, color = Color.Black, shape = CircleShape)
                     .clip(CircleShape),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     icon,

@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 data class ArtistDetailUiState(
     val artist: Artist? = null,
-    val isLoading: Boolean = true
+    val isLoading      : Boolean = true,
 )
 
 @HiltViewModel
@@ -39,15 +39,13 @@ class ArtistDetailViewModel @Inject constructor(
 
             if (artistResult is BeatlyResult.Success) {
                 val da = artistResult.data
-                val songs = if (tracksResult is BeatlyResult.Success) {
-                    tracksResult.data.map { ds ->
-                        com.taher.beatly.model.Song(
-                            id = ds.id, title = ds.title, artistName = ds.artistName,
-                            artistId = ds.artistId, imageUrl = ds.imageUrl,
-                            durationMs = ds.durationMs, isLiked = ds.isLiked, isSaved = ds.isSaved
-                        )
-                    }
-                } else emptyList()
+                val songs = (tracksResult as? BeatlyResult.Success)?.data?.map { ds ->
+                com.taher.beatly.model.Song(
+                    id = ds.id, title = ds.title, artistName = ds.artistName,
+                    artistId = ds.artistId, imageUrl = ds.imageUrl,
+                    durationMs = ds.durationMs, isLiked = ds.isLiked, isSaved = ds.isSaved
+                )
+            } ?: emptyList()
 
                 val modelArtist = Artist(
                     id = da.id,

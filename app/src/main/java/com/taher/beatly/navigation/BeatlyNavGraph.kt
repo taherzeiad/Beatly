@@ -113,14 +113,14 @@ fun BeatlyNavGraph() {
 
         // ===================== Splash =====================
         composable(Screen.Splash.route) {
-            SplashScreen(onSplashFinished = { goTo(Screen.Onboarding, Screen.Splash) })
+            SplashScreen { goTo(Screen.Onboarding, Screen.Splash) }
         }
 
         // ===================== Onboarding =====================
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onContinueFinished = { goTo(Screen.SignIn, Screen.Onboarding) },
-                onRegisterClicked = { nav.navigate(Screen.SignUp.route) }
+                onRegisterClicked = { nav.navigate(Screen.SignUp.route) },
             )
         }
 

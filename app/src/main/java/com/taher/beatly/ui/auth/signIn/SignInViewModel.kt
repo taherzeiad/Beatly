@@ -20,7 +20,7 @@ data class SignInUiState(
     val isFormValid       : Boolean = false,
     val isLoading         : Boolean = false,
     val errorMessage      : String? = null,
-    val isSuccess         : Boolean = false
+    val isSuccess         : Boolean = false,
 )
 
 @HiltViewModel
@@ -59,6 +59,6 @@ class SignInViewModel @Inject constructor(
 
     private fun validate() {
         val s = _uiState.value
-        _uiState.update { it.copy(isFormValid = s.email.isNotBlank() && s.password.length >= 6) }
+        _uiState.update { it.copy(isFormValid = (s.email.isNotBlank() && s.password.length >= 6)) }
     }
 }

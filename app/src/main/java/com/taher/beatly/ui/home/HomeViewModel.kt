@@ -1,6 +1,5 @@
 package com.taher.beatly.ui.home
 
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.taher.beatly.domain.model.BeatlyResult
@@ -30,7 +29,8 @@ data class HomeUiState(
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val musicRepository: MusicRepository, private val authRepository: AuthRepository
+    private val musicRepository: MusicRepository,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -38,7 +38,22 @@ class HomeViewModel @Inject constructor(
 
     init {
         observeUser()
+        observePlayerState()
         loadHomeData()
+    }
+
+    private fun observePlayerState() {
+        viewModelScope.launch {
+            musicRepository.playerState.collectLatest { state ->
+                _uiState.update {
+                    it.copy(
+                        currentSong = state.currentSong,
+                        currentlyPlayingSongId = state.currentSong?.id,
+                        isPlaying = state.isPlaying
+                    )
+                }
+            }
+        }
     }
 
     private fun observeUser() {
@@ -51,19 +66,7 @@ class HomeViewModel @Inject constructor(
                 }
                 user?.id?.let { userId ->
                     musicRepository.getRecentlyPlayedFlow(userId).collectLatest { domainSongs ->
-                        val uiSongs = domainSongs.map { ds ->
-                            Song(
-                                id = ds.id,
-                                title = ds.title,
-                                artistName = ds.artistName,
-                                artistId = ds.artistId,
-                                imageUrl = ds.imageUrl,
-                                previewUrl = ds.previewUrl,
-                                durationMs = ds.durationMs,
-                                isLiked = ds.isLiked,
-                                isSaved = ds.isSaved
-                            )
-                        }
+                        val uiSongs = domainSongs.map { it.toUi() }
                         _uiState.update { it.copy(recentlyPlayed = uiSongs) }
                     }
                 }
@@ -84,33 +87,11 @@ class HomeViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(
                         isLoading = false,
-                        trendingSongs = (if (t is BeatlyResult.Success) {
-                            t.data.map { ds ->
-                                Song(
-                                    id = ds.id,
-                                    title = ds.title,
-                                    artistName = ds.artistName,
-                                    artistId = ds.artistId,
-                                    imageUrl = ds.imageUrl,
-                                    durationMs = ds.durationMs,
-                                    isLiked = ds.isLiked,
-                                    isSaved = ds.isSaved
-                                )
-                            }
-                        } else state.trendingSongs),
-                        topArtists = (if (a is BeatlyResult.Success) {
-                            a.data.map { da ->
-                                Artist(
-                                    id = da.id,
-                                    name = da.name,
-                                    imageUrl = da.imageUrl,
-                                    isVerified = da.isVerified,
-                                    isFollowing = da.isFollowing,
-                                    monthlyListeners = da.monthlyListeners
-                                )
-                            }
-                        } else state.topArtists),
-                        errorMessage = if (t is BeatlyResult.Error) t.message else if (a is BeatlyResult.Error) a.message else null
+                        trendingSongs = (t as? BeatlyResult.Success)?.data?.map { it.toUi() } ?: state.trendingSongs,
+                        topArtists = (a as? BeatlyResult.Success)?.data?.map { it.toUi() } ?: state.topArtists,
+                        errorMessage = (t as? BeatlyResult.Error)?.message 
+                            ?: (a as? BeatlyResult.Error)?.message 
+                            ?: state.errorMessage,
                     )
                 }
             } catch (e: Exception) {
@@ -124,37 +105,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun loadRecentlyPlayed(userId: String) {
-        viewModelScope.launch {
-            when (val result = musicRepository.getRecentlyPlayed(userId)) {
-                is BeatlyResult.Success -> {
-                    val modelSongs = result.data.map { ds ->
-                        Song(
-                            id = ds.id,
-                            title = ds.title,
-                            artistName = ds.artistName,
-                            artistId = ds.artistId,
-                            imageUrl = ds.imageUrl,
-                            durationMs = ds.durationMs,
-                            isLiked = ds.isLiked,
-                            isSaved = ds.isSaved
-                        )
-                    }
-                    _uiState.update { it.copy(recentlyPlayed = modelSongs) }
-                }
-
-                else -> {}
-            }
-        }
-    }
-
     fun onPlayPauseToggled(song: Song) {
         viewModelScope.launch {
-            musicRepository.playSong(song)
-            _uiState.update {
-                it.copy(
-                    currentSong = song, currentlyPlayingSongId = song.id, isPlaying = true
-                )
+            if (uiState.value.currentlyPlayingSongId == song.id) {
+                musicRepository.togglePlayPause()
+            } else {
+                musicRepository.playSong(song)
             }
         }
     }
@@ -181,3 +137,26 @@ class HomeViewModel @Inject constructor(
         else -> "Good Night!"
     }
 }
+
+// ── UI Mappers ─────────────────────────────────────────────────────────────
+
+    private fun com.taher.beatly.domain.model.Song.toUi() = Song(
+        id = id,
+        title = title,
+        artistName = artistName,
+        artistId = artistId,
+        imageUrl = imageUrl,
+        previewUrl = previewUrl,
+        durationMs = durationMs,
+        isLiked = isLiked,
+        isSaved = isSaved,
+    )
+
+    private fun com.taher.beatly.domain.model.Artist.toUi() = Artist(
+        id = id,
+        name = name,
+        imageUrl = imageUrl,
+        isVerified = isVerified,
+        isFollowing = isFollowing,
+        monthlyListeners = monthlyListeners,
+    )

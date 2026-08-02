@@ -139,7 +139,6 @@ class EditProfileViewModel @Inject constructor(
     fun onBirthDateChanged(v: String){ _uiState.update { it.copy(birthDate = v) } }
     fun onMailChanged(v: String)     { _uiState.update { it.copy(mail = v) } }
     fun onGenderChanged(v: String)   { _uiState.update { it.copy(gender = v) } }
-    fun onAvatarChanged(v: String)   { _uiState.update { it.copy(avatarUrl = v) } }
 
     fun onDarkModeToggled() {
         viewModelScope.launch {
@@ -376,8 +375,6 @@ class SecurityViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.setBiometricId(!_uiState.value.biometricId) }
     }
 
-    fun onChangePin() { /* TODO */ }
-    fun onChangePassword() { /* TODO */ }
 
     fun onUpdate() { _uiState.update { it.copy(success = true) } }
 }
