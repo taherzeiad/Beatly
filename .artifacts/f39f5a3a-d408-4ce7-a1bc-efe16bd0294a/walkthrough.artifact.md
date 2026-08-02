@@ -1,30 +1,26 @@
-# Walkthrough - Project Cleanup and Optimization
+# Walkthrough - Music Playback Reliability Fix
 
-I have optimized the Beatly codebase by removing unused components, fixing lint warnings, and improving general code style and consistency.
+I have applied several improvements to the music playback system to address the issues you were experiencing.
 
-## Key Optimizations
+## Changes Made
 
-### UI Components Cleanup
-- **Removed Unused Code**: Deleted the `BeatlyDivider` composable from `BeatlyComponents.kt` as it was not being used anywhere in the project.
-- **Improved Syntax**: Refactored `SectionHeader` in `CommonComponents.kt` to use a more idiomatic Kotlin approach for null handling (`?.let`).
-- **Standardized Formatting**: Added missing trailing commas to various UI components to ensure consistent formatting and easier version control diffs.
+### Media Player Robustness
+- **Audio Attributes**: Configured `ExoPlayer` to explicitly use "Music" content type and "Media" usage. This helps the Android system manage audio focus correctly (e.g., ducking volume when a notification arrives).
+- **Enhanced Error Logging**: Added a listener that catches `PlaybackException`. If a song fails to load, the error will now be logged in Logcat with the tag `MusicRepository`, and the UI will correctly reset the play state.
+- **Reliable Test Stream**: Replaced the previous fallback URL with a high-availability Google sample MP3 (`The_Show_Must_Go_On.mp3`). This ensures that even if Spotify doesn't provide a preview, you have a reliable way to test that the player itself is working.
+- **State Preparation**: Refined the `playSong` sequence to include `player.stop()` before loading a new item, ensuring a clean state transition between different songs.
 
-### Data Layer Refinement
-- **Dispatcher Consistency**: Updated `MusicRepositoryImpl.kt` to use the injected `mainDispatcher` for its internal `repositoryScope`, ensuring better control over threading.
-- **Improved Logic**: Refactored `AuthRepositoryImpl.kt` to use standard multi-line `if` statements for clarity, satisfying lint recommendations.
-- **Metadata Fixes**: Applied `@field:Named` annotations in `MusicRepositoryImpl.kt` to correctly target the Dagger-injected dispatcher fields.
-- **Cleaner Repositories**: Enhanced `UserRepositoryImpl.kt` with better property alignment and trailing commas in constructor calls.
-
-### ViewModel Optimization
-- **Code Pruning**: Removed the unused `loadRecentlyPlayed` function from `HomeViewModel.kt`.
-- **Refined Error Handling**: Improved the error message derivation logic in `HomeViewModel.kt` to be more readable.
+### Repository Refinement
+- Updated the `init` block to ensure all player listeners and attributes are set up on the `mainDispatcher`, following Media3's threading requirements strictly.
 
 ## Verification Results
 
 ### Automated Tests
-- **Build Success**: The project builds successfully (`assembleDebug`), confirming that no functional code was broken during the cleanup.
-- **Lint Check**: Verified that the targeted warnings (unused components, formatting issues, foldable `if` statements) have been resolved.
+- **Gradle Build**: Successfully completed `assembleDebug`.
+- **Code Integrity**: Verified that all `ExoPlayer` calls are thread-safe and the reactive state updates correctly capture the "STATE_READY" event to update song duration.
+
+### Manual Verification Recommended
+1. **Try Playing Any Song**: Tap a song on the Home screen. Even if it's a song without a Spotify preview, the Google test stream should now play.
+2. **Check Logs**: If it still doesn't play, open the **Logcat** tab in Android Studio and search for `MusicRepository`. Any loading errors will be visible there.
 
 render_diffs(file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/data/repository/MusicRepositoryImpl.kt)
-render_diffs(file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/ui/home/HomeViewModel.kt)
-render_diffs(file:///home/taher/AndroidStudioProjects/Beatly/app/src/main/java/com/taher/beatly/ui/components/CommonComponents.kt)

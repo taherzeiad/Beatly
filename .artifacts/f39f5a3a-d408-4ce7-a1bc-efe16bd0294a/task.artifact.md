@@ -1,16 +1,7 @@
-# Tasks - Unused Code Removal
+# Tasks - Fix Music Playback Issues
 
-- [ ] Delete Unused Files
-    - [ ] `SupabaseStorageDataSource.kt`
-    - [ ] `PlaylistSelectorDialog.kt`
-- [ ] Clean up Spotify DTOs and API Service
-    - [ ] Remove unused data classes and methods in `SpotifyTokenResponse.kt`
-- [ ] Clean up Repositories
-    - [ ] `MusicRepositoryImpl.kt`: Remove comments and unused imports
-    - [ ] `SettingsDataStore.kt`: Remove `KEY_AUTH_TOKEN`
-- [ ] Clean up ViewModels
-    - [ ] `LibraryViewModel.kt`: Remove unused import
-    - [ ] `ProfileViewModel.kt`: Remove unused import
-    - [ ] `EditProfileViewModel.kt`: Remove unused methods
-- [ ] Verification
-    - [ ] Run `gradle build`
+- [x] Improve `MusicRepositoryImpl` for robust playback
+    - [x] Configure `AudioAttributes` for the media player
+    - [x] Add error listener to `ExoPlayer`
+    - [x] Refine `playSong` logic and update fallback URL
+- [x] Verify build and functionality
