@@ -34,12 +34,6 @@ class MusicRepositoryImpl @Inject constructor(
 
     init {
         repositoryScope.launch(mainDispatcher) {
-            val audioAttributes = androidx.media3.common.AudioAttributes.Builder()
-                .setUsage(androidx.media3.common.C.USAGE_MEDIA)
-                .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
-                .build()
-            player.setAudioAttributes(audioAttributes, true)
-
             player.addListener(object : androidx.media3.common.Player.Listener {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     updatePlayerState()
@@ -478,7 +472,9 @@ class MusicRepositoryImpl @Inject constructor(
                 if (url.isNullOrEmpty()) {
                     val token = withContext(ioDispatcher) { tokenManager.getValidToken() }
                     if (token.isNotEmpty()) {
-                        val response = withContext(ioDispatcher) { spotifyApi.search(song.title, type = "track", token = token) }
+                        val response = withContext(ioDispatcher) { 
+                            spotifyApi.search(song.title, type = "track", token = token) 
+                        }
                         url = response.tracks?.items?.find { it.id == song.id }?.preview_url
                             ?: response.tracks?.items?.firstOrNull()?.preview_url
                     }
@@ -489,8 +485,20 @@ class MusicRepositoryImpl @Inject constructor(
                     "https://storage.googleapis.com/exoplayer-test-media-0/Music/The_Show_Must_Go_On.mp3"
                 }
 
+                val mediaMetadata = androidx.media3.common.MediaMetadata.Builder()
+                    .setTitle(song.title)
+                    .setArtist(song.artistName)
+                    .setArtworkUri(android.net.Uri.parse(song.imageUrl ?: ""))
+                    .build()
+
+                val mediaItem = androidx.media3.common.MediaItem.Builder()
+                    .setMediaId(song.id)
+                    .setUri(finalUrl)
+                    .setMediaMetadata(mediaMetadata)
+                    .build()
+
                 player.stop()
-                player.setMediaItem(androidx.media3.common.MediaItem.fromUri(finalUrl))
+                player.setMediaItem(mediaItem)
                 player.prepare()
                 player.play()
             } catch (e: Exception) {

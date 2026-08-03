@@ -39,8 +39,17 @@ object AppModule {
 
     // ── Player ─────────────────────────────────────────────────────────────
     @Provides @Singleton
-    fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer =
-        ExoPlayer.Builder(context).build()
+    fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer {
+        val audioAttributes = androidx.media3.common.AudioAttributes.Builder()
+            .setUsage(androidx.media3.common.C.USAGE_MEDIA)
+            .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
+            .build()
+
+        return ExoPlayer.Builder(context).build().apply {
+            setAudioAttributes(audioAttributes, true)
+            setHandleAudioBecomingNoisy(true) // Pause on headphones unplugged
+        }
+    }
 
     // ── Firebase ───────────────────────────────────────────────────────────
     @Provides @Singleton fun provideFirebaseAuth()      = FirebaseAuth.getInstance()
