@@ -37,6 +37,7 @@ fun PlayMusicScreen(
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
+            viewModel.onErrorShown()
         }
     }
 

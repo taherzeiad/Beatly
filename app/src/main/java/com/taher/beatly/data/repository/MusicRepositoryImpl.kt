@@ -59,8 +59,9 @@ class MusicRepositoryImpl @Inject constructor(
                 }
 
                 override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
-                    android.util.Log.e("MusicRepository", "Player Error: ${error.message}", error)
-                    _playerState.update { it.copy(isPlaying = false, error = error.message) }
+                    val detailedError = "${error.errorCodeName}: ${error.localizedMessage} (Cause: ${error.cause?.message})"
+                    android.util.Log.e("MusicRepository", "Player Error: $detailedError", error)
+                    _playerState.update { it.copy(isPlaying = false, error = detailedError) }
                 }
             })
         }
@@ -469,6 +470,7 @@ class MusicRepositoryImpl @Inject constructor(
                 androidx.media3.common.MediaItem.Builder()
                     .setMediaId(song.id)
                     .setUri(url)
+                    .setMimeType("audio/mpeg")
                     .setMediaMetadata(mediaMetadata)
                     .build()
             }
@@ -523,6 +525,10 @@ class MusicRepositoryImpl @Inject constructor(
                 player.seekToPrevious()
             }
         }
+    }
+
+    override fun clearError() {
+        _playerState.update { it.copy(error = null) }
     }
 }
 

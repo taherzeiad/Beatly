@@ -42,4 +42,5 @@ interface MusicRepository {
     suspend fun seekBackward()
     suspend fun skipNext()
     suspend fun skipPrevious()
+    fun clearError()
 }

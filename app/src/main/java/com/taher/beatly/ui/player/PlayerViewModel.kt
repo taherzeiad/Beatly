@@ -61,4 +61,8 @@ class PlayerViewModel @Inject constructor(
     fun onSkipPrevious() {
         viewModelScope.launch { repository.skipPrevious() }
     }
+
+    fun onErrorShown() {
+        repository.clearError()
+    }
 }

@@ -387,7 +387,6 @@ fun BeatlyNavGraph() {
                         "language" -> nav.navigate(Screen.Language.route)
                         "privacy_policy" -> nav.navigate(Screen.PrivacyPolicy.route)
                         "about" -> nav.navigate(Screen.About.route)
-                        else -> {}
                     }
                 },
                 onNavigateTab = { tab ->
