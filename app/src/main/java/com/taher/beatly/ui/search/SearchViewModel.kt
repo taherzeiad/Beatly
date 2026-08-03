@@ -178,7 +178,15 @@ class SearchViewModel @Inject constructor(
     }
 
     fun onPlaySong(song: com.taher.beatly.model.Song) {
-        viewModelScope.launch { repository.playSong(song) }
+        viewModelScope.launch {
+            val songs = _songs.value
+            val index = songs.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
+            if (songs.isNotEmpty()) {
+                repository.playQueue(songs, index)
+            } else {
+                repository.playSong(song)
+            }
+        }
     }
 
     fun onLikeToggled(songId: String) {

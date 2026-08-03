@@ -6,6 +6,8 @@ import androidx.room.Room
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.datasource.DefaultHttpDataSource
 import com.taher.beatly.data.local.room.BeatlyDatabase
 import com.taher.beatly.data.remote.spotify.SpotifyApiService
 import com.taher.beatly.data.remote.spotify.SpotifyTokenService
@@ -38,6 +40,7 @@ object AppModule {
     fun provideMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
 
     // ── Player ─────────────────────────────────────────────────────────────
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     @Provides @Singleton
     fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer {
         val audioAttributes = androidx.media3.common.AudioAttributes.Builder()
@@ -45,10 +48,19 @@ object AppModule {
             .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
             .build()
 
-        return ExoPlayer.Builder(context).build().apply {
-            setAudioAttributes(audioAttributes, true)
-            setHandleAudioBecomingNoisy(true) // Pause on headphones unplugged
-        }
+        val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+            .setUserAgent("Beatly/1.0")
+            .setAllowCrossProtocolRedirects(true)
+
+        val mediaSourceFactory = DefaultMediaSourceFactory(context)
+            .setDataSourceFactory(httpDataSourceFactory)
+
+        return ExoPlayer.Builder(context)
+            .setMediaSourceFactory(mediaSourceFactory)
+            .build().apply {
+                setAudioAttributes(audioAttributes, true)
+                setHandleAudioBecomingNoisy(true) // Pause on headphones unplugged
+            }
     }
 
     // ── Firebase ───────────────────────────────────────────────────────────

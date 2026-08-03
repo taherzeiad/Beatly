@@ -35,8 +35,12 @@ interface MusicRepository {
     // Player methods
     val playerState: Flow<PlayerState>
     suspend fun playSong(song: UiSong)
+    suspend fun playQueue(songs: List<UiSong>, startIndex: Int)
     suspend fun togglePlayPause()
     suspend fun seekTo(positionMs: Long)
+    suspend fun seekForward()
+    suspend fun seekBackward()
     suspend fun skipNext()
     suspend fun skipPrevious()
+    fun clearError()
 }

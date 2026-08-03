@@ -31,9 +31,17 @@ fun PlayMusicScreen(
     viewModel     : PlayerViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val song = uiState.song ?: return
+    val song = uiState.song
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    var showLyrics by androidx.compose.runtime.remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.onErrorShown()
+        }
+    }
+
+    var showLyrics by remember { mutableStateOf(false) }
 
     if (showLyrics) {
         ModalBottomSheet(onDismissRequest = { showLyrics = false }) {
@@ -52,102 +60,113 @@ fun PlayMusicScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        Spacer(Modifier.height(12.dp))
-        Row(
-            modifier           = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment  = Alignment.CenterVertically
-        ) {
-            RoundIconButton(
-                icon               = Icons.AutoMirrored.Filled.ArrowBack,
-                onClick            = onBackClick,
-                contentDescription = "Back"
-            )
-            Text("Music", style = MaterialTheme.typography.titleMedium)
-            RoundIconButton(icon = Icons.Filled.MoreVert, onClick = { }, contentDescription = "More", hasBorder = true)
-        }
-
-        Spacer(Modifier.height(20.dp))
-        com.taher.beatly.ui.components.BeatlyImage(
-            url = song.imageUrl,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f),
-            shape = RoundedCornerShape(24.dp)
-        )
-
-        Spacer(Modifier.height(24.dp))
-        Text(song.title, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), modifier = Modifier.align(Alignment.CenterHorizontally))
-        Text("Ft. ${song.artistName}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.align(Alignment.CenterHorizontally))
-
-        Spacer(Modifier.height(16.dp))
-        Slider(
-            value = uiState.positionMs.toFloat(),
-            onValueChange = { viewModel.onSeek(it.toLong()) },
-            valueRange = 0f..uiState.durationMs.toFloat(),
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary,
-                inactiveTrackColor = Gray200
-            )
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(formatDuration(uiState.positionMs), style = MaterialTheme.typography.bodySmall)
-            Text(formatDuration(uiState.durationMs), style = MaterialTheme.typography.bodySmall)
-        }
-
-        Spacer(Modifier.height(12.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = viewModel::onSkipPrevious) {
-                Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous", modifier = Modifier.size(32.dp))
-            }
-            IconButton(onClick = { /* Replay 10 */ }) {
-                Icon(Icons.Filled.Replay10, contentDescription = "Replay 10s", modifier = Modifier.size(28.dp))
-            }
-            PlayPauseButton(isPlaying = uiState.isPlaying, onClick = viewModel::onPlayPauseClicked)
-            IconButton(onClick = { /* Forward 10 */ }) {
-                Icon(Icons.Filled.Forward10, contentDescription = "Forward 10s", modifier = Modifier.size(28.dp))
-            }
-            IconButton(onClick = viewModel::onSkipNext) {
-                Icon(Icons.Filled.SkipNext, contentDescription = "Next", modifier = Modifier.size(32.dp))
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = {}) { Icon(Icons.Outlined.Speed, contentDescription = "Playback speed") }
-            IconButton(onClick = {}) { Icon(Icons.Outlined.Timer, contentDescription = "Sleep timer") }
-            IconButton(onClick = {}) { Icon(Icons.Filled.Cast, contentDescription = "Cast") }
-            IconButton(onClick = {}) { Icon(Icons.Filled.MoreVert, contentDescription = "More options") }
-        }
-
-        Spacer(Modifier.height(20.dp))
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .fillMaxWidth()
-                .clickable { showLyrics = true }
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 20.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null)
-            Text("Lyrics", style = MaterialTheme.typography.labelLarge)
+            Spacer(Modifier.height(12.dp))
+            Row(
+                modifier           = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment  = Alignment.CenterVertically
+            ) {
+                RoundIconButton(
+                    icon               = Icons.AutoMirrored.Filled.ArrowBack,
+                    onClick            = onBackClick,
+                    contentDescription = "Back"
+                )
+                Text("Music", style = MaterialTheme.typography.titleMedium)
+                RoundIconButton(icon = Icons.Filled.MoreVert, onClick = { }, contentDescription = "More", hasBorder = true)
+            }
+
+            if (song == null) {
+                Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text("No song selected", style = MaterialTheme.typography.titleLarge)
+                }
+            } else {
+                Spacer(Modifier.height(20.dp))
+                com.taher.beatly.ui.components.BeatlyImage(
+                    url = song.imageUrl,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f),
+                    shape = RoundedCornerShape(24.dp)
+                )
+
+                Spacer(Modifier.height(24.dp))
+                Text(song.title, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), modifier = Modifier.align(Alignment.CenterHorizontally))
+                Text("Ft. ${song.artistName}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.align(Alignment.CenterHorizontally))
+
+                Spacer(Modifier.height(16.dp))
+                Slider(
+                    value = uiState.positionMs.toFloat(),
+                    onValueChange = { viewModel.onSeek(it.toLong()) },
+                    valueRange = 0f..uiState.durationMs.toFloat(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        inactiveTrackColor = Gray200
+                    )
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(formatDuration(uiState.positionMs), style = MaterialTheme.typography.bodySmall)
+                    Text(formatDuration(uiState.durationMs), style = MaterialTheme.typography.bodySmall)
+                }
+
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = viewModel::onSkipPrevious) {
+                        Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous", modifier = Modifier.size(32.dp))
+                    }
+                    IconButton(onClick = viewModel::onSeekBackward) {
+                        Icon(Icons.Filled.Replay10, contentDescription = "Replay 10s", modifier = Modifier.size(28.dp))
+                    }
+                    PlayPauseButton(isPlaying = uiState.isPlaying, onClick = viewModel::onPlayPauseClicked)
+                    IconButton(onClick = viewModel::onSeekForward) {
+                        Icon(Icons.Filled.Forward10, contentDescription = "Forward 10s", modifier = Modifier.size(28.dp))
+                    }
+                    IconButton(onClick = viewModel::onSkipNext) {
+                        Icon(Icons.Filled.SkipNext, contentDescription = "Next", modifier = Modifier.size(32.dp))
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    IconButton(onClick = {}) { Icon(Icons.Outlined.Speed, contentDescription = "Playback speed") }
+                    IconButton(onClick = {}) { Icon(Icons.Outlined.Timer, contentDescription = "Sleep timer") }
+                    IconButton(onClick = {}) { Icon(Icons.Filled.Cast, contentDescription = "Cast") }
+                    IconButton(onClick = {}) { Icon(Icons.Filled.MoreVert, contentDescription = "More options") }
+                }
+
+                Spacer(Modifier.height(20.dp))
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showLyrics = true }
+                ) {
+                    Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null)
+                    Text("Lyrics", style = MaterialTheme.typography.labelLarge)
+                }
+            }
+            Spacer(Modifier.height(20.dp))
         }
-        Spacer(Modifier.height(20.dp))
     }
 }
 
