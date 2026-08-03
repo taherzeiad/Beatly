@@ -66,7 +66,8 @@ data class PlayerState(
     val featuring: String? = null,
     val isPlaying: Boolean = false,
     val positionMs: Long = 0L,
-    val durationMs: Long = 0L
+    val durationMs: Long = 0L,
+    val error: String? = null
 )
 
 enum class SearchFilter { TOP, SONGS, ARTISTS, ALBUMS, PLAYLISTS }

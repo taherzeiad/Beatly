@@ -11,12 +11,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taher.beatly.model.Song
 import com.taher.beatly.ui.components.BeatlyImage
 import com.taher.beatly.ui.components.SectionHeader
@@ -26,9 +28,31 @@ import com.taher.beatly.ui.theme.SurfaceFill
 fun ExploreScreen(
     onSearchClick: () -> Unit,
     onGenreClick: (String) -> Unit,
-    onSongClick: (Song) -> Unit,
     onSeeAllGenres: () -> Unit,
-    trendingSongs: List<Song> = emptyList()
+    onSongClick: (Song) -> Unit,
+    viewModel: ExploreViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    ExploreScreenContent(
+        uiState = uiState,
+        onSearchClick = onSearchClick,
+        onGenreClick = onGenreClick,
+        onSeeAllGenres = onSeeAllGenres,
+        onSongClick = { song ->
+            viewModel.onPlaySong(song)
+            onSongClick(song)
+        }
+    )
+}
+
+@Composable
+fun ExploreScreenContent(
+    uiState: ExploreUiState,
+    onSearchClick: () -> Unit,
+    onGenreClick: (String) -> Unit,
+    onSeeAllGenres: () -> Unit,
+    onSongClick: (Song) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -56,6 +80,12 @@ fun ExploreScreen(
             )
         }
 
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+
         Spacer(Modifier.height(24.dp))
         
         // ── Genres ────────────────────────────────────────────────────────
@@ -80,7 +110,7 @@ fun ExploreScreen(
         SectionHeader(title = "Just For Your", onSeeAllClick = {})
         Spacer(Modifier.height(12.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(trendingSongs) { song ->
+            items(uiState.trendingSongs) { song ->
                 Column(modifier = Modifier.width(150.dp).clickable { onSongClick(song) }) {
                     BeatlyImage(url = song.imageUrl, modifier = Modifier.size(150.dp))
                     Spacer(Modifier.height(8.dp))
@@ -96,7 +126,7 @@ fun ExploreScreen(
         SectionHeader(title = "Top Songs", onSeeAllClick = {})
         Spacer(Modifier.height(12.dp))
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            trendingSongs.forEachIndexed { index, song ->
+            uiState.trendingSongs.forEachIndexed { index, song ->
                 TopSongRow(index + 1, song, onSongClick)
             }
         }

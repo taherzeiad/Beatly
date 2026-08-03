@@ -30,6 +30,8 @@ class MusicRepositoryImpl @Inject constructor(
     private val _playerState = MutableStateFlow(PlayerState())
     override val playerState: Flow<PlayerState> = _playerState.asStateFlow()
 
+    private var currentQueue: List<UiSong> = emptyList()
+
     private val repositoryScope = CoroutineScope(SupervisorJob() + mainDispatcher)
 
     init {
@@ -50,12 +52,15 @@ class MusicRepositoryImpl @Inject constructor(
                     mediaItem: androidx.media3.common.MediaItem?,
                     reason: Int
                 ) {
+                    val currentSongId = mediaItem?.mediaId
+                    val song = currentQueue.find { it.id == currentSongId }
+                    _playerState.update { it.copy(currentSong = song) }
                     updatePlayerState()
                 }
 
                 override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                     android.util.Log.e("MusicRepository", "Player Error: ${error.message}", error)
-                    _playerState.update { it.copy(isPlaying = false) }
+                    _playerState.update { it.copy(isPlaying = false, error = error.message) }
                 }
             })
         }
@@ -114,54 +119,29 @@ class MusicRepositoryImpl @Inject constructor(
     }
 
     private fun getDummySongs() = listOf(
-        Song(
-            "1",
-            "Starboy",
-            "The Weeknd",
-            "a1",
-            "Starboy",
-            "https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258be7bc452",
-            "",
-            230000
-        ), Song(
-            "2",
-            "Blinding Lights",
-            "The Weeknd",
-            "a1",
-            "After Hours",
-            "https://i.scdn.co/image/ab67616d0000b2738863bc11fcbfb2428c5a2df1",
-            "",
-            200000
-        ), Song(
-            "3",
-            "Shape of You",
-            "Ed Sheeran",
-            "a2",
-            "Divide",
-            "https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96",
-            "",
-            233000
-        )
+        Song("1", "Starboy", "The Weeknd", "a1", "Starboy", "https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258be7bc452", "", 230000),
+        Song("2", "Blinding Lights", "The Weeknd", "a1", "After Hours", "https://i.scdn.co/image/ab67616d0000b2738863bc11fcbfb2428c5a2df1", "", 200000),
+        Song("3", "Shape of You", "Ed Sheeran", "a2", "Divide", "https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96", "", 233000),
+        Song("4", "Perfect", "Ed Sheeran", "a2", "Divide", "https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96", "", 263000),
+        Song("5", "Levitating", "Dua Lipa", "a3", "Future Nostalgia", "https://i.scdn.co/image/ab67616d0000b273bd0e199f7d23f7936a77519b", "", 203000),
+        Song("6", "Don't Start Now", "Dua Lipa", "a3", "Future Nostalgia", "https://i.scdn.co/image/ab67616d0000b273bd0e199f7d23f7936a77519b", "", 183000),
+        Song("7", "Peaches", "Justin Bieber", "a4", "Justice", "https://i.scdn.co/image/ab67616d0000b273e6f9e3d77e497a7a58a6988d", "", 198000),
+        Song("8", "STAY", "The Kid LAROI", "a5", "F*CK LOVE 3", "https://i.scdn.co/image/ab67616d0000b2734125b2734125b2734125b273", "", 141000),
+        Song("9", "Save Your Tears", "The Weeknd", "a1", "After Hours", "https://i.scdn.co/image/ab67616d0000b2738863bc11fcbfb2428c5a2df1", "", 215000),
+        Song("10", "As It Was", "Harry Styles", "a6", "Harry's House", "https://i.scdn.co/image/ab67616d0000b27311fcbfb2428c5a2df18863bc", "", 167000)
     )
 
     private fun getDummyArtists() = listOf(
-        Artist(
-            "a1",
-            "The Weeknd",
-            "https://i.scdn.co/image/ab6761610000e5eb214f3bc2bc97d9834125b273",
-            100000000,
-            false,
-            true,
-            listOf("pop")
-        ), Artist(
-            "a2",
-            "Ed Sheeran",
-            "https://i.scdn.co/image/ab6761610000e5eb1ad50e05066a7b36029994cf",
-            80000000,
-            false,
-            true,
-            listOf("pop")
-        )
+        Artist("a1", "The Weeknd", "https://i.scdn.co/image/ab6761610000e5eb214f3bc2bc97d9834125b273", 100000000, false, true, listOf("pop")),
+        Artist("a2", "Ed Sheeran", "https://i.scdn.co/image/ab6761610000e5eb1ad50e05066a7b36029994cf", 80000000, false, true, listOf("pop")),
+        Artist("a3", "Dua Lipa", "https://i.scdn.co/image/ab6761610000e5ebbd0e199f7d23f7936a77519b", 70000000, false, true, listOf("pop")),
+        Artist("a4", "Justin Bieber", "https://i.scdn.co/image/ab6761610000e5ebe6f9e3d77e497a7a58a6988d", 85000000, false, true, listOf("pop")),
+        Artist("a5", "The Kid LAROI", "https://i.scdn.co/image/ab6761610000e5eb4125b2734125b2734125b273", 40000000, false, true, listOf("hip-hop")),
+        Artist("a6", "Harry Styles", "https://i.scdn.co/image/ab6761610000e5eb11fcbfb2428c5a2df18863bc", 65000000, false, true, listOf("pop")),
+        Artist("a7", "Billie Eilish", "https://i.scdn.co/image/ab6761610000e5eb214f3bc2bc97d9834125b273", 60000000, false, true, listOf("pop")),
+        Artist("a8", "Drake", "https://i.scdn.co/image/ab6761610000e5eb1ad50e05066a7b36029994cf", 90000000, false, true, listOf("hip-hop")),
+        Artist("a9", "Taylor Swift", "https://i.scdn.co/image/ab6761610000e5ebbd0e199f7d23f7936a77519b", 95000000, false, true, listOf("pop")),
+        Artist("a10", "Ariana Grande", "https://i.scdn.co/image/ab6761610000e5ebe6f9e3d77e497a7a58a6988d", 75000000, false, true, listOf("pop"))
     )
 
     override suspend fun getRecentlyPlayed(userId: String): BeatlyResult<List<Song>> = withContext(ioDispatcher) {
@@ -459,54 +439,48 @@ class MusicRepositoryImpl @Inject constructor(
 
     // ── Player implementation ──────────────────────────────────────────────
     override suspend fun playSong(song: UiSong) {
+        playQueue(listOf(song), 0)
+    }
+
+    override suspend fun playQueue(songs: List<UiSong>, startIndex: Int) {
         withContext(mainDispatcher) {
-            if (song.id == _playerState.value.currentSong?.id) {
-                if (!player.isPlaying) player.play()
-                return@withContext
-            }
+            currentQueue = songs
+            val currentSong = songs.getOrNull(startIndex)
+            _playerState.update { it.copy(currentSong = currentSong, isPlaying = true, positionMs = 0, error = null) }
 
-            _playerState.update { it.copy(currentSong = song, isPlaying = true, positionMs = 0) }
+            player.stop()
+            player.clearMediaItems()
 
-            try {
-                var url = song.previewUrl
-                if (url.isNullOrEmpty()) {
-                    val token = withContext(ioDispatcher) { tokenManager.getValidToken() }
-                    if (token.isNotEmpty()) {
-                        val response = withContext(ioDispatcher) { 
-                            spotifyApi.search(song.title, type = "track", token = token) 
-                        }
-                        url = response.tracks?.items?.find { it.id == song.id }?.preview_url
-                            ?: response.tracks?.items?.firstOrNull()?.preview_url
-                    }
-                }
-
-                // Reliability fix: Use a high-availability Google sample stream if no URL found
-                val finalUrl = if (!url.isNullOrEmpty()) url else {
-                    "https://storage.googleapis.com/exoplayer-test-media-0/Music/The_Show_Must_Go_On.mp3"
-                }
-
+            val mediaItems = songs.map { song ->
                 val mediaMetadata = androidx.media3.common.MediaMetadata.Builder()
                     .setTitle(song.title)
                     .setArtist(song.artistName)
                     .setArtworkUri(android.net.Uri.parse(song.imageUrl ?: ""))
                     .build()
 
-                val mediaItem = androidx.media3.common.MediaItem.Builder()
+                val url = if (!song.previewUrl.isNullOrEmpty()) {
+                    android.util.Log.d("MusicRepository", "Playing Spotify preview: ${song.previewUrl}")
+                    song.previewUrl
+                } else {
+                    android.util.Log.w("MusicRepository", "No preview URL for ${song.title}, using fallback")
+                    "https://storage.googleapis.com/exoplayer-test-media-0/Music/The_Show_Must_Go_On.mp3"
+                }
+
+                androidx.media3.common.MediaItem.Builder()
                     .setMediaId(song.id)
-                    .setUri(finalUrl)
+                    .setUri(url)
                     .setMediaMetadata(mediaMetadata)
                     .build()
-
-                player.stop()
-                player.setMediaItem(mediaItem)
-                player.prepare()
-                player.play()
-            } catch (e: Exception) {
-                android.util.Log.e("MusicRepository", "Error playing: ${song.title}", e)
             }
 
-            authRepository.currentUser.firstOrNull()?.let { user ->
-                addToRecentlyPlayed(user.id, song)
+            player.setMediaItems(mediaItems, startIndex, 0L)
+            player.prepare()
+            player.play()
+
+            currentSong?.let { s ->
+                authRepository.currentUser.firstOrNull()?.let { user ->
+                    addToRecentlyPlayed(user.id, s)
+                }
             }
         }
     }
@@ -523,15 +497,31 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun seekForward() {
+        withContext(mainDispatcher) {
+            player.seekTo(player.currentPosition + 10_000)
+        }
+    }
+
+    override suspend fun seekBackward() {
+        withContext(mainDispatcher) {
+            player.seekTo(kotlin.math.max(0, player.currentPosition - 10_000))
+        }
+    }
+
     override suspend fun skipNext() {
         withContext(mainDispatcher) {
-            player.seekToNext()
+            if (player.hasNextMediaItem()) {
+                player.seekToNext()
+            }
         }
     }
 
     override suspend fun skipPrevious() {
         withContext(mainDispatcher) {
-            player.seekToPrevious()
+            if (player.hasPreviousMediaItem()) {
+                player.seekToPrevious()
+            }
         }
     }
 }

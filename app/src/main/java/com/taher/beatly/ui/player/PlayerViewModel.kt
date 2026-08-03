@@ -13,7 +13,8 @@ data class PlayerUiState(
     val song: Song? = null,
     val isPlaying: Boolean = false,
     val positionMs: Long = 0L,
-    val durationMs: Long = 1L
+    val durationMs: Long = 1L,
+    val error: String? = null
 )
 
 @HiltViewModel
@@ -26,7 +27,8 @@ class PlayerViewModel @Inject constructor(
             song = state.currentSong,
             isPlaying = state.isPlaying,
             positionMs = state.positionMs,
-            durationMs = if (state.durationMs > 0) state.durationMs else 1L
+            durationMs = if (state.durationMs > 0) state.durationMs else 1L,
+            error = state.error
         )
     }.stateIn(
         scope = viewModelScope,
@@ -42,6 +44,14 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             repository.seekTo(positionMs)
         }
+    }
+
+    fun onSeekForward() {
+        viewModelScope.launch { repository.seekForward() }
+    }
+
+    fun onSeekBackward() {
+        viewModelScope.launch { repository.seekBackward() }
     }
 
     fun onSkipNext() {

@@ -110,7 +110,13 @@ class HomeViewModel @Inject constructor(
             if (uiState.value.currentlyPlayingSongId == song.id) {
                 musicRepository.togglePlayPause()
             } else {
-                musicRepository.playSong(song)
+                val songs = uiState.value.trendingSongs
+                val index = songs.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
+                if (songs.isNotEmpty()) {
+                    musicRepository.playQueue(songs, index)
+                } else {
+                    musicRepository.playSong(song)
+                }
             }
         }
     }
