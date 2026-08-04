@@ -1,4 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">بيتلي</string>
+
+    <!-- الملف الشخصي والإعدادات -->
+    <string name="profile">الملف الشخصي</string>
+    <string name="edit_profile">تعديل الملف الشخصي</string>
+    <string name="notification">التنبيهات</string>
+    <string name="dark_mode">الوضع الداكن</string>
+    <string name="audio_video">الصوت والفيديو</string>
+    <string name="playback">التشغيل</string>
+    <string name="data_saver">توفير البيانات والتخزين</string>
+    <string name="security">الأمان</string>
+    <string name="language">اللغة</string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
+    <string name="about">حول التطبيق</string>
+    <string name="delete_account">حذف الحساب</string>
+    <string name="logout">تسجيل الخروج</string>
+    <string name="get_premium">احصل على بريميوم</string>
+    <string name="premium_benefits_title">استمتع بجميع المزايا!</string>
+    <string name="premium_benefits_desc">استمتع بالاستماع للأغاني والبودكاست بجودة صوت أفضل، بدون قيود، وبدون إعلانات.</string>
+    <string name="premium_member_status">أنت عضو بريميوم</string>
+    <string name="share_profile">مشاركة الملف الشخصي</string>
+    <string name="direct_link">الرابط المباشر</string>
+    <string name="copy">نسخ</string>
+    <string name="cancel">إلغاء</string>
+    <string name="delete">حذف</string>
+    <string name="yes_logout">نعم، تسجيل الخروج</string>
+    <string name="save_changes">حفظ التغييرات</string>
+    <string name="profile_updated_success">تم تحديث الملف الشخصي بنجاح!</string>
 </resources>

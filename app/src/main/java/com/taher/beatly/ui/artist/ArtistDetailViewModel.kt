@@ -83,6 +83,14 @@ class ArtistDetailViewModel @Inject constructor(
     }
 
     fun onPlaySong(song: com.taher.beatly.model.Song) {
-        viewModelScope.launch { repository.playSong(song) }
+        viewModelScope.launch {
+            val songs = _uiState.value.artist?.popularSongs ?: emptyList()
+            val index = songs.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
+            if (songs.isNotEmpty()) {
+                repository.playQueue(songs, index)
+            } else {
+                repository.playSong(song)
+            }
+        }
     }
 }

@@ -108,16 +108,30 @@ class MusicRepositoryImpl @Inject constructor(
             val token = tokenManager.getValidToken()
             if (token.isEmpty()) throw Exception("Invalid Spotify Token")
 
-            // If we want real playable tracks, we prefer recommendations
-            val recResponse =
-                spotifyApi.getRecommendations(genres = "pop,hip-hop", limit = 10, token = token)
-            val trendingSongs = recResponse.tracks.map { it.toDomain() }
+            val response = spotifyApi.search(query = "tag:new", type = "track", limit = 15, token = token)
+            val trendingSongs = response.tracks?.items?.map { it.toDomain() } ?: emptyList()
 
             songDao.insertSongs(trendingSongs.map { it.toEntity() })
             BeatlyResult.Success(trendingSongs)
         } catch (e: Exception) {
             android.util.Log.e("MusicRepository", "Error getting trending songs", e)
-            BeatlyResult.Success(getDummySongs())
+            BeatlyResult.Success(getDummySongs().shuffled().take(10))
+        }
+    }
+
+    override suspend fun getRecommendedSongs(): BeatlyResult<List<Song>> = withContext(ioDispatcher) {
+        try {
+            val token = tokenManager.getValidToken()
+            if (token.isEmpty()) throw Exception("Invalid Spotify Token")
+
+            val recResponse = spotifyApi.getRecommendations(genres = "pop,dance,rock", limit = 15, token = token)
+            val recommendedSongs = recResponse.tracks.map { it.toDomain() }
+
+            songDao.insertSongs(recommendedSongs.map { it.toEntity() })
+            BeatlyResult.Success(recommendedSongs)
+        } catch (e: Exception) {
+            android.util.Log.e("MusicRepository", "Error getting recommended songs", e)
+            BeatlyResult.Success(getDummySongs().shuffled().take(8))
         }
     }
 

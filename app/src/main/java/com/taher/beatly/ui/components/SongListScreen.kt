@@ -84,7 +84,15 @@ class SongListViewModel @Inject constructor(
     }
 
     fun onPlaySong(song: Song) {
-        viewModelScope.launch { repository.playSong(song) }
+        viewModelScope.launch {
+            val songs = _uiState.value.songs
+            val index = songs.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
+            if (songs.isNotEmpty()) {
+                repository.playQueue(songs, index)
+            } else {
+                repository.playSong(song)
+            }
+        }
     }
 
     fun onLikeToggled(songId: String) {

@@ -16,6 +16,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.taher.beatly.R
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taher.beatly.ui.components.AuthFieldLabel
@@ -37,9 +41,11 @@ fun EditProfileScreen(
     onUpdated: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     LaunchedEffect(uiState.success) {
         if (uiState.success) {
+            Toast.makeText(context, R.string.profile_updated_success, Toast.LENGTH_SHORT).show()
             onUpdated()
         }
     }
@@ -83,7 +89,7 @@ fun EditProfileScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 120.dp)
         ) {
-            SettingsTopBar("Edit Profile", onBackClicked)
+            SettingsTopBar(stringResource(R.string.edit_profile), onBackClicked)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -233,7 +239,7 @@ fun EditProfileScreen(
             }
         }
         AuthPrimaryButton(
-            "Update",
+            stringResource(R.string.save_changes),
             viewModel::onUpdate,
             enabled = !uiState.isLoading,
             modifier = Modifier
@@ -272,7 +278,7 @@ fun NotificationScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 120.dp)
         ) {
-            SettingsTopBar("Notification", onBackClicked)
+            SettingsTopBar(stringResource(R.string.notification), onBackClicked)
             Spacer(Modifier.height(20.dp))
             Column(
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -284,7 +290,7 @@ fun NotificationScreen(
             }
         }
         AuthPrimaryButton(
-            "Update",
+            stringResource(R.string.save_changes),
             viewModel::onUpdate,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -322,7 +328,7 @@ fun AudioVideoScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 120.dp)
         ) {
-            SettingsTopBar("Audio & Video", onBackClicked)
+            SettingsTopBar(stringResource(R.string.audio_video), onBackClicked)
             Spacer(Modifier.height(20.dp))
             Column(
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -345,7 +351,7 @@ fun AudioVideoScreen(
             }
         }
         AuthPrimaryButton(
-            "Update",
+            stringResource(R.string.save_changes),
             viewModel::onUpdate,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -383,7 +389,7 @@ fun PlaybackScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 120.dp)
         ) {
-            SettingsTopBar("Playback", onBackClicked)
+            SettingsTopBar(stringResource(R.string.playback), onBackClicked)
             Spacer(Modifier.height(20.dp))
             Column(
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -399,7 +405,7 @@ fun PlaybackScreen(
             }
         }
         AuthPrimaryButton(
-            "Update",
+            stringResource(R.string.save_changes),
             viewModel::onUpdate,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -437,7 +443,7 @@ fun DataSaverScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 120.dp)
         ) {
-            SettingsTopBar("Data Saver & Storage", onBackClicked)
+            SettingsTopBar(stringResource(R.string.data_saver), onBackClicked)
             Spacer(Modifier.height(20.dp))
             Column(
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -472,7 +478,7 @@ fun DataSaverScreen(
             }
         }
         AuthPrimaryButton(
-            "Update",
+            stringResource(R.string.save_changes),
             viewModel::onUpdate,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -511,7 +517,7 @@ fun SecurityScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 120.dp)
         ) {
-            SettingsTopBar("Security", onBackClicked)
+            SettingsTopBar(stringResource(R.string.security), onBackClicked)
             Spacer(Modifier.height(20.dp))
             Column(
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -539,7 +545,7 @@ fun SecurityScreen(
             }
         }
         AuthPrimaryButton(
-            "Update",
+            stringResource(R.string.save_changes),
             viewModel::onUpdate,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -577,7 +583,7 @@ fun LanguageScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 120.dp)
         ) {
-            SettingsTopBar("Language", onBackClicked)
+            SettingsTopBar(stringResource(R.string.language), onBackClicked)
             Spacer(Modifier.height(20.dp))
             Column(
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -627,7 +633,7 @@ fun LanguageScreen(
             }
         }
         AuthPrimaryButton(
-            "Change",
+            stringResource(R.string.save_changes),
             onChanged,
             modifier = Modifier
                 .align(Alignment.BottomCenter)

@@ -17,13 +17,14 @@ data class ProfileSettingItem(
 )
 
 data class ProfileUiState(
-    val userName  : String                 = "",
-    val email     : String                 = "",
-    val avatarUrl : String                 = "",
-    val isPremium : Boolean                = false,
-    val isDarkMode: Boolean                = false,
-    val isLoggedOut: Boolean               = false,
-    val settings  : List<ProfileSettingItem> = emptyList()
+    val userName   : String                 = "",
+    val email      : String                 = "",
+    val avatarUrl  : String                 = "",
+    val isPremium  : Boolean                = false,
+    val isDarkMode : Boolean                = false,
+    val isLoggedOut: Boolean                = false,
+    val shareLink  : String                 = "",
+    val settings   : List<ProfileSettingItem> = emptyList()
 )
 
 @HiltViewModel
@@ -43,18 +44,18 @@ class ProfileViewModel @Inject constructor(
     private fun loadSettings() {
         _uiState.update { state ->
             state.copy(settings = listOf(
-                ProfileSettingItem("profile",        "Profile"),
-                ProfileSettingItem("notification",   "Notification"),
-                ProfileSettingItem("dark_mode",      "Dark Mode", isToggle = true, toggled = false),
-                ProfileSettingItem("audio_video",    "Audio & Video"),
-                ProfileSettingItem("playback",       "Playback"),
-                ProfileSettingItem("downloads",      "Data Saver & Storage"),
-                ProfileSettingItem("security",       "Security"),
-                ProfileSettingItem("language",       "Language"),
-                ProfileSettingItem("privacy_policy", "Privacy Policy"),
-                ProfileSettingItem("about",          "About"),
-                ProfileSettingItem("delete_account", "Delete Account"),
-                ProfileSettingItem("logout",         "Logout"),
+                ProfileSettingItem("profile",        "profile"),
+                ProfileSettingItem("notification",   "notification"),
+                ProfileSettingItem("dark_mode",      "dark_mode", isToggle = true, toggled = false),
+                ProfileSettingItem("audio_video",    "audio_video"),
+                ProfileSettingItem("playback",       "playback"),
+                ProfileSettingItem("downloads",      "data_saver"),
+                ProfileSettingItem("security",       "security"),
+                ProfileSettingItem("language",       "language"),
+                ProfileSettingItem("privacy_policy", "privacy_policy"),
+                ProfileSettingItem("about",          "about"),
+                ProfileSettingItem("delete_account", "delete_account"),
+                ProfileSettingItem("logout",         "logout"),
             ))
         }
     }
@@ -62,11 +63,13 @@ class ProfileViewModel @Inject constructor(
     private fun observeUserData() {
         authRepository.currentUser
             .onEach { user ->
+                val username = user?.username ?: "guest"
                 _uiState.update { it.copy(
                     userName = user?.name ?: "Guest",
                     email = user?.email ?: "",
                     avatarUrl = user?.avatarUrl ?: "",
-                    isPremium = user?.isPremium ?: false
+                    isPremium = user?.isPremium ?: false,
+                    shareLink = "https://beatly.app/user/@$username"
                 )}
             }
             .launchIn(viewModelScope)

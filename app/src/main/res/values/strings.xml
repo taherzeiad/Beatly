@@ -1,3 +1,30 @@
 <resources>
     <string name="app_name">Beatly</string>
+
+    <!-- Profile & Settings -->
+    <string name="profile">Profile</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="notification">Notification</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="audio_video">Audio &amp; Video</string>
+    <string name="playback">Playback</string>
+    <string name="data_saver">Data Saver &amp; Storage</string>
+    <string name="security">Security</string>
+    <string name="language">Language</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="about">About</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="logout">Logout</string>
+    <string name="get_premium">Get Premium</string>
+    <string name="premium_benefits_title">Enjoy All Benefits!</string>
+    <string name="premium_benefits_desc">Enjoy listening songs &amp; podcasts with better audio quality, without restrictions, and without ads.</string>
+    <string name="premium_member_status">You are a Premium Member</string>
+    <string name="share_profile">Share Profile</string>
+    <string name="direct_link">Direct Link</string>
+    <string name="copy">Copy</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="yes_logout">Yes, Logout</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="profile_updated_success">Profile updated successfully!</string>
 </resources>

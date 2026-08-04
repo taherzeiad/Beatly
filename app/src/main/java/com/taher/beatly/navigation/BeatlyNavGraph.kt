@@ -27,12 +27,14 @@ import com.taher.beatly.ui.onboarding.OnboardingScreen
 import com.taher.beatly.ui.player.PlayMusicScreen
 import com.taher.beatly.ui.search.SearchArtistsScreen
 import com.taher.beatly.ui.search.ExploreScreen
+import com.taher.beatly.ui.settings.AboutScreen
 import com.taher.beatly.ui.settings.AudioVideoScreen
 import com.taher.beatly.ui.settings.DataSaverScreen
 import com.taher.beatly.ui.settings.EditProfileScreen
 import com.taher.beatly.ui.settings.LanguageScreen
 import com.taher.beatly.ui.settings.NotificationScreen
 import com.taher.beatly.ui.settings.PlaybackScreen
+import com.taher.beatly.ui.settings.PrivacyPolicyScreen
 import com.taher.beatly.ui.settings.SecurityScreen
 import com.taher.beatly.ui.splash.SplashScreen
 import com.taher.beatly.ui.subscription.AddCardScreen
@@ -381,10 +383,12 @@ fun BeatlyNavGraph() {
             LanguageScreen(onBackClicked = { popBack() }, onChanged = { popBack() })
         }
         composable(Screen.PrivacyPolicy.route) {
-            com.taher.beatly.ui.settings.PrivacyPolicyScreen(onBackClicked = { popBack() })
+            PrivacyPolicyScreen(
+                onBackClicked = { popBack() })
         }
         composable(Screen.About.route) {
-            com.taher.beatly.ui.settings.AboutScreen(onBackClicked = { popBack() })
+            AboutScreen(
+                onBackClicked = { popBack() })
         }
 
         // ===================== Subscription Flow =====================

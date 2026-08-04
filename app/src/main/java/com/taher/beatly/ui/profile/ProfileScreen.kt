@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.taher.beatly.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taher.beatly.ui.components.BeatlyBottomBar
@@ -108,7 +110,10 @@ fun ProfileContent(
         )
     }
     if (showShareSheet) {
-        ShareProfileBottomSheet(onDismiss = { showShareSheet = false })
+        ShareProfileBottomSheet(
+            onDismiss = { showShareSheet = false },
+            shareLink = uiState.shareLink
+        )
     }
 
     Scaffold(
@@ -135,9 +140,9 @@ fun ProfileContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                RoundIconButton(Icons.Default.ArrowBackIosNew, onBackClicked, "Back")
+                RoundIconButton(Icons.Default.ArrowBackIosNew, onBackClicked, stringResource(R.string.cancel))
                 Text(
-                    "Profile",
+                    stringResource(R.string.profile),
                     style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextBlack
                 )
@@ -204,14 +209,14 @@ fun ProfileContent(
                             .padding(20.dp)
                     ) {
                         Text(
-                            "Enjoy All Benefits!",
+                            stringResource(R.string.premium_benefits_title),
                             fontSize = 20.sp,
                             style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
                             color = White
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            "Enjoy listening songs & podcasts with better audio quality, without restrictions, and without ads.",
+                            stringResource(R.string.premium_benefits_desc),
                             style = BodyXSmallRegular, color = White.copy(alpha = 0.85f),
                             modifier = Modifier.widthIn(max = 240.dp)
                         )
@@ -223,7 +228,7 @@ fun ProfileContent(
                             contentPadding = PaddingValues(horizontal = 18.dp)
                         ) {
                             Text(
-                                "Get Premium",
+                                stringResource(R.string.get_premium),
                                 style = BodySmallRegular.copy(fontWeight = FontWeight.SemiBold),
                                 color = Purple500,
                                 fontSize = 14.sp
@@ -244,7 +249,7 @@ fun ProfileContent(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.Star, null, tint = White, modifier = Modifier.size(32.dp))
                         Text(
-                            "You are a Premium Member",
+                            stringResource(R.string.premium_member_status),
                             style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
                             color = White
                         )
@@ -317,8 +322,23 @@ private fun SettingRow(
             }
             Icon(icon, null, tint = Gray600, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(14.dp))
+            val label = when (item.id) {
+                "profile" -> stringResource(R.string.edit_profile)
+                "notification" -> stringResource(R.string.notification)
+                "dark_mode" -> stringResource(R.string.dark_mode)
+                "audio_video" -> stringResource(R.string.audio_video)
+                "playback" -> stringResource(R.string.playback)
+                "downloads" -> stringResource(R.string.data_saver)
+                "privacy_policy" -> stringResource(R.string.privacy_policy)
+                "security" -> stringResource(R.string.security)
+                "language" -> stringResource(R.string.language)
+                "about" -> stringResource(R.string.about)
+                "delete_account" -> stringResource(R.string.delete_account)
+                "logout" -> stringResource(R.string.logout)
+                else -> item.label
+            }
             Text(
-                item.label,
+                label,
                 style = BodySmallRegular,
                 color = TextBlack,
                 modifier = Modifier.weight(1f)
@@ -353,7 +373,7 @@ fun DeleteAccountDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
         shape = RoundedCornerShape(24.dp),
         title = {
             Text(
-                "Delete Account", style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
+                stringResource(R.string.delete_account), style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
                 color = TextBlack
             )
         },
@@ -369,7 +389,7 @@ fun DeleteAccountDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
                 border = androidx.compose.foundation.BorderStroke(1.dp, Gray200),
                 modifier = Modifier.height(44.dp)
             ) {
-                Text("Cancel", style = BodySmallRegular, color = TextBlack)
+                Text(stringResource(R.string.cancel), style = BodySmallRegular, color = TextBlack)
             }
         },
         confirmButton = {
@@ -378,7 +398,7 @@ fun DeleteAccountDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = Purple500),
                 modifier = Modifier.height(44.dp)
             ) {
-                Text("Delete", style = BodySmallRegular, color = White)
+                Text(stringResource(R.string.delete), style = BodySmallRegular, color = White)
             }
         }
     )
@@ -399,7 +419,7 @@ fun LogoutDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Logout",
+                stringResource(R.string.logout),
                 style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
                 color = Color.Red
             )
@@ -416,7 +436,7 @@ fun LogoutDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
                     shape = RoundedCornerShape(50),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Gray200)
                 ) {
-                    Text("Cancel", style = BodySmallRegular, color = TextBlack)
+                    Text(stringResource(R.string.cancel), style = BodySmallRegular, color = TextBlack)
                 }
                 Button(
                     onClick = onConfirm, modifier = Modifier
@@ -425,7 +445,7 @@ fun LogoutDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
                     shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(containerColor = Purple500)
                 ) {
-                    Text("Yes, Logout", style = BodySmallRegular, color = White)
+                    Text(stringResource(R.string.yes_logout), style = BodySmallRegular, color = White)
                 }
             }
         }
@@ -434,9 +454,8 @@ fun LogoutDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShareProfileBottomSheet(onDismiss: () -> Unit) {
+fun ShareProfileBottomSheet(onDismiss: () -> Unit, shareLink: String) {
     val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
-    val profileLink = "https://beatly.com/profile/jenny_wilson" // Mock link
 
     ModalBottomSheet(
         onDismissRequest = onDismiss, containerColor = White,
@@ -458,7 +477,7 @@ fun ShareProfileBottomSheet(onDismiss: () -> Unit) {
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    "Share Profile",
+                    stringResource(R.string.share_profile),
                     style = BodyMediumMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextBlack
                 )
@@ -477,7 +496,7 @@ fun ShareProfileBottomSheet(onDismiss: () -> Unit) {
             }
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                "Direct Link",
+                stringResource(R.string.direct_link),
                 style = BodySmallRegular.copy(fontWeight = FontWeight.SemiBold),
                 color = TextBlack,
                 modifier = Modifier.fillMaxWidth()
@@ -495,7 +514,7 @@ fun ShareProfileBottomSheet(onDismiss: () -> Unit) {
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     Text(
-                        profileLink,
+                        shareLink,
                         style = BodySmallRegular,
                         color = Gray500,
                         maxLines = 1
@@ -504,12 +523,12 @@ fun ShareProfileBottomSheet(onDismiss: () -> Unit) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = {
-                        clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(profileLink))
+                        clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(shareLink))
                     }, shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(containerColor = Purple500),
                     modifier = Modifier.height(44.dp)
                 ) {
-                    Text("Copy", style = BodySmallRegular, color = White)
+                    Text(stringResource(R.string.copy), style = BodySmallRegular, color = White)
                 }
             }
         }
