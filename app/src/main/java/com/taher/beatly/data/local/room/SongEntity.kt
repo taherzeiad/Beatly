@@ -47,6 +47,14 @@ data class ArtistEntity(
     val isFollowing      : Boolean = false
 )
 
+@Entity(tableName = "artist_play_counts")
+data class ArtistPlayCountEntity(
+    @PrimaryKey val artistId: String,
+    val name: String,
+    val imageUrl: String,
+    val playCount: Int = 0
+)
+
 // ── DAOs ───────────────────────────────────────────────────────────────────
 
 @Dao
@@ -94,15 +102,28 @@ interface ArtistDao {
     suspend fun setFollowing(id: String, following: Boolean)
 }
 
+@Dao
+interface ArtistPlayCountDao {
+    @Query("SELECT * FROM artist_play_counts ORDER BY playCount DESC LIMIT 20")
+    fun getTopArtistsFlow(): Flow<List<ArtistPlayCountEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(entity: ArtistPlayCountEntity)
+
+    @Query("UPDATE artist_play_counts SET playCount = playCount + 1 WHERE artistId = :artistId")
+    suspend fun incrementPlayCount(artistId: String)
+}
+
 // ── Database ───────────────────────────────────────────────────────────────
 
 @Database(
-    entities = [SongEntity::class, RecentlyPlayedEntity::class, ArtistEntity::class],
-    version  = 2,
+    entities = [SongEntity::class, RecentlyPlayedEntity::class, ArtistEntity::class, ArtistPlayCountEntity::class],
+    version  = 3,
     exportSchema = false
 )
 abstract class BeatlyDatabase : RoomDatabase() {
     abstract fun songDao()          : SongDao
     abstract fun recentlyPlayedDao(): RecentlyPlayedDao
     abstract fun artistDao()        : ArtistDao
+    abstract fun artistPlayCountDao(): ArtistPlayCountDao
 }

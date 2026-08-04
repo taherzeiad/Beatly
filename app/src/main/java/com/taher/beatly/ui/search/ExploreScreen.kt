@@ -39,8 +39,8 @@ fun ExploreScreen(
         onSearchClick = onSearchClick,
         onGenreClick = onGenreClick,
         onSeeAllGenres = onSeeAllGenres,
-        onSongClick = { song ->
-            viewModel.onPlaySong(song)
+        onSongClick = { song, section ->
+            viewModel.onPlaySong(song, section)
             onSongClick(song)
         }
     )
@@ -52,7 +52,7 @@ fun ExploreScreenContent(
     onSearchClick: () -> Unit,
     onGenreClick: (String) -> Unit,
     onSeeAllGenres: () -> Unit,
-    onSongClick: (Song) -> Unit,
+    onSongClick: (Song, String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -92,11 +92,11 @@ fun ExploreScreenContent(
         SectionHeader(title = "Genres", onSeeAllClick = onSeeAllGenres)
         Spacer(Modifier.height(12.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            val genres = listOf("Dance", "Pop", "Jazz", "Classical", "Latin", "Electronic", "Rock", "Acoustic")
+            val genres = listOf("Pop", "Hip Hop", "Dance", "Jazz", "Classical", "Rock", "Latin", "Romance")
             items(genres) { genre ->
                 FilterChip(
                     selected = false,
-                    onClick = { onGenreClick(genre) },
+                    onClick = { onGenreClick(genre.lowercase()) },
                     label = { Text(genre) },
                     shape = RoundedCornerShape(50),
                     colors = FilterChipDefaults.filterChipColors(containerColor = SurfaceFill)
@@ -106,16 +106,20 @@ fun ExploreScreenContent(
 
         Spacer(Modifier.height(24.dp))
         
-        // ── Just For Your ─────────────────────────────────────────────────
-        SectionHeader(title = "Just For Your", onSeeAllClick = {})
+        // ── Just For You ──────────────────────────────────────────────────
+        SectionHeader(title = "Just For You", onSeeAllClick = {})
         Spacer(Modifier.height(12.dp))
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(uiState.trendingSongs) { song ->
-                Column(modifier = Modifier.width(150.dp).clickable { onSongClick(song) }) {
-                    BeatlyImage(url = song.imageUrl, modifier = Modifier.size(150.dp))
-                    Spacer(Modifier.height(8.dp))
-                    Text(song.title, style = MaterialTheme.typography.labelLarge, maxLines = 1)
-                    Text(song.artistName, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+        if (uiState.justForYouSongs.isEmpty() && !uiState.isLoading) {
+             Text("No recommendations yet", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                items(uiState.justForYouSongs, key = { it.id }) { song ->
+                    Column(modifier = Modifier.width(150.dp).clickable { onSongClick(song, "just_for_you") }) {
+                        BeatlyImage(url = song.imageUrl, modifier = Modifier.size(150.dp))
+                        Spacer(Modifier.height(8.dp))
+                        Text(song.title, style = MaterialTheme.typography.labelLarge, maxLines = 1)
+                        Text(song.artistName, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }
@@ -125,9 +129,13 @@ fun ExploreScreenContent(
         // ── Top Songs ─────────────────────────────────────────────────────
         SectionHeader(title = "Top Songs", onSeeAllClick = {})
         Spacer(Modifier.height(12.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            uiState.trendingSongs.forEachIndexed { index, song ->
-                TopSongRow(index + 1, song, onSongClick)
+        if (uiState.topSongs.isEmpty() && !uiState.isLoading) {
+            Text("No top songs available", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                uiState.topSongs.forEachIndexed { index, song ->
+                    TopSongRow(index + 1, song) { onSongClick(song, "top_songs") }
+                }
             }
         }
         
@@ -136,12 +144,12 @@ fun ExploreScreenContent(
 }
 
 @Composable
-fun TopSongRow(index: Int, song: Song, onClick: (Song) -> Unit) {
+fun TopSongRow(index: Int, song: Song, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(song) }
+            .clickable { onClick() }
     ) {
         Text(
             text = "$index",

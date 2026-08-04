@@ -1,3 +1,103 @@
 <resources>
     <string name="app_name">Beatly</string>
+
+    <!-- Profile & Settings -->
+    <string name="profile">Profile</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="notification">Notification</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="audio_video">Audio &amp; Video</string>
+    <string name="playback">Playback</string>
+    <string name="data_saver">Data Saver &amp; Storage</string>
+    <string name="security">Security</string>
+    <string name="language">Language</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="about">About</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="logout">Logout</string>
+    <string name="get_premium">Get Premium</string>
+    <string name="premium_benefits_title">Enjoy All Benefits!</string>
+    <string name="premium_benefits_desc">Enjoy listening songs &amp; podcasts with better audio quality, without restrictions, and without ads.</string>
+    <string name="premium_member_status">You are a Premium Member</string>
+    <string name="share_profile">Share Profile</string>
+    <string name="direct_link">Direct Link</string>
+    <string name="copy">Copy</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="yes_logout">Yes, Logout</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="profile_updated_success">Profile updated successfully!</string>
+
+    <!-- Notification types -->
+    <string name="notif_recommended">Recommended Music</string>
+    <string name="notif_new_music">New Music</string>
+    <string name="notif_playlist">Playlist Updates</string>
+    <string name="notif_concert">Concert Notifications</string>
+    <string name="notif_artist">Artist Updates</string>
+    <string name="notif_product_news">Product News</string>
+    <string name="notif_events">Events</string>
+
+    <!-- Audio Quality -->
+    <string name="quality_automatic">Automatic</string>
+    <string name="quality_normal">Normal</string>
+    <string name="quality_high">High</string>
+    <string name="quality_extreme">Extreme</string>
+    <string name="wifi_streaming">Wi-Fi Streaming</string>
+    <string name="cellular_streaming">Data Cellular Streaming</string>
+    <string name="download">Download</string>
+    <string name="audio_quality">Audio Quality</string>
+    <string name="video_quality">Video Quality</string>
+    <string name="auto_adjust_quality">Auto Adjust Quality</string>
+
+    <!-- About & Privacy -->
+    <string name="about_beatly_desc">Beatly is a premium music streaming experience designed for true audiophiles. Enjoy millions of songs, high-quality audio, and personalized recommendations.</string>
+    <string name="version">Version 1.0.0</string>
+    <string name="privacy_desc">Your privacy is important to us. Beatly collects minimal data to provide you with the best music experience. We do not sell your personal information to third parties.</string>
+    <string name="data_collection_title">1. Data Collection</string>
+    <string name="data_collection_desc">We collect your email and name to create your account.</string>
+    <string name="usage_title">2. Usage</string>
+    <string name="usage_desc">Your listening history is used to improve your recommendations.</string>
+
+    <!-- Edit Profile Labels -->
+    <string name="name">Name</string>
+    <string name="username">Username</string>
+    <string name="birth_date">Birth Date</string>
+    <string name="mail">Mail</string>
+    <string name="gender">Gender</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="gender_other">Prefer not to say</string>
+
+    <!-- Playback Settings -->
+    <string name="gapless">Gapless</string>
+    <string name="gapless_desc">Allows gapless playback.</string>
+    <string name="automix">Automix</string>
+    <string name="automix_desc">Transitions between songs on select playlists.</string>
+    <string name="explicit">Allow Explicit Content</string>
+    <string name="explicit_desc">Turn on play explicit content.</string>
+    <string name="normalize">Normalize Volume</string>
+    <string name="normalize_desc">Set the same volume level for all tracks.</string>
+    <string name="canvas">Canvas</string>
+    <string name="canvas_desc">Display short, looping visuals on tracks.</string>
+    <string name="broadcast">Device Broadcast Status</string>
+    <string name="broadcast_desc">Allow other apps on your device to see what you are listening to.</string>
+
+    <!-- Data Saver Settings -->
+    <string name="audio_quality_saver_desc">Sets your audio quality to low (24kbit/s) and disables artist canvases.</string>
+    <string name="podcasts">Podcasts</string>
+    <string name="download_audio_only">Download Audio Only</string>
+    <string name="download_audio_only_desc">Save video podcasts as audio only.</string>
+    <string name="stream_audio_only">Stream Audio Only</string>
+    <string name="stream_audio_only_desc">Play video podcasts as audio only when not connected on Wi-Fi.</string>
+    <string name="storage">Storage</string>
+    <string name="other_apps">Other Apps</string>
+    <string name="cache">Cache</string>
+
+    <!-- Security Settings -->
+    <string name="remember_me">Remember me</string>
+    <string name="face_id">Face ID</string>
+    <string name="biometric_id">Biometric ID</string>
+    <string name="google_authenticator">Google Authenticator</string>
+    <string name="change_pin">Change Pin</string>
+    <string name="change_password">Change Password</string>
 </resources>

@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.StateFlow
 interface MusicRepository {
     fun getUserName(): Flow<String>
     suspend fun getTrendingSongs(): BeatlyResult<List<Song>>
+    suspend fun getRecommendedSongs(): BeatlyResult<List<Song>>
     suspend fun getTopArtists(): BeatlyResult<List<Artist>>
+    fun getUserTopArtists(): Flow<List<Artist>>
     suspend fun getRecentlyPlayed(userId: String): BeatlyResult<List<Song>>
     fun getRecentlyPlayedFlow(userId: String): Flow<List<Song>>
     suspend fun getArtistDetail(artistId: String): BeatlyResult<Artist>

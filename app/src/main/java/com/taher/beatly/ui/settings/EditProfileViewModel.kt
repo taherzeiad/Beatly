@@ -59,30 +59,60 @@ class LanguageViewModel @Inject constructor(
 
 // ── Notification ───────────────────────────────────────────────────────────
 
-data class NotificationItem(val id: String, val label: String, val subtitle: String = "Push, Email")
+data class NotificationItem(
+    val id: String,
+    val labelRes: Int,
+    val subtitle: String = "Push, Email",
+    val enabled: Boolean = true
+)
+
 data class NotificationUiState(
     val items: List<NotificationItem> = emptyList(),
     val success: Boolean = false
 )
 
 @HiltViewModel
-class NotificationViewModel @Inject constructor() : ViewModel() {
+class NotificationViewModel @Inject constructor(
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(NotificationUiState())
     val uiState: StateFlow<NotificationUiState> = _uiState.asStateFlow()
 
     init {
-        _uiState.update {
-            it.copy(
-                items = listOf(
-                    NotificationItem("recommended", "Recommended Music"),
-                    NotificationItem("new_music", "New Music"),
-                    NotificationItem("playlist", "Playlist Updates"),
-                    NotificationItem("concert", "Concert Notifications"),
-                    NotificationItem("artist", "Artist Updates"),
-                    NotificationItem("product_news", "Product News"),
-                    NotificationItem("events", "Events"),
-                )
+        combine(
+            settingsRepository.notifRecommended,
+            settingsRepository.notifNewMusic,
+            settingsRepository.notifPlaylist,
+            settingsRepository.notifConcert,
+            settingsRepository.notifArtist,
+            settingsRepository.notifNews,
+            settingsRepository.notifEvents
+        ) { values ->
+            listOf(
+                NotificationItem("recommended",  com.taher.beatly.R.string.notif_recommended,  enabled = values[0]),
+                NotificationItem("new_music",   com.taher.beatly.R.string.notif_new_music,    enabled = values[1]),
+                NotificationItem("playlist",    com.taher.beatly.R.string.notif_playlist,     enabled = values[2]),
+                NotificationItem("concert",     com.taher.beatly.R.string.notif_concert,      enabled = values[3]),
+                NotificationItem("artist",      com.taher.beatly.R.string.notif_artist,       enabled = values[4]),
+                NotificationItem("product_news", com.taher.beatly.R.string.notif_product_news,  enabled = values[5]),
+                NotificationItem("events",       com.taher.beatly.R.string.notif_events,        enabled = values[6]),
             )
+        }.onEach { items ->
+            _uiState.update { it.copy(items = items) }
+        }.launchIn(viewModelScope)
+    }
+
+    fun onToggled(id: String, enabled: Boolean) {
+        viewModelScope.launch {
+            when (id) {
+                "recommended"  -> settingsRepository.setNotifRecommended(enabled)
+                "new_music"    -> settingsRepository.setNotifNewMusic(enabled)
+                "playlist"     -> settingsRepository.setNotifPlaylist(enabled)
+                "concert"      -> settingsRepository.setNotifConcert(enabled)
+                "artist"       -> settingsRepository.setNotifArtist(enabled)
+                "product_news" -> settingsRepository.setNotifNews(enabled)
+                "events"       -> settingsRepository.setNotifEvents(enabled)
+            }
         }
     }
 
@@ -169,9 +199,14 @@ class EditProfileViewModel @Inject constructor(
 // ── Audio & Video ─────────────────────────────────────────────────────────
 
 data class AudioVideoUiState(
-    val wifiStreamingAudio: String = "High", val cellularStreamingAudio: String = "Automatic",
-    val autoAdjustQuality: Boolean = true, val downloadQuality: String = "Normal",
-    val wifiStreamingVideo: String = "High", val cellularStreamingVideo: String = "Medium",
+    val wifiStreamingAudio: String = "High", 
+    val cellularStreamingAudio: String = "Automatic",
+    val autoAdjustQuality: Boolean = true, 
+    val downloadQuality: String = "Normal",
+    val wifiStreamingVideo: String = "High", 
+    val cellularStreamingVideo: String = "Medium",
+    val isQualityDialogVisible: Boolean = false,
+    val activeSelectionKey: String = "", // "wifi", "cellular", "download"
     val success: Boolean = false
 )
 
@@ -187,9 +222,8 @@ class AudioVideoViewModel @Inject constructor(
             settingsRepository.wifiAudio,
             settingsRepository.cellularAudio,
             settingsRepository.autoAdjustQuality,
-            settingsRepository.downloadQuality,
-            settingsRepository.isDarkMode // Just to have 5 flows if needed, or just combine 4
-        ) { wifi, cellular, auto, download, _ ->
+            settingsRepository.downloadQuality
+        ) { wifi, cellular, auto, download ->
             AudioVideoUiState(
                 wifiStreamingAudio = wifi,
                 cellularStreamingAudio = cellular,
@@ -212,6 +246,25 @@ class AudioVideoViewModel @Inject constructor(
         }
     }
 
+    fun onQualityRowClicked(key: String) {
+        _uiState.update { it.copy(isQualityDialogVisible = true, activeSelectionKey = key) }
+    }
+
+    fun onQualityDialogDismiss() {
+        _uiState.update { it.copy(isQualityDialogVisible = false, activeSelectionKey = "") }
+    }
+
+    fun onQualitySelected(quality: String) {
+        viewModelScope.launch {
+            when (_uiState.value.activeSelectionKey) {
+                "wifi" -> settingsRepository.setWifiAudio(quality)
+                "cellular" -> settingsRepository.setCellularAudio(quality)
+                "download" -> settingsRepository.setDownloadQuality(quality)
+            }
+            onQualityDialogDismiss()
+        }
+    }
+
     fun onUpdate() {
         _uiState.update { it.copy(success = true) }
     }
@@ -221,8 +274,8 @@ class AudioVideoViewModel @Inject constructor(
 
 data class PlaybackSetting(
     val id: String,
-    val label: String,
-    val subtitle: String,
+    val labelRes: Int,
+    val subtitleRes: Int,
     val enabled: Boolean
 )
 
@@ -244,14 +297,14 @@ class PlaybackViewModel @Inject constructor(
             settingsRepository.automix,
             settingsRepository.explicit,
             settingsRepository.normalize
-        ) { gapless, automix, explicit, normalize ->
+        ) { values ->
             listOf(
-                PlaybackSetting("gapless", "Gapless", "Allows gapless playback.", gapless),
-                PlaybackSetting("automix", "Automixte", "Transitions between songs on select playlists.", automix),
-                PlaybackSetting("explicit", "Allow Explicit Content", "Turn on play explicit content.", explicit),
-                PlaybackSetting("normalize", "Normalize Volume", "Set the same volume level for all tracks.", normalize),
-                PlaybackSetting("canvas", "Canvas", "Display short, looping visuals on tracks.", false),
-                PlaybackSetting("broadcast", "Device Broadcast Status", "Allow other apps on your device to see what you are listening to.", true),
+                PlaybackSetting("gapless",   com.taher.beatly.R.string.gapless,   com.taher.beatly.R.string.gapless_desc,   values[0]),
+                PlaybackSetting("automix",   com.taher.beatly.R.string.automix,   com.taher.beatly.R.string.automix_desc,   values[1]),
+                PlaybackSetting("explicit",  com.taher.beatly.R.string.explicit,  com.taher.beatly.R.string.explicit_desc,  values[2]),
+                PlaybackSetting("normalize", com.taher.beatly.R.string.normalize, com.taher.beatly.R.string.normalize_desc, values[3]),
+                PlaybackSetting("canvas",    com.taher.beatly.R.string.canvas,    com.taher.beatly.R.string.canvas_desc,    false),
+                PlaybackSetting("broadcast", com.taher.beatly.R.string.broadcast, com.taher.beatly.R.string.broadcast_desc, true),
             )
         }.onEach { settings ->
             _uiState.update { it.copy(settings = settings) }

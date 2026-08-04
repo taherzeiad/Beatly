@@ -6,6 +6,7 @@ import com.taher.beatly.domain.model.BeatlyResult
 import com.taher.beatly.domain.repository.MusicRepository
 import com.taher.beatly.model.Song
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +15,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ExploreUiState(
-    val trendingSongs: List<Song> = emptyList(),
+    val justForYouSongs: List<Song> = emptyList(),
+    val topSongs: List<Song> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
@@ -34,29 +36,36 @@ class ExploreViewModel @Inject constructor(
     private fun loadExploreData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            when (val result = musicRepository.getTrendingSongs()) {
-                is BeatlyResult.Success -> {
-                    _uiState.update { it.copy(
+            try {
+                val recommendedJob = async { musicRepository.getRecommendedSongs() }
+                val trendingJob = async { musicRepository.getTrendingSongs() }
+
+                val recommended = recommendedJob.await()
+                val trending = trendingJob.await()
+
+                _uiState.update { state ->
+                    state.copy(
                         isLoading = false,
-                        trendingSongs = result.data.map { it.toUi() }
-                    )}
+                        justForYouSongs = (recommended as? BeatlyResult.Success)?.data?.map { it.toUi() } ?: state.justForYouSongs,
+                        topSongs = (trending as? BeatlyResult.Success)?.data?.map { it.toUi() } ?: state.topSongs,
+                        errorMessage = (recommended as? BeatlyResult.Error)?.message 
+                            ?: (trending as? BeatlyResult.Error)?.message 
+                            ?: state.errorMessage
+                    )
                 }
-                is BeatlyResult.Error -> {
-                    _uiState.update { it.copy(
-                        isLoading = false,
-                        errorMessage = result.message
-                    )}
-                }
-                else -> {
-                    _uiState.update { it.copy(isLoading = false) }
-                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
             }
         }
     }
 
-    fun onPlaySong(song: Song) {
+    fun onPlaySong(song: Song, fromSection: String) {
         viewModelScope.launch {
-            val songs = _uiState.value.trendingSongs
+            val songs = when (fromSection) {
+                "just_for_you" -> _uiState.value.justForYouSongs
+                "top_songs" -> _uiState.value.topSongs
+                else -> listOf(song)
+            }
             val index = songs.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
             if (songs.isNotEmpty()) {
                 musicRepository.playQueue(songs, index)

@@ -96,6 +96,14 @@ class LibraryViewModel @Inject constructor(
     }
 
     fun onPlaySong(song: Song) {
-        viewModelScope.launch { musicRepository.playSong(song) }
+        viewModelScope.launch {
+            val songs = likedSongsState.value.songs
+            val index = songs.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
+            if (songs.isNotEmpty()) {
+                musicRepository.playQueue(songs, index)
+            } else {
+                musicRepository.playSong(song)
+            }
+        }
     }
 }

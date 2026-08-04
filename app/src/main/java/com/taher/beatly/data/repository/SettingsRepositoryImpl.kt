@@ -31,6 +31,14 @@ class SettingsRepositoryImpl @Inject constructor(
     override val downloadAudioOnly: Flow<Boolean> = dataStore.downloadAudioOnly
     override val streamAudioOnly: Flow<Boolean> = dataStore.streamAudioOnly
 
+    override val notifRecommended: Flow<Boolean> = dataStore.notifRecommended
+    override val notifNewMusic: Flow<Boolean> = dataStore.notifNewMusic
+    override val notifPlaylist: Flow<Boolean> = dataStore.notifPlaylist
+    override val notifConcert: Flow<Boolean> = dataStore.notifConcert
+    override val notifArtist: Flow<Boolean> = dataStore.notifArtist
+    override val notifNews: Flow<Boolean> = dataStore.notifNews
+    override val notifEvents: Flow<Boolean> = dataStore.notifEvents
+
     override suspend fun setDarkMode(enabled: Boolean) = dataStore.setDarkMode(enabled)
     override suspend fun setLanguage(lang: String) = dataStore.setLanguage(lang)
     
@@ -51,6 +59,14 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setAudioQualitySaver(v: Boolean) = dataStore.setAudioQualitySaver(v)
     override suspend fun setDownloadAudioOnly(v: Boolean) = dataStore.setDownloadAudioOnly(v)
     override suspend fun setStreamAudioOnly(v: Boolean) = dataStore.setStreamAudioOnly(v)
+
+    override suspend fun setNotifRecommended(v: Boolean) = dataStore.setNotifRecommended(v)
+    override suspend fun setNotifNewMusic(v: Boolean) = dataStore.setNotifNewMusic(v)
+    override suspend fun setNotifPlaylist(v: Boolean) = dataStore.setNotifPlaylist(v)
+    override suspend fun setNotifConcert(v: Boolean) = dataStore.setNotifConcert(v)
+    override suspend fun setNotifArtist(v: Boolean) = dataStore.setNotifArtist(v)
+    override suspend fun setNotifNews(v: Boolean) = dataStore.setNotifNews(v)
+    override suspend fun setNotifEvents(v: Boolean) = dataStore.setNotifEvents(v)
 
     override suspend fun clearAll() = dataStore.clearAll()
 }

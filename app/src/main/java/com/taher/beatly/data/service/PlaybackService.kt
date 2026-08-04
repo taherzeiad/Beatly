@@ -17,7 +17,10 @@ class PlaybackService : MediaSessionService() {
 
     override fun onCreate() {
         super.onCreate()
-        mediaSession = MediaSession.Builder(this, player).build()
+        val callback = object : MediaSession.Callback {}
+        mediaSession = MediaSession.Builder(this, player)
+            .setCallback(callback)
+            .build()
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {

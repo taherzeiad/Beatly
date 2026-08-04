@@ -1,7 +1,10 @@
 package com.taher.beatly.data.repository
 
+import android.app.Application
+import android.content.Intent
 import com.taher.beatly.data.local.room.*
 import com.taher.beatly.data.remote.spotify.*
+import com.taher.beatly.data.service.PlaybackService
 import com.taher.beatly.domain.model.*
 import com.taher.beatly.domain.repository.*
 import com.taher.beatly.model.LibraryItem
@@ -15,11 +18,13 @@ import javax.inject.Singleton
 
 @Singleton
 class MusicRepositoryImpl @Inject constructor(
+    private val app: Application,
     private val spotifyApi: SpotifyApiService,
     private val tokenManager: SpotifyTokenManager,
     private val songDao: SongDao,
     private val recentlyDao: RecentlyPlayedDao,
     private val artistDao: ArtistDao,
+    private val artistPlayCountDao: ArtistPlayCountDao,
     private val libraryRepository: LibraryRepository,
     private val authRepository: AuthRepository,
     private val player: androidx.media3.exoplayer.ExoPlayer,
@@ -82,22 +87,51 @@ class MusicRepositoryImpl @Inject constructor(
 
     override fun getUserName(): Flow<String> = _userName
 
+    override fun getUserTopArtists(): Flow<List<Artist>> {
+        return artistPlayCountDao.getTopArtistsFlow().map { entities ->
+            entities.map {
+                Artist(
+                    id = it.artistId,
+                    name = it.name,
+                    imageUrl = it.imageUrl,
+                    monthlyListeners = 0,
+                    isVerified = false,
+                    isFollowing = false
+                )
+            }
+        }
+    }
+
     // ── Trending songs (New Releases or Recommendations) ───────────────────
     override suspend fun getTrendingSongs(): BeatlyResult<List<Song>> = withContext(ioDispatcher) {
         try {
             val token = tokenManager.getValidToken()
             if (token.isEmpty()) throw Exception("Invalid Spotify Token")
 
-            // If we want real playable tracks, we prefer recommendations
-            val recResponse =
-                spotifyApi.getRecommendations(genres = "pop,hip-hop", limit = 10, token = token)
-            val trendingSongs = recResponse.tracks.map { it.toDomain() }
+            val response = spotifyApi.search(query = "tag:new", type = "track", limit = 15, token = token)
+            val trendingSongs = response.tracks?.items?.map { it.toDomain() } ?: emptyList()
 
             songDao.insertSongs(trendingSongs.map { it.toEntity() })
             BeatlyResult.Success(trendingSongs)
         } catch (e: Exception) {
             android.util.Log.e("MusicRepository", "Error getting trending songs", e)
-            BeatlyResult.Success(getDummySongs())
+            BeatlyResult.Success(getDummySongs().shuffled().take(10))
+        }
+    }
+
+    override suspend fun getRecommendedSongs(): BeatlyResult<List<Song>> = withContext(ioDispatcher) {
+        try {
+            val token = tokenManager.getValidToken()
+            if (token.isEmpty()) throw Exception("Invalid Spotify Token")
+
+            val recResponse = spotifyApi.getRecommendations(genres = "pop,dance,rock", limit = 15, token = token)
+            val recommendedSongs = recResponse.tracks.map { it.toDomain() }
+
+            songDao.insertSongs(recommendedSongs.map { it.toEntity() })
+            BeatlyResult.Success(recommendedSongs)
+        } catch (e: Exception) {
+            android.util.Log.e("MusicRepository", "Error getting recommended songs", e)
+            BeatlyResult.Success(getDummySongs().shuffled().take(8))
         }
     }
 
@@ -305,6 +339,19 @@ class MusicRepositoryImpl @Inject constructor(
                 )
             )
             recentlyDao.trimOld()
+
+            // Update artist play count
+            if (song.artistId.isNotEmpty()) {
+                artistPlayCountDao.insert(
+                    ArtistPlayCountEntity(
+                        artistId = song.artistId,
+                        name = song.artistName,
+                        imageUrl = song.imageUrl ?: ""
+                    )
+                )
+                artistPlayCountDao.incrementPlayCount(song.artistId)
+            }
+
             BeatlyResult.Success(Unit)
         } catch (e: Exception) {
             BeatlyResult.Error(e.message ?: "Failed", e)
@@ -445,6 +492,13 @@ class MusicRepositoryImpl @Inject constructor(
 
     override suspend fun playQueue(songs: List<UiSong>, startIndex: Int) {
         withContext(mainDispatcher) {
+            try {
+                app.startService(Intent(app, PlaybackService::class.java))
+                android.util.Log.d("MusicRepository", "PlaybackService started from Repository")
+            } catch (e: Exception) {
+                android.util.Log.e("MusicRepository", "Failed to start PlaybackService", e)
+            }
+
             currentQueue = songs
             val currentSong = songs.getOrNull(startIndex)
             _playerState.update { it.copy(currentSong = currentSong, isPlaying = true, positionMs = 0, error = null) }
@@ -463,8 +517,9 @@ class MusicRepositoryImpl @Inject constructor(
                     android.util.Log.d("MusicRepository", "Playing Spotify preview: ${song.previewUrl}")
                     song.previewUrl
                 } else {
-                    android.util.Log.w("MusicRepository", "No preview URL for ${song.title}, using fallback")
-                    "https://storage.googleapis.com/exoplayer-test-media-0/Music/The_Show_Must_Go_On.mp3"
+                    val fallback = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+                    android.util.Log.w("MusicRepository", "No preview URL for ${song.title}, using verified fallback: $fallback")
+                    fallback
                 }
 
                 androidx.media3.common.MediaItem.Builder()

@@ -28,6 +28,15 @@ interface SettingsRepository {
     val downloadAudioOnly: Flow<Boolean>
     val streamAudioOnly: Flow<Boolean>
 
+    // Notifications
+    val notifRecommended: Flow<Boolean>
+    val notifNewMusic: Flow<Boolean>
+    val notifPlaylist: Flow<Boolean>
+    val notifConcert: Flow<Boolean>
+    val notifArtist: Flow<Boolean>
+    val notifNews: Flow<Boolean>
+    val notifEvents: Flow<Boolean>
+
     suspend fun setDarkMode(enabled: Boolean)
     suspend fun setLanguage(lang: String)
     
@@ -48,6 +57,14 @@ interface SettingsRepository {
     suspend fun setAudioQualitySaver(v: Boolean)
     suspend fun setDownloadAudioOnly(v: Boolean)
     suspend fun setStreamAudioOnly(v: Boolean)
+
+    suspend fun setNotifRecommended(v: Boolean)
+    suspend fun setNotifNewMusic(v: Boolean)
+    suspend fun setNotifPlaylist(v: Boolean)
+    suspend fun setNotifConcert(v: Boolean)
+    suspend fun setNotifArtist(v: Boolean)
+    suspend fun setNotifNews(v: Boolean)
+    suspend fun setNotifEvents(v: Boolean)
 
     suspend fun clearAll()
 }
