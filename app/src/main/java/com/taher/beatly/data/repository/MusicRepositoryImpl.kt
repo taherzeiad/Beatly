@@ -1,7 +1,10 @@
 package com.taher.beatly.data.repository
 
+import android.app.Application
+import android.content.Intent
 import com.taher.beatly.data.local.room.*
 import com.taher.beatly.data.remote.spotify.*
+import com.taher.beatly.data.service.PlaybackService
 import com.taher.beatly.domain.model.*
 import com.taher.beatly.domain.repository.*
 import com.taher.beatly.model.LibraryItem
@@ -15,6 +18,7 @@ import javax.inject.Singleton
 
 @Singleton
 class MusicRepositoryImpl @Inject constructor(
+    private val app: Application,
     private val spotifyApi: SpotifyApiService,
     private val tokenManager: SpotifyTokenManager,
     private val songDao: SongDao,
@@ -445,6 +449,13 @@ class MusicRepositoryImpl @Inject constructor(
 
     override suspend fun playQueue(songs: List<UiSong>, startIndex: Int) {
         withContext(mainDispatcher) {
+            try {
+                app.startService(Intent(app, PlaybackService::class.java))
+                android.util.Log.d("MusicRepository", "PlaybackService started from Repository")
+            } catch (e: Exception) {
+                android.util.Log.e("MusicRepository", "Failed to start PlaybackService", e)
+            }
+
             currentQueue = songs
             val currentSong = songs.getOrNull(startIndex)
             _playerState.update { it.copy(currentSong = currentSong, isPlaying = true, positionMs = 0, error = null) }
@@ -463,8 +474,9 @@ class MusicRepositoryImpl @Inject constructor(
                     android.util.Log.d("MusicRepository", "Playing Spotify preview: ${song.previewUrl}")
                     song.previewUrl
                 } else {
-                    android.util.Log.w("MusicRepository", "No preview URL for ${song.title}, using fallback")
-                    "https://storage.googleapis.com/exoplayer-test-media-0/Music/The_Show_Must_Go_On.mp3"
+                    val fallback = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+                    android.util.Log.w("MusicRepository", "No preview URL for ${song.title}, using verified fallback: $fallback")
+                    fallback
                 }
 
                 androidx.media3.common.MediaItem.Builder()

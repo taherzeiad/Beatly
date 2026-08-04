@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.DefaultDataSource
 import com.taher.beatly.data.local.room.BeatlyDatabase
 import com.taher.beatly.data.remote.spotify.SpotifyApiService
 import com.taher.beatly.data.remote.spotify.SpotifyTokenService
@@ -39,7 +40,6 @@ object AppModule {
     @Provides @Singleton @Named("Main")
     fun provideMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
 
-    // ── Player ─────────────────────────────────────────────────────────────
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     @Provides @Singleton
     fun provideExoPlayer(@ApplicationContext context: Context): ExoPlayer {
@@ -49,18 +49,22 @@ object AppModule {
             .build()
 
         val httpDataSourceFactory = DefaultHttpDataSource.Factory()
-            .setUserAgent("Beatly/1.0")
+            .setUserAgent("Beatly-Android/1.0")
             .setAllowCrossProtocolRedirects(true)
+            .setConnectTimeoutMs(15000)
+            .setReadTimeoutMs(15000)
+
+        val dataSourceFactory = DefaultDataSource.Factory(context, httpDataSourceFactory)
 
         val mediaSourceFactory = DefaultMediaSourceFactory(context)
-            .setDataSourceFactory(httpDataSourceFactory)
+            .setDataSourceFactory(dataSourceFactory)
 
         return ExoPlayer.Builder(context)
             .setMediaSourceFactory(mediaSourceFactory)
-            .build().apply {
-                setAudioAttributes(audioAttributes, true)
-                setHandleAudioBecomingNoisy(true) // Pause on headphones unplugged
-            }
+            .setAudioAttributes(audioAttributes, true)
+            .setHandleAudioBecomingNoisy(true)
+            .setWakeMode(androidx.media3.common.C.WAKE_MODE_NETWORK)
+            .build()
     }
 
     // ── Firebase ───────────────────────────────────────────────────────────
