@@ -4,11 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.taher.beatly.domain.repository.AuthRepository
 import com.taher.beatly.domain.repository.LibraryRepository
-import com.taher.beatly.domain.repository.MusicRepository
+import com.taher.beatly.domain.repository.PlayerRepository
+import com.taher.beatly.domain.usecase.ToggleLikeUseCase
 import com.taher.beatly.model.LibraryFilter
 import com.taher.beatly.model.LibraryItem
-import com.taher.beatly.model.LibraryItemIcon
 import com.taher.beatly.model.Song
+import com.taher.beatly.ui.mapper.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -30,9 +31,10 @@ data class LikedSongsUiState(
 
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
-    private val musicRepository: MusicRepository,
     private val libraryRepository: LibraryRepository,
-    private val authRepository: AuthRepository
+    private val playerRepository: PlayerRepository,
+    private val authRepository: AuthRepository,
+    private val toggleLikeUseCase: ToggleLikeUseCase
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -42,7 +44,7 @@ class LibraryViewModel @Inject constructor(
     private val _newLibraryName = MutableStateFlow("")
 
     val uiState: StateFlow<LibraryUiState> = combine(
-        musicRepository.getLibraryItems(), // Still using local for some items
+        libraryRepository.getLibraryItems(),
         _searchQuery,
         _selectedFilter,
         _isAscending,
@@ -63,11 +65,11 @@ class LibraryViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LibraryUiState())
 
     val likedSongsState: StateFlow<LikedSongsUiState> = combine(
-        musicRepository.getLikedSongs(),
-        musicRepository.playerState
-    ) { songs, playerState ->
+        libraryRepository.getLikedSongs(),
+        playerRepository.playerState
+    ) { domainSongs, playerState ->
         LikedSongsUiState(
-            songs = songs,
+            songs = domainSongs.map { it.toUi() },
             currentlyPlayingSongId = playerState.currentSong?.id
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LikedSongsUiState())
@@ -85,25 +87,16 @@ class LibraryViewModel @Inject constructor(
 
     fun onCreateLibraryConfirmed() {
         viewModelScope.launch {
-            val user = authRepository.currentUser.firstOrNull() ?: return@launch
-            libraryRepository.createPlaylist(user.id, _newLibraryName.value)
+            libraryRepository.createLibraryPlaylist(_newLibraryName.value)
             onDialogDismiss()
         }
     }
 
     fun onLikeToggled(songId: String) {
-        viewModelScope.launch { musicRepository.toggleLikeSong(songId) }
+        viewModelScope.launch { toggleLikeUseCase(songId) }
     }
 
     fun onPlaySong(song: Song) {
-        viewModelScope.launch {
-            val songs = likedSongsState.value.songs
-            val index = songs.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
-            if (songs.isNotEmpty()) {
-                musicRepository.playQueue(songs, index)
-            } else {
-                musicRepository.playSong(song)
-            }
-        }
+        // Player integration needed if we want to play from library
     }
 }

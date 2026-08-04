@@ -1,9 +1,16 @@
 package com.taher.beatly.domain.repository
 
 import com.taher.beatly.domain.model.*
+import com.taher.beatly.model.LibraryItem
 import kotlinx.coroutines.flow.Flow
 
 interface LibraryRepository {
+    fun getLibraryItems(): Flow<List<LibraryItem>>
+    fun getLikedSongs(): Flow<List<Song>>
+    suspend fun toggleLikeSong(songId: String)
+    suspend fun createLibraryPlaylist(name: String)
+
+    // Lower level methods (Firestore)
     fun getLibrary(userId: String): Flow<BeatlyResult<List<Playlist>>>
     fun getLikedSongsFlow(userId: String): Flow<BeatlyResult<List<Song>>>
     fun getFollowedArtistsFlow(userId: String): Flow<BeatlyResult<List<Artist>>>

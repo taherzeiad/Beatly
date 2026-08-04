@@ -26,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taher.beatly.model.Artist
 import com.taher.beatly.model.Song
 import com.taher.beatly.ui.components.*
+import com.taher.beatly.ui.mapper.toUi
 
 /**
  * Stateful entry point wired to Hilt + the real ViewModel.
@@ -51,9 +52,8 @@ fun HomeScreen(
         onSeeAllArtistsClick = onSeeAllArtistsClick,
         onSeeAllRecentClick = onSeeAllRecentClick,
         onArtistClick = onArtistClick,
-        onSongClick = { song ->
-            viewModel.onPlayPauseToggled(song)
-            onSongClick(song)
+        onSongClick = { songId ->
+            viewModel.onPlayPauseToggled(songId)
         },
         onNavigateTab = onNavigateTab,
         onLikeClick = viewModel::onLikeToggled,
@@ -63,10 +63,6 @@ fun HomeScreen(
 
 /**
  * Stateless UI layer — takes plain data and lambdas only, no ViewModel/Hilt.
- * Because it has no dependency on hiltViewModel(), it can be rendered directly
- * inside @Preview (Android Studio's "Split"/"Design" preview pane) with fake
- * data, so you can tweak spacing/colors/layout and see results instantly
- * without running the app on a device or emulator.
  */
 @Composable
 fun HomeScreenContent(
@@ -76,11 +72,15 @@ fun HomeScreenContent(
     onSeeAllArtistsClick: () -> Unit = {},
     onSeeAllRecentClick: () -> Unit = {},
     onArtistClick: (String) -> Unit = {},
-    onSongClick: (Song) -> Unit = {},
+    onSongClick: (String) -> Unit = {},
     onNavigateTab: (BeatlyTab) -> Unit = {},
     onLikeClick: (String) -> Unit = {},
-    onPlayPauseClick: (Song) -> Unit = {},
+    onPlayPauseClick: (String) -> Unit = {},
 ) {
+    // Import the mapper
+    val toUiMapper: (com.taher.beatly.domain.model.Song) -> com.taher.beatly.model.Song = { it.toUi() }
+    val toUiArtistMapper: (com.taher.beatly.domain.model.Artist) -> com.taher.beatly.model.Artist = { it.toUi() }
+
     Scaffold(
         bottomBar = {
             BeatlyBottomBar(
@@ -111,7 +111,7 @@ fun HomeScreenContent(
                     if (uiState.trendingSongs.isEmpty()) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                     } else {
-                        TrendingRow(songs = uiState.trendingSongs, onSongClick = onSongClick)
+                        TrendingRow(songs = uiState.trendingSongs.map(toUiMapper), onSongClick = { onSongClick(it.id) })
                     }
 
                     Spacer(Modifier.height(24.dp))
@@ -120,7 +120,7 @@ fun HomeScreenContent(
                     if (uiState.topArtists.isEmpty()) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                     } else {
-                        TopArtistRow(artists = uiState.topArtists, onArtistClick = onArtistClick)
+                        TopArtistRow(artists = uiState.topArtists.map(toUiArtistMapper), onArtistClick = onArtistClick)
                     }
 
                     Spacer(Modifier.height(24.dp))
@@ -133,12 +133,13 @@ fun HomeScreenContent(
                         )
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            uiState.recentlyPlayed.take(3).forEach { song ->
+                            uiState.recentlyPlayed.take(3).forEach { domainSong ->
+                                val song = domainSong.toUi()
                                 SongRow(
                                     song = song,
                                     onLikeClick = { onLikeClick(song.id) },
-                                    onPlayClick = { onSongClick(song) },
-                                    onPauseClick = { onPlayPauseClick(song) },
+                                    onPlayClick = { onSongClick(song.id) },
+                                    onPauseClick = { onPlayPauseClick(song.id) },
                                     isCurrentlyPlaying = uiState.currentlyPlayingSongId == song.id
                                 )
                             }
@@ -256,24 +257,24 @@ private fun TopArtistRow(artists: List<Artist>, onArtistClick: (String) -> Unit)
 // ─────────────────────────────────────────────────────────────────────────
 
 private val previewSongs = listOf(
-    Song(
+    com.taher.beatly.domain.model.Song(
         id = "s1", title = "Sharks", artistName = "Imagine Dragons", artistId = "a9", isLiked = true
     ),
-    Song(
+    com.taher.beatly.domain.model.Song(
         id = "s2",
         title = "God Is a Woman",
         artistName = "Ariana Grande",
         artistId = "a10",
         isLiked = true
     ),
-    Song(id = "s3", title = "Handsome", artistName = "Warren Hue", artistId = "a11", isLiked = true)
+    com.taher.beatly.domain.model.Song(id = "s3", title = "Handsome", artistName = "Warren Hue", artistId = "a11", isLiked = true)
 )
 
 private val previewArtists = listOf(
-    Artist(id = "a5", name = "Khalid", isVerified = true),
-    Artist(id = "a3", name = "Taylor Swift", isVerified = true),
-    Artist(id = "a1", name = "Justin Bieber", isVerified = true),
-    Artist(id = "a8", name = "Paramore")
+    com.taher.beatly.domain.model.Artist(id = "a5", name = "Khalid"),
+    com.taher.beatly.domain.model.Artist(id = "a3", name = "Taylor Swift"),
+    com.taher.beatly.domain.model.Artist(id = "a1", name = "Justin Bieber"),
+    com.taher.beatly.domain.model.Artist(id = "a8", name = "Paramore")
 )
 
 private val previewUiState = HomeUiState(
@@ -281,18 +282,18 @@ private val previewUiState = HomeUiState(
     trendingSongs = previewSongs,
     topArtists = previewArtists,
     recentlyPlayed = listOf(
-        Song(
+        com.taher.beatly.domain.model.Song(
             id = "s4",
             title = "Ghost",
             artistName = "Justin Bieber",
             artistId = "a1",
             isLiked = true
         )
-
     ),
     currentlyPlayingSongId = "s4",
     isLoading = false
 )
+
 
 @Preview(showBackground = true, name = "Home – Light")
 @Composable

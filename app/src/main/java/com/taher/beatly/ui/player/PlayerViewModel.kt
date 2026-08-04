@@ -2,8 +2,9 @@ package com.taher.beatly.ui.player
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.taher.beatly.domain.repository.MusicRepository
+import com.taher.beatly.domain.repository.PlayerRepository
 import com.taher.beatly.model.Song
+import com.taher.beatly.ui.mapper.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -19,12 +20,12 @@ data class PlayerUiState(
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-    private val repository: MusicRepository
+    private val playerRepository: PlayerRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<PlayerUiState> = repository.playerState.map { state ->
+    val uiState: StateFlow<PlayerUiState> = playerRepository.playerState.map { state ->
         PlayerUiState(
-            song = state.currentSong,
+            song = state.currentSong?.toUi(),
             isPlaying = state.isPlaying,
             positionMs = state.positionMs,
             durationMs = if (state.durationMs > 0) state.durationMs else 1L,
@@ -37,32 +38,32 @@ class PlayerViewModel @Inject constructor(
     )
 
     fun onPlayPauseClicked() {
-        viewModelScope.launch { repository.togglePlayPause() }
+        viewModelScope.launch { playerRepository.togglePlayPause() }
     }
 
     fun onSeek(positionMs: Long) {
         viewModelScope.launch {
-            repository.seekTo(positionMs)
+            playerRepository.seekTo(positionMs)
         }
     }
 
     fun onSeekForward() {
-        viewModelScope.launch { repository.seekForward() }
+        viewModelScope.launch { playerRepository.seekForward() }
     }
 
     fun onSeekBackward() {
-        viewModelScope.launch { repository.seekBackward() }
+        viewModelScope.launch { playerRepository.seekBackward() }
     }
 
     fun onSkipNext() {
-        viewModelScope.launch { repository.skipNext() }
+        viewModelScope.launch { playerRepository.skipNext() }
     }
 
     fun onSkipPrevious() {
-        viewModelScope.launch { repository.skipPrevious() }
+        viewModelScope.launch { playerRepository.skipPrevious() }
     }
 
     fun onErrorShown() {
-        repository.clearError()
+        playerRepository.clearError()
     }
 }

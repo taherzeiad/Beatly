@@ -85,7 +85,7 @@ fun SearchArtistsScreen(
                                     song = song,
                                     onLikeClick = { viewModel.onLikeToggled(song.id) },
                                     onPlayClick = {
-                                        viewModel.onPlaySong(song)
+                                        viewModel.onPlaySong(song.id)
                                         onSongClick(song)
                                     }
                                 )

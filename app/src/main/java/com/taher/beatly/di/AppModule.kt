@@ -137,4 +137,10 @@ abstract class RepositoryModule {
 
     @Binds @Singleton
     abstract fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
+
+    @Binds @Singleton
+    abstract fun bindSearchRepository(impl: SearchRepositoryImpl): SearchRepository
+
+    @Binds @Singleton
+    abstract fun bindPlayerRepository(impl: PlayerRepositoryImpl): PlayerRepository
 }

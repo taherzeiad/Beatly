@@ -3,12 +3,16 @@ package com.taher.beatly.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.taher.beatly.domain.model.BeatlyResult
+import com.taher.beatly.domain.model.Song as DomainSong
+import com.taher.beatly.domain.model.Artist as DomainArtist
 import com.taher.beatly.domain.repository.AuthRepository
 import com.taher.beatly.domain.repository.MusicRepository
+import com.taher.beatly.domain.repository.PlayerRepository
+import com.taher.beatly.domain.usecase.GetHomeDataUseCase
+import com.taher.beatly.domain.usecase.ToggleLikeUseCase
 import com.taher.beatly.model.Artist
 import com.taher.beatly.model.Song
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -17,10 +21,10 @@ import javax.inject.Inject
 data class HomeUiState(
     val greeting: String = "",
     val userName: String = "",
-    val trendingSongs: List<Song> = emptyList(),
-    val topArtists: List<Artist> = emptyList(),
-    val recentlyPlayed: List<Song> = emptyList(),
-    val currentSong: Song? = null,
+    val trendingSongs: List<DomainSong> = emptyList(),
+    val topArtists: List<DomainArtist> = emptyList(),
+    val recentlyPlayed: List<DomainSong> = emptyList(),
+    val currentSong: DomainSong? = null,
     val currentlyPlayingSongId: String? = null,
     val isPlaying: Boolean = false,
     val isLoading: Boolean = false,
@@ -30,7 +34,10 @@ data class HomeUiState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val musicRepository: MusicRepository,
+    private val playerRepository: PlayerRepository,
     private val authRepository: AuthRepository,
+    private val getHomeDataUseCase: GetHomeDataUseCase,
+    private val toggleLikeUseCase: ToggleLikeUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -46,14 +53,14 @@ class HomeViewModel @Inject constructor(
     private fun observeTopArtists() {
         viewModelScope.launch {
             musicRepository.getUserTopArtists().collectLatest { artists ->
-                _uiState.update { it.copy(topArtists = artists.map { it.toUi() }) }
+                _uiState.update { it.copy(topArtists = artists) }
             }
         }
     }
 
     private fun observePlayerState() {
         viewModelScope.launch {
-            musicRepository.playerState.collectLatest { state ->
+            playerRepository.playerState.collectLatest { state ->
                 _uiState.update {
                     it.copy(
                         currentSong = state.currentSong,
@@ -75,8 +82,7 @@ class HomeViewModel @Inject constructor(
                 }
                 user?.id?.let { userId ->
                     musicRepository.getRecentlyPlayedFlow(userId).collectLatest { domainSongs ->
-                        val uiSongs = domainSongs.map { it.toUi() }
-                        _uiState.update { it.copy(recentlyPlayed = uiSongs) }
+                        _uiState.update { it.copy(recentlyPlayed = domainSongs) }
                     }
                 }
             }
@@ -87,16 +93,21 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val trending = async { musicRepository.getTrendingSongs() }
-
-                val t = trending.await()
+                val result = getHomeDataUseCase()
 
                 _uiState.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        trendingSongs = (t as? BeatlyResult.Success)?.data?.map { it.toUi() } ?: state.trendingSongs,
-                        errorMessage = (t as? BeatlyResult.Error)?.message ?: state.errorMessage,
-                    )
+                    when (result) {
+                        is BeatlyResult.Success -> state.copy(
+                            isLoading = false,
+                            trendingSongs = result.data.trendingSongs,
+                            topArtists = result.data.topArtists
+                        )
+                        is BeatlyResult.Error -> state.copy(
+                            isLoading = false,
+                            errorMessage = result.message
+                        )
+                        else -> state
+                    }
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -109,17 +120,15 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun onPlayPauseToggled(song: Song) {
+    fun onPlayPauseToggled(songId: String) {
         viewModelScope.launch {
-            if (uiState.value.currentlyPlayingSongId == song.id) {
-                musicRepository.togglePlayPause()
+            if (uiState.value.currentlyPlayingSongId == songId) {
+                playerRepository.togglePlayPause()
             } else {
                 val songs = uiState.value.trendingSongs
-                val index = songs.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
+                val index = songs.indexOfFirst { it.id == songId }.coerceAtLeast(0)
                 if (songs.isNotEmpty()) {
-                    musicRepository.playQueue(songs, index)
-                } else {
-                    musicRepository.playSong(song)
+                    playerRepository.playQueue(songs, index)
                 }
             }
         }
@@ -127,16 +136,7 @@ class HomeViewModel @Inject constructor(
 
     fun onLikeToggled(id: String) {
         viewModelScope.launch {
-            musicRepository.toggleLikeSong(id)
-            // The UI state for recentlyPlayed will be refreshed if we observe a Flow,
-            // but for now let's manually update it to show immediate feedback.
-            _uiState.update { state ->
-                state.copy(recentlyPlayed = state.recentlyPlayed.map {
-                    if (it.id == id) it.copy(isLiked = !it.isLiked) else it
-                }, trendingSongs = state.trendingSongs.map {
-                    if (it.id == id) it.copy(isLiked = !it.isLiked) else it
-                })
-            }
+            toggleLikeUseCase(id)
         }
     }
 
@@ -147,26 +147,3 @@ class HomeViewModel @Inject constructor(
         else -> "Good Night!"
     }
 }
-
-// ── UI Mappers ─────────────────────────────────────────────────────────────
-
-    private fun com.taher.beatly.domain.model.Song.toUi() = Song(
-        id = id,
-        title = title,
-        artistName = artistName,
-        artistId = artistId,
-        imageUrl = imageUrl,
-        previewUrl = previewUrl,
-        durationMs = durationMs,
-        isLiked = isLiked,
-        isSaved = isSaved,
-    )
-
-    private fun com.taher.beatly.domain.model.Artist.toUi() = Artist(
-        id = id,
-        name = name,
-        imageUrl = imageUrl,
-        isVerified = isVerified,
-        isFollowing = isFollowing,
-        monthlyListeners = monthlyListeners,
-    )

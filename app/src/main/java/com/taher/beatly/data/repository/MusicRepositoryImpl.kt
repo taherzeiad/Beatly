@@ -1,24 +1,18 @@
 package com.taher.beatly.data.repository
 
-import android.app.Application
-import android.content.Intent
 import com.taher.beatly.data.local.room.*
 import com.taher.beatly.data.remote.spotify.*
-import com.taher.beatly.data.service.PlaybackService
+import com.taher.beatly.data.mapper.*
 import com.taher.beatly.domain.model.*
 import com.taher.beatly.domain.repository.*
-import com.taher.beatly.model.LibraryItem
-import com.taher.beatly.model.LibraryItemIcon
-import com.taher.beatly.model.PlayerState
-import com.taher.beatly.model.Song as UiSong
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 class MusicRepositoryImpl @Inject constructor(
-    private val app: Application,
     private val spotifyApi: SpotifyApiService,
     private val tokenManager: SpotifyTokenManager,
     private val songDao: SongDao,
@@ -27,61 +21,8 @@ class MusicRepositoryImpl @Inject constructor(
     private val artistPlayCountDao: ArtistPlayCountDao,
     private val libraryRepository: LibraryRepository,
     private val authRepository: AuthRepository,
-    private val player: androidx.media3.exoplayer.ExoPlayer,
-    @javax.inject.Named("IO") private val ioDispatcher: CoroutineDispatcher,
-    @javax.inject.Named("Main") private val mainDispatcher: CoroutineDispatcher,
+    @Named("IO") private val ioDispatcher: CoroutineDispatcher
 ) : MusicRepository {
-
-    private val _playerState = MutableStateFlow(PlayerState())
-    override val playerState: Flow<PlayerState> = _playerState.asStateFlow()
-
-    private var currentQueue: List<UiSong> = emptyList()
-
-    private val repositoryScope = CoroutineScope(SupervisorJob() + mainDispatcher)
-
-    init {
-        repositoryScope.launch(mainDispatcher) {
-            player.addListener(object : androidx.media3.common.Player.Listener {
-                override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    updatePlayerState()
-                }
-
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    updatePlayerState()
-                    if (playbackState == androidx.media3.common.Player.STATE_READY) {
-                        updatePlayerState() // Ensure duration is updated when ready
-                    }
-                }
-
-                override fun onMediaItemTransition(
-                    mediaItem: androidx.media3.common.MediaItem?,
-                    reason: Int
-                ) {
-                    val currentSongId = mediaItem?.mediaId
-                    val song = currentQueue.find { it.id == currentSongId }
-                    _playerState.update { it.copy(currentSong = song) }
-                    updatePlayerState()
-                }
-
-                override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
-                    val detailedError = "${error.errorCodeName}: ${error.localizedMessage} (Cause: ${error.cause?.message})"
-                    android.util.Log.e("MusicRepository", "Player Error: $detailedError", error)
-                    _playerState.update { it.copy(isPlaying = false, error = detailedError) }
-                }
-            })
-        }
-        simulatePlayback()
-    }
-
-    private fun updatePlayerState() {
-        _playerState.update {
-            it.copy(
-                isPlaying = player.isPlaying,
-                positionMs = player.currentPosition,
-                durationMs = if (player.duration > 0) player.duration else it.durationMs
-            )
-        }
-    }
 
     private val _userName = MutableStateFlow("Mr. Aiden Smith")
 
@@ -102,7 +43,6 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    // ── Trending songs (New Releases or Recommendations) ───────────────────
     override suspend fun getTrendingSongs(): BeatlyResult<List<Song>> = withContext(ioDispatcher) {
         try {
             val token = tokenManager.getValidToken()
@@ -135,7 +75,6 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    // ── Top Artists (search popular genres) ────────────────────────────────
     override suspend fun getTopArtists(): BeatlyResult<List<Artist>> = withContext(ioDispatcher) {
         try {
             val token = tokenManager.getValidToken()
@@ -213,7 +152,6 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    // ── Artist detail ──────────────────────────────────────────────────────
     override suspend fun getArtistDetail(artistId: String): BeatlyResult<Artist> = withContext(ioDispatcher) {
         try {
             val token = tokenManager.getValidToken()
@@ -224,53 +162,11 @@ class MusicRepositoryImpl @Inject constructor(
         }
     }
 
-    // ── Artist top tracks ──────────────────────────────────────────────────
     override suspend fun getArtistTopTracks(artistId: String): BeatlyResult<List<Song>> = withContext(ioDispatcher) {
         try {
             val token = tokenManager.getValidToken()
             val response = spotifyApi.getArtistTopTracks(artistId, market = "US", token = token)
             BeatlyResult.Success(response.tracks.map { it.toDomain() })
-        } catch (e: Exception) {
-            BeatlyResult.Error(e.message ?: "Failed", e)
-        }
-    }
-
-    // ── Search ─────────────────────────────────────────────────────────────
-    override suspend fun searchArtists(query: String): BeatlyResult<List<Artist>> = withContext(ioDispatcher) {
-        try {
-            val token = tokenManager.getValidToken()
-            val result = spotifyApi.search(query, type = "artist", token = token)
-            BeatlyResult.Success(result.artists?.items?.map { it.toDomain() } ?: emptyList())
-        } catch (e: Exception) {
-            BeatlyResult.Error(e.message ?: "Failed", e)
-        }
-    }
-
-    override suspend fun searchSongs(query: String): BeatlyResult<List<Song>> = withContext(ioDispatcher) {
-        try {
-            val token = tokenManager.getValidToken()
-            val result = spotifyApi.search(query, type = "track", token = token)
-            BeatlyResult.Success(result.tracks?.items?.map { it.toDomain() } ?: emptyList())
-        } catch (e: Exception) {
-            BeatlyResult.Error(e.message ?: "Failed", e)
-        }
-    }
-
-    override suspend fun searchAlbums(query: String): BeatlyResult<List<Album>> = withContext(ioDispatcher) {
-        try {
-            val token = tokenManager.getValidToken()
-            val result = spotifyApi.search(query, type = "album", token = token)
-            BeatlyResult.Success(result.albums?.items?.map { it.toDomain() } ?: emptyList())
-        } catch (e: Exception) {
-            BeatlyResult.Error(e.message ?: "Failed", e)
-        }
-    }
-
-    override suspend fun searchPlaylists(query: String): BeatlyResult<List<Playlist>> = withContext(ioDispatcher) {
-        try {
-            val token = tokenManager.getValidToken()
-            val result = spotifyApi.search(query, type = "playlist", token = token)
-            BeatlyResult.Success(result.playlists?.items?.map { it.toDomain() } ?: emptyList())
         } catch (e: Exception) {
             BeatlyResult.Error(e.message ?: "Failed", e)
         }
@@ -300,16 +196,12 @@ class MusicRepositoryImpl @Inject constructor(
         try {
             val token = tokenManager.getValidToken()
             val response = spotifyApi.getAlbumTracks(albumId, token)
-            // Note: Album tracks response might not have full album object in items, 
-            // we might need to fetch album details or handle missing fields.
-            // Assuming SpotifyTrackItem is compatible enough.
             BeatlyResult.Success(response.items.map { it.toDomain() })
         } catch (e: Exception) {
             BeatlyResult.Error(e.message ?: "Failed", e)
         }
     }
 
-    // ── Genres (hardcoded since Spotify deprecated the endpoint) ──────────
     override suspend fun getGenres(): BeatlyResult<List<Genre>> = BeatlyResult.Success(
         listOf(
             Genre("latin", "Latin"),
@@ -325,7 +217,7 @@ class MusicRepositoryImpl @Inject constructor(
     )
 
     override suspend fun addToRecentlyPlayed(
-        userId: String, song: UiSong
+        userId: String, song: Song
     ): BeatlyResult<Unit> = withContext(ioDispatcher) {
         try {
             recentlyDao.insert(
@@ -334,19 +226,18 @@ class MusicRepositoryImpl @Inject constructor(
                     title = song.title,
                     artistName = song.artistName,
                     artistId = song.artistId,
-                    imageUrl = song.imageUrl ?: "",
+                    imageUrl = song.imageUrl,
                     durationMs = song.durationMs,
                 )
             )
             recentlyDao.trimOld()
 
-            // Update artist play count
             if (song.artistId.isNotEmpty()) {
                 artistPlayCountDao.insert(
                     ArtistPlayCountEntity(
                         artistId = song.artistId,
                         name = song.artistName,
-                        imageUrl = song.imageUrl ?: ""
+                        imageUrl = song.imageUrl
                     )
                 )
                 artistPlayCountDao.incrementPlayCount(song.artistId)
@@ -360,8 +251,7 @@ class MusicRepositoryImpl @Inject constructor(
 
     override suspend fun toggleFollowArtist(artistId: String): BeatlyResult<Boolean> = withContext(ioDispatcher) {
         try {
-            val user =
-                authRepository.currentUser.firstOrNull() ?: return@withContext BeatlyResult.Error("Not logged in")
+            val user = authRepository.currentUser.firstOrNull() ?: return@withContext BeatlyResult.Error("Not logged in")
             val token = tokenManager.getValidToken()
             val artist = spotifyApi.getArtist(artistId, token).toDomain()
             libraryRepository.toggleFollowArtist(user.id, artist)
@@ -369,280 +259,4 @@ class MusicRepositoryImpl @Inject constructor(
             BeatlyResult.Error(e.message ?: "Failed", e)
         }
     }
-
-
-    private fun simulatePlayback() {
-        repositoryScope.launch {
-            while (true) {
-                delay(1000)
-                if (player.isPlaying) {
-                    updatePlayerState()
-                }
-            }
-        }
-    }
-
-    // ── Library implementation ─────────────────────────────────────────────
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    override fun getLibraryItems(): Flow<List<LibraryItem>> {
-        val userFlow = authRepository.currentUser
-        return userFlow.flatMapLatest { user ->
-            if (user == null) return@flatMapLatest flowOf(emptyList())
-
-            val playlistsFlow = libraryRepository.getLibrary(user.id).map { result ->
-                if (result is BeatlyResult.Success) {
-                    result.data.map { playlist ->
-                        LibraryItem(
-                            id = playlist.id,
-                            name = playlist.name,
-                            songCount = playlist.songCount,
-                            artistCount = 0,
-                            icon = LibraryItemIcon.PLAYLIST,
-                            imageUrl = playlist.imageUrl,
-                            isCustomPlaylist = true
-                        )
-                    }
-                } else emptyList()
-            }
-
-            val likedSongsFlow = libraryRepository.getLikedSongsFlow(user.id)
-            val followedArtistsFlow = libraryRepository.getFollowedArtistsFlow(user.id)
-
-            combine(
-                playlistsFlow, likedSongsFlow, followedArtistsFlow
-            ) { playlists, likedSongsResult, followedArtistsResult ->
-                val likedCount = (likedSongsResult as? BeatlyResult.Success)?.data?.size ?: 0
-                val artistCount = (followedArtistsResult as? BeatlyResult.Success)?.data?.size ?: 0
-                
-                val virtualItems = listOf(
-                    LibraryItem(
-                        id = "liked_songs",
-                        name = "Liked songs",
-                        songCount = likedCount,
-                        artistCount = 0,
-                        icon = LibraryItemIcon.LIKED_SONGS
-                    ), LibraryItem(
-                        id = "followed_artists",
-                        name = "Artist you follow",
-                        songCount = 0,
-                        artistCount = artistCount,
-                        icon = LibraryItemIcon.FOLLOWED_ARTISTS
-                    )
-                )
-                virtualItems + playlists
-            }
-        }
-    }
-
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    override fun getLikedSongs(): Flow<List<UiSong>> {
-        val userFlow = authRepository.currentUser
-        return userFlow.flatMapLatest { user ->
-            if (user == null) return@flatMapLatest flowOf(emptyList<UiSong>())
-            libraryRepository.getLikedSongsFlow(user.id).map { result ->
-                if (result is BeatlyResult.Success) {
-                    result.data.map { ds ->
-                        UiSong(
-                            id = ds.id,
-                            title = ds.title,
-                            artistName = ds.artistName,
-                            artistId = ds.artistId,
-                            imageUrl = ds.imageUrl,
-                            previewUrl = ds.previewUrl,
-                            durationMs = ds.durationMs
-                        )
-                    }
-                } else emptyList()
-            }
-        }
-    }
-
-    override suspend fun toggleLikeSong(songId: String) {
-        withContext(ioDispatcher) {
-            val user = authRepository.currentUser.firstOrNull() ?: return@withContext
-            val songEntity = songDao.getSongById(songId) ?: return@withContext
-            val domainSong = Song(
-                id = songEntity.id,
-                title = songEntity.title,
-                artistName = songEntity.artistName,
-                artistId = songEntity.artistId,
-                albumName = songEntity.albumName,
-                imageUrl = songEntity.imageUrl,
-                previewUrl = songEntity.previewUrl,
-                durationMs = songEntity.durationMs,
-                isLiked = !songEntity.isLiked
-            )
-
-            // Update local Room
-            songDao.setLiked(songId, !songEntity.isLiked)
-
-            // Update Firestore
-            libraryRepository.toggleLikeSong(user.id, domainSong)
-        }
-    }
-
-    override suspend fun createLibraryPlaylist(name: String) {
-        withContext(ioDispatcher) {
-            val user = authRepository.currentUser.firstOrNull() ?: return@withContext
-            libraryRepository.createPlaylist(user.id, name)
-        }
-    }
-
-    // ── Player implementation ──────────────────────────────────────────────
-    override suspend fun playSong(song: UiSong) {
-        playQueue(listOf(song), 0)
-    }
-
-    override suspend fun playQueue(songs: List<UiSong>, startIndex: Int) {
-        withContext(mainDispatcher) {
-            try {
-                app.startService(Intent(app, PlaybackService::class.java))
-                android.util.Log.d("MusicRepository", "PlaybackService started from Repository")
-            } catch (e: Exception) {
-                android.util.Log.e("MusicRepository", "Failed to start PlaybackService", e)
-            }
-
-            currentQueue = songs
-            val currentSong = songs.getOrNull(startIndex)
-            _playerState.update { it.copy(currentSong = currentSong, isPlaying = true, positionMs = 0, error = null) }
-
-            player.stop()
-            player.clearMediaItems()
-
-            val mediaItems = songs.map { song ->
-                val mediaMetadata = androidx.media3.common.MediaMetadata.Builder()
-                    .setTitle(song.title)
-                    .setArtist(song.artistName)
-                    .setArtworkUri(android.net.Uri.parse(song.imageUrl ?: ""))
-                    .build()
-
-                val url = if (!song.previewUrl.isNullOrEmpty()) {
-                    android.util.Log.d("MusicRepository", "Playing Spotify preview: ${song.previewUrl}")
-                    song.previewUrl
-                } else {
-                    val fallback = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-                    android.util.Log.w("MusicRepository", "No preview URL for ${song.title}, using verified fallback: $fallback")
-                    fallback
-                }
-
-                androidx.media3.common.MediaItem.Builder()
-                    .setMediaId(song.id)
-                    .setUri(url)
-                    .setMimeType("audio/mpeg")
-                    .setMediaMetadata(mediaMetadata)
-                    .build()
-            }
-
-            player.setMediaItems(mediaItems, startIndex, 0L)
-            player.prepare()
-            player.play()
-
-            currentSong?.let { s ->
-                authRepository.currentUser.firstOrNull()?.let { user ->
-                    addToRecentlyPlayed(user.id, s)
-                }
-            }
-        }
-    }
-
-    override suspend fun togglePlayPause() {
-        withContext(mainDispatcher) {
-            if (player.isPlaying) player.pause() else player.play()
-        }
-    }
-
-    override suspend fun seekTo(positionMs: Long) {
-        withContext(mainDispatcher) {
-            player.seekTo(positionMs)
-        }
-    }
-
-    override suspend fun seekForward() {
-        withContext(mainDispatcher) {
-            player.seekTo(player.currentPosition + 10_000)
-        }
-    }
-
-    override suspend fun seekBackward() {
-        withContext(mainDispatcher) {
-            player.seekTo(kotlin.math.max(0, player.currentPosition - 10_000))
-        }
-    }
-
-    override suspend fun skipNext() {
-        withContext(mainDispatcher) {
-            if (player.hasNextMediaItem()) {
-                player.seekToNext()
-            }
-        }
-    }
-
-    override suspend fun skipPrevious() {
-        withContext(mainDispatcher) {
-            if (player.hasPreviousMediaItem()) {
-                player.seekToPrevious()
-            }
-        }
-    }
-
-    override fun clearError() {
-        _playerState.update { it.copy(error = null) }
-    }
 }
-
-// ── Mappers ────────────────────────────────────────────────────────────────
-
-fun SpotifyTrackItem.toDomain() = Song(
-    id = id,
-    title = name,
-    artistName = artists.firstOrNull()?.name ?: "",
-    artistId = artists.firstOrNull()?.id ?: "",
-    albumName = album.name,
-    imageUrl = album.images.firstOrNull()?.url ?: "",
-    previewUrl = preview_url ?: "",
-    durationMs = duration_ms
-)
-
-fun SpotifyArtist.toDomain() = Artist(
-    id = id,
-    name = name,
-    imageUrl = images.firstOrNull()?.url ?: "",
-    monthlyListeners = followers.total,
-    genres = genres
-)
-
-fun SpotifyAlbumItem.toDomain() = Album(
-    id = id,
-    name = name,
-    imageUrl = images.firstOrNull()?.url ?: "",
-    artistName = artists.firstOrNull()?.name ?: "",
-    totalTracks = total_tracks
-)
-
-fun SpotifyPlaylistItem.toDomain() = Playlist(
-    id = id,
-    name = name,
-    imageUrl = images.firstOrNull()?.url ?: "",
-    songCount = tracks.total,
-    ownerId = owner.display_name
-)
-
-fun Song.toEntity() = SongEntity(
-    id = id,
-    title = title,
-    artistName = artistName,
-    artistId = artistId,
-    albumName = albumName,
-    imageUrl = imageUrl,
-    previewUrl = previewUrl,
-    durationMs = durationMs
-)
-
-fun Artist.toEntity() = ArtistEntity(
-    id = id,
-    name = name,
-    imageUrl = imageUrl,
-    monthlyListeners = monthlyListeners,
-    isFollowing = isFollowing
-)
-

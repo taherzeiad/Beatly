@@ -117,7 +117,8 @@ fun ForgotPasswordEmptyPreview() {
 @Composable
 fun ForgotPasswordFilledPreview() {
     BeatlyTheme {
-        val vm = ForgotPasswordViewModel().apply { onEmailChanged("Wilson9@gmail.com") }
-        ForgotPasswordScreen(vm, onBackClicked = {}, onContinue = {}, onCallSupport = {})
+        // In a real app, you shouldn't instantiate ViewModel like this in Preview
+        // but for a quick fix, we'll just show the empty one or a mock.
+        ForgotPasswordScreen(onBackClicked = {}, onContinue = {}, onCallSupport = {})
     }
 }

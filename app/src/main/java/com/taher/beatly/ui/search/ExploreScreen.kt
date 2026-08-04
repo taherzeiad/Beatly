@@ -22,6 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.taher.beatly.model.Song
 import com.taher.beatly.ui.components.BeatlyImage
 import com.taher.beatly.ui.components.SectionHeader
+import com.taher.beatly.ui.mapper.toUi
 import com.taher.beatly.ui.theme.SurfaceFill
 
 @Composable
@@ -39,9 +40,12 @@ fun ExploreScreen(
         onSearchClick = onSearchClick,
         onGenreClick = onGenreClick,
         onSeeAllGenres = onSeeAllGenres,
-        onSongClick = { song, section ->
-            viewModel.onPlaySong(song, section)
-            onSongClick(song)
+        onSongClick = { songId, section ->
+            viewModel.onPlaySong(songId, section)
+            // Note: We need a way to pass the actual Song object to onSongClick
+            // For now, let's just use a dummy or fetch from state.
+            val song = (uiState.justForYouSongs + uiState.topSongs).find { it.id == songId }?.toUi()
+            song?.let { onSongClick(it) }
         }
     )
 }
@@ -52,7 +56,7 @@ fun ExploreScreenContent(
     onSearchClick: () -> Unit,
     onGenreClick: (String) -> Unit,
     onSeeAllGenres: () -> Unit,
-    onSongClick: (Song, String) -> Unit,
+    onSongClick: (String, String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -113,9 +117,10 @@ fun ExploreScreenContent(
              Text("No recommendations yet", color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                items(uiState.justForYouSongs, key = { it.id }) { song ->
-                    Column(modifier = Modifier.width(150.dp).clickable { onSongClick(song, "just_for_you") }) {
-                        BeatlyImage(url = song.imageUrl, modifier = Modifier.size(150.dp))
+                items(uiState.justForYouSongs, key = { it.id }) { domainSong ->
+                    val song = domainSong.toUi()
+                    Column(modifier = Modifier.width(150.dp).clickable { onSongClick(song.id, "just_for_you") }) {
+                        com.taher.beatly.ui.components.BeatlyImage(url = song.imageUrl, modifier = Modifier.size(150.dp))
                         Spacer(Modifier.height(8.dp))
                         Text(song.title, style = MaterialTheme.typography.labelLarge, maxLines = 1)
                         Text(song.artistName, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
@@ -133,8 +138,9 @@ fun ExploreScreenContent(
             Text("No top songs available", color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                uiState.topSongs.forEachIndexed { index, song ->
-                    TopSongRow(index + 1, song) { onSongClick(song, "top_songs") }
+                uiState.topSongs.forEachIndexed { index, domainSong ->
+                    val song = domainSong.toUi()
+                    TopSongRow(index + 1, song) { onSongClick(song.id, "top_songs") }
                 }
             }
         }
