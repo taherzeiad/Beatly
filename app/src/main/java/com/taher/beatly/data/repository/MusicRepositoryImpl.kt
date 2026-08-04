@@ -187,9 +187,9 @@ class MusicRepositoryImpl @Inject constructor(
                     id = it.id,
                     title = it.title,
                     artistName = it.artistName,
+                    artistId = it.artistId,
                     imageUrl = it.imageUrl,
                     durationMs = it.durationMs,
-                    artistId = "",
                 )
             }
             BeatlyResult.Success(songs)
@@ -205,9 +205,9 @@ class MusicRepositoryImpl @Inject constructor(
                     id = it.id,
                     title = it.title,
                     artistName = it.artistName,
+                    artistId = it.artistId,
                     imageUrl = it.imageUrl,
                     durationMs = it.durationMs,
-                    artistId = "",
                 )
             }
         }
@@ -410,19 +410,22 @@ class MusicRepositoryImpl @Inject constructor(
 
             combine(
                 playlistsFlow, likedSongsFlow, followedArtistsFlow
-            ) { playlists, _, _ ->
+            ) { playlists, likedSongsResult, followedArtistsResult ->
+                val likedCount = (likedSongsResult as? BeatlyResult.Success)?.data?.size ?: 0
+                val artistCount = (followedArtistsResult as? BeatlyResult.Success)?.data?.size ?: 0
+                
                 val virtualItems = listOf(
                     LibraryItem(
                         id = "liked_songs",
                         name = "Liked songs",
-                        songCount = 100,
-                        artistCount = 24,
+                        songCount = likedCount,
+                        artistCount = 0,
                         icon = LibraryItemIcon.LIKED_SONGS
                     ), LibraryItem(
                         id = "followed_artists",
                         name = "Artist you follow",
-                        songCount = 100,
-                        artistCount = 12,
+                        songCount = 0,
+                        artistCount = artistCount,
                         icon = LibraryItemIcon.FOLLOWED_ARTISTS
                     )
                 )

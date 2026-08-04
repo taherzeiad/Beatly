@@ -139,11 +139,18 @@ fun BeatlyNavGraph() {
 
         // ===================== Sign Up =====================
         composable(Screen.SignUp.route) {
+            val context = androidx.compose.ui.platform.LocalContext.current
             SignUpScreen(
                 onBackClicked = { popBack() },
                 onSignUpSuccess = { goTo(Screen.ProfileSuccess, Screen.SignUp) },
-                onTermsClicked = { },
-                onPrivacyClicked = { })
+                onTermsClicked = { 
+                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://beatly.com/terms"))
+                    context.startActivity(intent)
+                },
+                onPrivacyClicked = { 
+                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://beatly.com/privacy"))
+                    context.startActivity(intent)
+                })
         }
 
         // ===================== Profile Setup Success =====================
@@ -285,14 +292,16 @@ fun BeatlyNavGraph() {
             })
         }
 
-        // ===================== Artist Detail =====================
         composable(
             route = Screen.ArtistDetail.route,
             arguments = listOf(navArgument("artistId") { type = NavType.StringType })
-        ) {
+        ) { backStackEntry ->
+            val artistId = backStackEntry.arguments?.getString("artistId") ?: ""
             ArtistDetailScreen(
                 onBackClick = { popBack() },
-                onSeeAllSongsClick = { /* Navigate to all songs */ },
+                onSeeAllSongsClick = { 
+                    nav.navigate(Screen.SongList.createRoute(SongListSource.ARTIST, artistId, "Artist Songs"))
+                },
                 onSongClick = { _ ->
                     nav.navigate(Screen.Player.route)
                 })
@@ -332,10 +341,17 @@ fun BeatlyNavGraph() {
 
         // ===================== Profile (tab) =====================
         composable(Screen.Profile.route) {
+            val context = androidx.compose.ui.platform.LocalContext.current
             ProfileScreen(
                 onBackClicked = { popBack() },
                 onGetPremium = { nav.navigate(Screen.PickPlan.route) },
-                onShareProfile = { },   // show bottom sheet inside ProfileScreen
+                onShareProfile = { 
+                    val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(android.content.Intent.EXTRA_TEXT, "Check out my profile on Beatly!")
+                    }
+                    context.startActivity(android.content.Intent.createChooser(intent, "Share Profile"))
+                },
                 onEditProfile = { nav.navigate(Screen.EditProfile.route) },
                 onSettingClicked = { id ->
                     when (id) {

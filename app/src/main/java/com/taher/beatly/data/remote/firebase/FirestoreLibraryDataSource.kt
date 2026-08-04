@@ -112,6 +112,7 @@ class FirestoreLibraryDataSource @Inject constructor(
     private fun songToMap(song: Song) = mapOf(
         "title"      to song.title,
         "artistName" to song.artistName,
+        "artistId"   to song.artistId,
         "imageUrl"   to song.imageUrl,
         "previewUrl" to song.previewUrl,
         "durationMs" to song.durationMs
@@ -121,6 +122,7 @@ class FirestoreLibraryDataSource @Inject constructor(
         id         = id,
         title      = map["title"]      as? String ?: "",
         artistName = map["artistName"] as? String ?: "",
+        artistId   = map["artistId"]   as? String ?: "",
         imageUrl   = map["imageUrl"]   as? String ?: "",
         previewUrl = map["previewUrl"] as? String ?: "",
         durationMs = map["durationMs"] as? Long   ?: 0L,

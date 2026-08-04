@@ -1,11 +1,13 @@
 package com.taher.beatly.ui.auth.resetpassword
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PasswordRule(
@@ -55,9 +57,14 @@ class ResetPasswordViewModel @Inject constructor() : ViewModel() {
         _uiState.update { it.copy(isConfirmPasswordVisible = !it.isConfirmPasswordVisible) }
     }
 
-    fun onContinueClicked() {
+    fun onContinueClicked(onSuccess: () -> Unit) {
         _uiState.update { it.copy(isLoading = true) }
-        // TODO: call auth repository → send recovery email
+        viewModelScope.launch {
+            // Simulate network delay for prototype
+            kotlinx.coroutines.delay(1500)
+            _uiState.update { it.copy(isLoading = false) }
+            onSuccess()
+        }
     }
 
     private fun validate() {

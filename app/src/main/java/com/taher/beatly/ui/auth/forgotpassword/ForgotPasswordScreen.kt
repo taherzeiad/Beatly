@@ -37,7 +37,7 @@ fun ForgotPasswordScreen(
         uiState = uiState,
         onBackClicked = onBackClicked,
         onEmailChanged = viewModel::onEmailChanged,
-        onContinue = { viewModel.onContinueClicked(); onContinue() },
+        onContinue = { viewModel.onContinueClicked(onSuccess = onContinue) },
         onCallSupport = onCallSupport
     )
 }

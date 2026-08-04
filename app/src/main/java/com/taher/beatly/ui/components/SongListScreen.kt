@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class SongListSource { PLAYLIST, ALBUM, GENRE, RECENT }
+enum class SongListSource { PLAYLIST, ALBUM, GENRE, RECENT, ARTIST }
 
 data class SongListUiState(
     val title: String = "",
@@ -62,6 +62,7 @@ class SongListViewModel @Inject constructor(
                     if (user != null) repository.getRecentlyPlayed(user)
                     else BeatlyResult.Success(emptyList())
                 }
+                SongListSource.ARTIST -> repository.getArtistTopTracks(id)
             }
 
             _uiState.update { state ->

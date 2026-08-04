@@ -41,7 +41,7 @@ fun ResetPasswordScreen(
         onConfirmPasswordChanged = viewModel::onConfirmPasswordChanged,
         onPasswordToggled = viewModel::onPasswordVisibilityToggled,
         onConfirmPasswordToggled = viewModel::onConfirmPasswordVisibilityToggled,
-        onContinue = { viewModel.onContinueClicked(); onContinue() },
+        onContinue = { viewModel.onContinueClicked(onSuccess = onContinue) },
         onCallSupport = onCallSupport
     )
 }
