@@ -35,11 +35,11 @@ data class SongListUiState(
 
 @HiltViewModel
 class SongListViewModel @Inject constructor(
-    private val repository: MusicRepository,
-    savedStateHandle: SavedStateHandle
+    private val repository: MusicRepository, savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val source: SongListSource = SongListSource.valueOf(checkNotNull(savedStateHandle["source"]))
+    private val source: SongListSource =
+        SongListSource.valueOf(checkNotNull(savedStateHandle["source"]))
     private val id: String = checkNotNull(savedStateHandle["id"])
     private val initialTitle: String = savedStateHandle["title"] ?: "Songs"
 
@@ -63,20 +63,27 @@ class SongListViewModel @Inject constructor(
                     else BeatlyResult.Success(emptyList())
                 }
             }
-            
+
             _uiState.update { state ->
                 when (result) {
                     is BeatlyResult.Success -> state.copy(
-                        isLoading = false,
-                        songs = result.data.map { ds ->
+                        isLoading = false, songs = result.data.map { ds ->
                             Song(
-                                id = ds.id, title = ds.title, artistName = ds.artistName,
-                                artistId = ds.artistId, imageUrl = ds.imageUrl,
-                                durationMs = ds.durationMs, isLiked = ds.isLiked, isSaved = ds.isSaved
+                                id = ds.id,
+                                title = ds.title,
+                                artistName = ds.artistName,
+                                artistId = ds.artistId,
+                                imageUrl = ds.imageUrl,
+                                durationMs = ds.durationMs,
+                                isLiked = ds.isLiked,
+                                isSaved = ds.isSaved
                             )
-                        }
+                        })
+
+                    is BeatlyResult.Error -> state.copy(
+                        isLoading = false, errorMessage = result.message
                     )
-                    is BeatlyResult.Error -> state.copy(isLoading = false, errorMessage = result.message)
+
                     else -> state.copy(isLoading = false)
                 }
             }
@@ -116,18 +123,22 @@ fun SongListScreen(
     Scaffold(
         topBar = {
             BeatlyTopBar(
-                title = uiState.title,
-                onBackClick = onBackClick
+                title = uiState.title, onBackClick = onBackClick
             )
-        }
-    ) { padding ->
+        }) { padding ->
         if (uiState.isLoading) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding), contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 contentPadding = PaddingValues(20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -138,8 +149,7 @@ fun SongListScreen(
                         onPlayClick = {
                             viewModel.onPlaySong(song)
                             onSongClick(song)
-                        }
-                    )
+                        })
                 }
             }
         }

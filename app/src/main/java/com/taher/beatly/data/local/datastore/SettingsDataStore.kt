@@ -43,6 +43,15 @@ class SettingsDataStore @Inject constructor(
         val KEY_AUDIO_QUALITY_SAVER = booleanPreferencesKey("audio_quality_saver")
         val KEY_DOWNLOAD_AUDIO_ONLY = booleanPreferencesKey("download_audio_only")
         val KEY_STREAM_AUDIO_ONLY = booleanPreferencesKey("stream_audio_only")
+
+        // Notifications
+        val KEY_NOTIF_RECOMMENDED = booleanPreferencesKey("notif_recommended")
+        val KEY_NOTIF_NEW_MUSIC = booleanPreferencesKey("notif_new_music")
+        val KEY_NOTIF_PLAYLIST = booleanPreferencesKey("notif_playlist")
+        val KEY_NOTIF_CONCERT = booleanPreferencesKey("notif_concert")
+        val KEY_NOTIF_ARTIST = booleanPreferencesKey("notif_artist")
+        val KEY_NOTIF_NEWS = booleanPreferencesKey("notif_news")
+        val KEY_NOTIF_EVENTS = booleanPreferencesKey("notif_events")
     }
 
     // ── Dark mode ──────────────────────────────────────────────────────────
@@ -93,6 +102,23 @@ class SettingsDataStore @Inject constructor(
     suspend fun setAudioQualitySaver(v: Boolean) { context.dataStore.edit { it[KEY_AUDIO_QUALITY_SAVER] = v } }
     suspend fun setDownloadAudioOnly(v: Boolean) { context.dataStore.edit { it[KEY_DOWNLOAD_AUDIO_ONLY] = v } }
     suspend fun setStreamAudioOnly(v: Boolean) { context.dataStore.edit { it[KEY_STREAM_AUDIO_ONLY] = v } }
+
+    // ── Notifications ──────────────────────────────────────────────────────
+    val notifRecommended: Flow<Boolean> = context.dataStore.data.map { it[KEY_NOTIF_RECOMMENDED] ?: true }
+    val notifNewMusic: Flow<Boolean> = context.dataStore.data.map { it[KEY_NOTIF_NEW_MUSIC] ?: true }
+    val notifPlaylist: Flow<Boolean> = context.dataStore.data.map { it[KEY_NOTIF_PLAYLIST] ?: true }
+    val notifConcert: Flow<Boolean> = context.dataStore.data.map { it[KEY_NOTIF_CONCERT] ?: true }
+    val notifArtist: Flow<Boolean> = context.dataStore.data.map { it[KEY_NOTIF_ARTIST] ?: true }
+    val notifNews: Flow<Boolean> = context.dataStore.data.map { it[KEY_NOTIF_NEWS] ?: true }
+    val notifEvents: Flow<Boolean> = context.dataStore.data.map { it[KEY_NOTIF_EVENTS] ?: true }
+
+    suspend fun setNotifRecommended(v: Boolean) { context.dataStore.edit { it[KEY_NOTIF_RECOMMENDED] = v } }
+    suspend fun setNotifNewMusic(v: Boolean) { context.dataStore.edit { it[KEY_NOTIF_NEW_MUSIC] = v } }
+    suspend fun setNotifPlaylist(v: Boolean) { context.dataStore.edit { it[KEY_NOTIF_PLAYLIST] = v } }
+    suspend fun setNotifConcert(v: Boolean) { context.dataStore.edit { it[KEY_NOTIF_CONCERT] = v } }
+    suspend fun setNotifArtist(v: Boolean) { context.dataStore.edit { it[KEY_NOTIF_ARTIST] = v } }
+    suspend fun setNotifNews(v: Boolean) { context.dataStore.edit { it[KEY_NOTIF_NEWS] = v } }
+    suspend fun setNotifEvents(v: Boolean) { context.dataStore.edit { it[KEY_NOTIF_EVENTS] = v } }
 
     // ── Language ───────────────────────────────────────────────────────────
     val language: Flow<String> = context.dataStore.data

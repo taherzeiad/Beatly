@@ -28,4 +28,77 @@
     <string name="yes_logout">نعم، تسجيل الخروج</string>
     <string name="save_changes">حفظ التغييرات</string>
     <string name="profile_updated_success">تم تحديث الملف الشخصي بنجاح!</string>
+
+    <!-- أنواع التنبيهات -->
+    <string name="notif_recommended">موسيقى مقترحة</string>
+    <string name="notif_new_music">موسيقى جديدة</string>
+    <string name="notif_playlist">تحديثات قوائم التشغيل</string>
+    <string name="notif_concert">تنبيهات الحفلات</string>
+    <string name="notif_artist">تحديثات الفنانين</string>
+    <string name="notif_product_news">أخبار المنتج</string>
+    <string name="notif_events">فعاليات</string>
+
+    <!-- جودة الصوت -->
+    <string name="quality_automatic">تلقائي</string>
+    <string name="quality_normal">عادي</string>
+    <string name="quality_high">عالي</string>
+    <string name="quality_extreme">فائق</string>
+    <string name="wifi_streaming">البث عبر الواي فاي</string>
+    <string name="cellular_streaming">البث عبر بيانات الهاتف</string>
+    <string name="download">تحميل</string>
+    <string name="audio_quality">جودة الصوت</string>
+    <string name="video_quality">جودة الفيديو</string>
+    <string name="auto_adjust_quality">ضبط الجودة تلقائياً</string>
+
+    <!-- حول التطبيق والخصوصية -->
+    <string name="about_beatly_desc">بيتلي هي تجربة بث موسيقى متميزة مصممة لعشاق الصوت الحقيقيين. استمتع بملايين الأغاني، وصوت عالي الجودة، وتوصيات مخصصة.</string>
+    <string name="version">الإصدار 1.0.0</string>
+    <string name="privacy_desc">خصوصيتك تهمنا. يجمع بيتلي الحد الأدنى من البيانات لتزويدك بأفضل تجربة موسيقية. نحن لا نبيع معلوماتك الشخصية لأطراف ثالثة.</string>
+    <string name="data_collection_title">1. جمع البيانات</string>
+    <string name="data_collection_desc">نحن نجمع بريدك الإلكتروني واسمك لإنشاء حسابك.</string>
+    <string name="usage_title">2. الاستخدام</string>
+    <string name="usage_desc">يتم استخدام سجل الاستماع الخاص بك لتحسين توصياتك.</string>
+
+    <!-- تسميات تعديل الملف الشخصي -->
+    <string name="name">الاسم</string>
+    <string name="username">اسم المستخدم</string>
+    <string name="birth_date">تاريخ الميلاد</string>
+    <string name="mail">البريد الإلكتروني</string>
+    <string name="gender">الجنس</string>
+    <string name="male">ذكر</string>
+    <string name="female">أنثى</string>
+    <string name="gender_other">أفضل عدم القول</string>
+
+    <!-- إعدادات التشغيل -->
+    <string name="gapless">تشغيل بدون فواصل</string>
+    <string name="gapless_desc">يسمح بتشغيل الأغاني بدون فواصل زمنية.</string>
+    <string name="automix">خلط تلقائي</string>
+    <string name="automix_desc">انتقالات سلسة بين الأغاني في قوائم تشغيل مختارة.</string>
+    <string name="explicit">السماح بالمحتوى الصريح</string>
+    <string name="explicit_desc">تفعيل تشغيل المحتوى الذي يحتوي على عبارات صريحة.</string>
+    <string name="normalize">تساوي مستوى الصوت</string>
+    <string name="normalize_desc">ضبط نفس مستوى الصوت لجميع المسارات.</string>
+    <string name="canvas">اللوحة الفنية (Canvas)</string>
+    <string name="canvas_desc">عرض مرئيات قصيرة ومكررة أثناء التشغيل.</string>
+    <string name="broadcast">حالة بث الجهاز</string>
+    <string name="broadcast_desc">السماح للتطبيقات الأخرى برؤية ما تستمع إليه.</string>
+
+    <!-- إعدادات توفير البيانات -->
+    <string name="audio_quality_saver_desc">يضبط جودة الصوت على منخفضة (24 كيلوبت/ثانية) ويعطل اللوحات الفنية.</string>
+    <string name="podcasts">البودكاست</string>
+    <string name="download_audio_only">تحميل الصوت فقط</string>
+    <string name="download_audio_only_desc">حفظ البودكاست المرئي كملف صوتي فقط.</string>
+    <string name="stream_audio_only">بث الصوت فقط</string>
+    <string name="stream_audio_only_desc">تشغيل البودكاست المرئي كصوت فقط عند عدم الاتصال بالواي فاي.</string>
+    <string name="storage">التخزين</string>
+    <string name="other_apps">تطبيقات أخرى</string>
+    <string name="cache">ذاكرة التخزين المؤقت</string>
+
+    <!-- إعدادات الأمان -->
+    <string name="remember_me">تذكرني</string>
+    <string name="face_id">بصمة الوجه</string>
+    <string name="biometric_id">البصمة الحيوية</string>
+    <string name="google_authenticator">أداة مصادقة جوجل</string>
+    <string name="change_pin">تغيير رمز PIN</string>
+    <string name="change_password">تغيير كلمة المرور</string>
 </resources>
