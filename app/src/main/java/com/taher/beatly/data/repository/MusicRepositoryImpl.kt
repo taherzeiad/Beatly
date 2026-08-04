@@ -24,6 +24,7 @@ class MusicRepositoryImpl @Inject constructor(
     private val songDao: SongDao,
     private val recentlyDao: RecentlyPlayedDao,
     private val artistDao: ArtistDao,
+    private val artistPlayCountDao: ArtistPlayCountDao,
     private val libraryRepository: LibraryRepository,
     private val authRepository: AuthRepository,
     private val player: androidx.media3.exoplayer.ExoPlayer,
@@ -85,6 +86,21 @@ class MusicRepositoryImpl @Inject constructor(
     private val _userName = MutableStateFlow("Mr. Aiden Smith")
 
     override fun getUserName(): Flow<String> = _userName
+
+    override fun getUserTopArtists(): Flow<List<Artist>> {
+        return artistPlayCountDao.getTopArtistsFlow().map { entities ->
+            entities.map {
+                Artist(
+                    id = it.artistId,
+                    name = it.name,
+                    imageUrl = it.imageUrl,
+                    monthlyListeners = 0,
+                    isVerified = false,
+                    isFollowing = false
+                )
+            }
+        }
+    }
 
     // ── Trending songs (New Releases or Recommendations) ───────────────────
     override suspend fun getTrendingSongs(): BeatlyResult<List<Song>> = withContext(ioDispatcher) {
@@ -309,6 +325,19 @@ class MusicRepositoryImpl @Inject constructor(
                 )
             )
             recentlyDao.trimOld()
+
+            // Update artist play count
+            if (song.artistId.isNotEmpty()) {
+                artistPlayCountDao.insert(
+                    ArtistPlayCountEntity(
+                        artistId = song.artistId,
+                        name = song.artistName,
+                        imageUrl = song.imageUrl ?: ""
+                    )
+                )
+                artistPlayCountDao.incrementPlayCount(song.artistId)
+            }
+
             BeatlyResult.Success(Unit)
         } catch (e: Exception) {
             BeatlyResult.Error(e.message ?: "Failed", e)

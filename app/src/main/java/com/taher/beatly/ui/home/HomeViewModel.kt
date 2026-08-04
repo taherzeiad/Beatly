@@ -39,7 +39,16 @@ class HomeViewModel @Inject constructor(
     init {
         observeUser()
         observePlayerState()
+        observeTopArtists()
         loadHomeData()
+    }
+
+    private fun observeTopArtists() {
+        viewModelScope.launch {
+            musicRepository.getUserTopArtists().collectLatest { artists ->
+                _uiState.update { it.copy(topArtists = artists.map { it.toUi() }) }
+            }
+        }
     }
 
     private fun observePlayerState() {
@@ -79,19 +88,14 @@ class HomeViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val trending = async { musicRepository.getTrendingSongs() }
-                val artists = async { musicRepository.getTopArtists() }
 
                 val t = trending.await()
-                val a = artists.await()
 
                 _uiState.update { state ->
                     state.copy(
                         isLoading = false,
                         trendingSongs = (t as? BeatlyResult.Success)?.data?.map { it.toUi() } ?: state.trendingSongs,
-                        topArtists = (a as? BeatlyResult.Success)?.data?.map { it.toUi() } ?: state.topArtists,
-                        errorMessage = (t as? BeatlyResult.Error)?.message 
-                            ?: (a as? BeatlyResult.Error)?.message 
-                            ?: state.errorMessage,
+                        errorMessage = (t as? BeatlyResult.Error)?.message ?: state.errorMessage,
                     )
                 }
             } catch (e: Exception) {

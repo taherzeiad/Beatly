@@ -114,6 +114,7 @@ object AppModule {
     @Provides fun provideSongDao(db: BeatlyDatabase)          = db.songDao()
     @Provides fun provideRecentlyPlayedDao(db: BeatlyDatabase) = db.recentlyPlayedDao()
     @Provides fun provideArtistDao(db: BeatlyDatabase)        = db.artistDao()
+    @Provides fun provideArtistPlayCountDao(db: BeatlyDatabase) = db.artistPlayCountDao()
 }
 
 // ── Repository bindings ────────────────────────────────────────────────────
